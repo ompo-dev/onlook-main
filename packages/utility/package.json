@@ -45,7 +45,7 @@
         "normalize-url": "^8.0.2",
         "strip-ansi": "^7.1.0",
         "tailwind-merge": "^3.3.1",
-        "tldts": "^6.1.82",
+        "tldts": "^7.0.28",
         "uuid": "^11.1.0"
     }
 }
