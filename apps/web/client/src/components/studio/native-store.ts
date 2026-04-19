@@ -15,6 +15,8 @@ interface NativeStudioPanelsSlice {
     timelineOpen: boolean;
 }
 
+type NativeStudioTogglePanel = 'inspectorOpen' | 'navigatorOpen' | 'timelineOpen';
+
 interface NativeStudioDomSlice {
     expandedNodes: Record<string, boolean>;
 }
@@ -43,7 +45,7 @@ interface NativeStudioState {
     setScrubberPosition: (value: number) => void;
     setTextDrafts: (value: Partial<NativeStudioEditSlice>) => void;
     toggleNode: (nodeId: string) => void;
-    togglePanel: (panel: keyof NativeStudioPanelsSlice) => void;
+    togglePanel: (panel: NativeStudioTogglePanel) => void;
 }
 
 const INITIAL_EDIT_STATE: NativeStudioEditSlice = {

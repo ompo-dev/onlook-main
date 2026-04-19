@@ -1,0 +1,117 @@
+.tree {
+    font-family: var(--cs-font-mono, monospace);
+    font-size: 11px;
+    overflow-y: auto;
+    flex: 1;
+    padding: 4px 0;
+}
+
+.empty {
+    padding: 12px;
+    color: var(--cs-secondary-text);
+    font-size: 12px;
+    text-align: center;
+}
+
+.node {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 22px;
+    cursor: pointer;
+    padding-right: 8px;
+    user-select: none;
+    border-radius: 4px;
+    margin: 0 2px;
+    transition: background 0.05s;
+}
+
+.node:hover {
+    background: var(--cs-feint);
+}
+
+.selected {
+    background: var(--cs-selected-tree-bg);
+    color: var(--cs-accent);
+}
+
+.selectedSecondary {
+    background: var(--cs-feint-solid);
+}
+
+.dragging {
+    opacity: 0.4;
+}
+
+.dimmed {
+    opacity: 0.3;
+}
+
+.dragHandle {
+    color: var(--cs-icon-muted);
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    padding: 0 2px;
+    flex-shrink: 0;
+}
+
+.dragHandle:hover {
+    color: var(--cs-foreground);
+}
+
+.chevron {
+    width: 14px;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cs-icon-muted);
+    flex-shrink: 0;
+    transition: transform 0.1s;
+    cursor: pointer;
+}
+
+.chevron.expanded {
+    transform: rotate(90deg);
+}
+
+.chevron.hidden {
+    visibility: hidden;
+}
+
+.tag {
+    color: var(--cs-accent);
+    font-weight: 500;
+}
+
+.className {
+    color: var(--cs-secondary-text);
+    margin-left: 2px;
+    font-size: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 140px;
+}
+
+.tagInput {
+    background: var(--cs-input-bg);
+    border: 1px solid var(--cs-accent);
+    border-radius: 3px;
+    color: var(--cs-foreground);
+    font-family: var(--cs-font-mono, monospace);
+    font-size: 11px;
+    outline: none;
+    padding: 1px 4px;
+    width: 80px;
+}
+
+.insertionBar {
+    position: absolute;
+    height: 2px;
+    background: var(--cs-accent);
+    border-radius: 1px;
+    pointer-events: none;
+    z-index: 10;
+}

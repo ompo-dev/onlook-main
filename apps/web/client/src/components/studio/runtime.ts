@@ -3,10 +3,9 @@
 import { usePathname } from 'next/navigation';
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
 
-export type StudioMode = 'off' | 'original' | 'native';
+export type StudioMode = 'off' | 'native';
 
 export interface StudioAvailability {
-    original: boolean;
     native: boolean;
 }
 
@@ -35,9 +34,8 @@ const DEFAULT_NATIVE_SETTINGS: NativeStudioSettings = {
     scheme: 'indigo',
 };
 const DEFAULT_STUDIO_MODE: StudioMode =
-    process.env.NODE_ENV === 'development' ? 'original' : 'off';
+    process.env.NODE_ENV === 'development' ? 'native' : 'off';
 const DEFAULT_STUDIO_AVAILABILITY: StudioAvailability = {
-    original: process.env.NODE_ENV === 'development',
     native: false,
 };
 const DEFAULT_STUDIO_RUNTIME_SNAPSHOT: StudioRuntimeSnapshot = {
@@ -57,10 +55,10 @@ function emitRuntimeChange() {
 }
 
 function normalizeMode(value: unknown): StudioMode {
-    if (value === 'native' || value === 'original' || value === 'off') {
+    if (value === 'native' || value === 'off') {
         return value;
     }
-    return process.env.NODE_ENV === 'development' ? 'original' : 'off';
+    return process.env.NODE_ENV === 'development' ? 'native' : 'off';
 }
 
 export function getStudioAvailability(pathname?: string): StudioAvailability {
@@ -69,17 +67,12 @@ export function getStudioAvailability(pathname?: string): StudioAvailability {
     const isProjectRoute = currentPath.startsWith('/project/');
 
     return {
-        original: isDevelopment,
         native: isDevelopment && isProjectRoute,
     };
 }
 
 function resolveModeForAvailability(mode: StudioMode, availability: StudioAvailability): StudioMode {
     if (mode === 'native' && !availability.native) {
-        return 'off';
-    }
-
-    if (mode === 'original' && !availability.original) {
         return 'off';
     }
 

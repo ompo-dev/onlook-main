@@ -1,0 +1,76 @@
+.panel {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 8px;
+}
+
+.empty {
+    padding: 16px 12px;
+    color: var(--cs-secondary-text);
+    font-size: 12px;
+    text-align: center;
+}
+
+.filterBar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--cs-border);
+    position: sticky;
+    top: 0;
+    background: var(--cs-layer);
+    z-index: 1;
+}
+
+.filterIcon {
+    color: var(--cs-icon-muted);
+    flex-shrink: 0;
+}
+
+.filterInput {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--cs-foreground);
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 12px;
+    outline: none;
+}
+
+.filterInput::placeholder {
+    color: var(--cs-icon-muted);
+}
+
+.filterClear {
+    background: none;
+    border: none;
+    color: var(--cs-icon-muted);
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    border-radius: 3px;
+}
+
+.filterClear:hover {
+    background: var(--cs-feint);
+    color: var(--cs-foreground);
+}
+
+.multiSelectBar {
+    padding: 6px 12px;
+    color: var(--cs-secondary-text);
+    font-size: 11px;
+    border-bottom: 1px solid var(--cs-border);
+}
+
+.emptyHint {
+    padding: 6px 12px;
+    color: var(--cs-secondary-text);
+    font-size: 11px;
+    font-style: italic;
+}
+
+.textArea {
+    padding: 4px 8px;
+}

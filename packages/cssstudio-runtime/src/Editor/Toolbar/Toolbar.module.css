@@ -1,0 +1,141 @@
+.toolbar {
+    border: 1px solid var(--cs-border);
+    background: var(--cs-layer);
+    z-index: 5;
+    pointer-events: auto;
+    color: var(--cs-foreground);
+    border-radius: 10px;
+    align-items: center;
+    gap: 2px;
+    padding: 4px;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 12px;
+    display: flex;
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+.toolbarCollapsed {
+    border-radius: 8px;
+    gap: 0;
+    padding: 4px 2px;
+}
+
+.collapseToggle {
+    width: 20px;
+    height: 28px;
+    color: var(--cs-feint-text, rgba(255,255,255,0.4));
+    cursor: pointer;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    transition: color 0.1s, background 0.1s;
+    display: flex;
+}
+
+.collapseToggle:hover {
+    color: var(--cs-foreground);
+    background: var(--cs-feint);
+}
+
+.toolbarButton {
+    width: 28px;
+    height: 28px;
+    color: var(--cs-white);
+    cursor: pointer;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    transition: background 0.1s, color 0.1s, opacity 0.1s;
+    display: flex;
+}
+
+.toolbarButton:hover {
+    background: var(--cs-feint);
+}
+
+.toolbarButton:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.toolbarButton:disabled:hover {
+    background: none;
+}
+
+.toolbarButton.primary {
+    background: var(--cs-accent);
+    color: var(--cs-on-accent, #000);
+}
+
+.toolbarButton.primary:hover {
+    opacity: 0.9;
+    background: var(--cs-accent);
+}
+
+.toolbarButton.active {
+    background: var(--cs-feint-solid);
+    color: var(--cs-accent);
+}
+
+.toolbarButton.muted {
+    opacity: 0.45;
+}
+
+.separator {
+    width: 1px;
+    height: 18px;
+    background: var(--cs-border);
+    margin: 0 2px;
+    flex-shrink: 0;
+}
+
+.agentStatus {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.demoStrip {
+    position: absolute;
+    top: -22px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 10px;
+    color: var(--cs-secondary-text);
+    background: var(--cs-layer);
+    border: 1px solid var(--cs-border);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    padding: 2px 8px;
+    cursor: pointer;
+}
+
+.demoTitle {
+    font-weight: 600;
+    margin: 0 0 6px;
+    color: var(--cs-foreground);
+}
+
+.demoDescription {
+    color: var(--cs-secondary-text);
+    margin: 0 0 8px;
+    line-height: 1.5;
+    font-size: 11px;
+}
+
+.demoLink {
+    color: var(--cs-accent);
+    text-decoration: none;
+    font-size: 12px;
+}

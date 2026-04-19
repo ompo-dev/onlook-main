@@ -1,0 +1,132 @@
+.rowWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.tokenTrigger {
+  background: none;
+  border: none;
+  color: var(--cs-icon-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  flex-shrink: 0;
+  position: absolute;
+  right: 12px;
+  z-index: 1;
+}
+
+.tokenTrigger:hover {
+  background: var(--cs-feint);
+  color: var(--cs-accent);
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  background: var(--cs-input-bg);
+  border-radius: 3px;
+  padding: 2px 6px;
+  min-width: 0;
+}
+
+.pillIcon {
+  color: var(--cs-accent);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.pillName {
+  flex: 1;
+  font-family: var(--cs-font-mono, monospace);
+  font-size: 11px;
+  color: var(--cs-accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pillClear {
+  background: none;
+  border: none;
+  color: var(--cs-icon-muted);
+  cursor: pointer;
+  padding: 1px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+.pillClear:hover {
+  background: var(--cs-feint);
+  color: var(--cs-foreground);
+}
+
+.overlay {
+  position: fixed;
+  z-index: 9999;
+  background: var(--cs-panel-bg);
+  border: 1px solid var(--cs-border);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  min-width: 220px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.tokenItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  border-radius: 3px;
+  padding: 4px 8px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.tokenItem:hover {
+  background: var(--cs-feint);
+}
+
+.tokenColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid var(--cs-border);
+  flex-shrink: 0;
+}
+
+.tokenName {
+  flex: 1;
+  font-family: var(--cs-font-mono, monospace);
+  font-size: 11px;
+  color: var(--cs-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tokenValue {
+  font-size: 10px;
+  color: var(--cs-secondary-text);
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 80px;
+}

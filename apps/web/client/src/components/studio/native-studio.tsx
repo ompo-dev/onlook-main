@@ -5,6 +5,7 @@ import { api } from '@/trpc/react';
 import { EditorAttributes } from '@onlook/constants';
 import type { Font, SystemTheme } from '@onlook/models/assets';
 import {
+    type ChatMessage,
     ChatType,
     EditorMode,
     type ActionElement,
@@ -820,7 +821,7 @@ function NativeStudioChatPanel() {
             {isLoading && <div className="studio-muted">Loading conversation...</div>}
             {conversationMessages && conversationMessages.length > 0 && (
                 <div className="studio-section">
-                    {conversationMessages.map((message) => {
+                    {conversationMessages.map((message: ChatMessage) => {
                         const text = extractMessageText(message);
                         if (!text) {
                             return null;

@@ -1,4 +1,4 @@
-import { startStudio as startVendoredStudio } from "./dist/cssstudio.mjs";
+import { startStudio as startSrcStudio } from "./dist/cssstudio-src.mjs";
 
 const TOKEN_KEY = "css-studio-auth-token";
 const AUTH_LAST_CHECK_KEY = "css-studio-auth-last-check";
@@ -22,7 +22,7 @@ function primeLocalAuth() {
 export function startStudio(options = {}) {
   primeLocalAuth();
 
-  return startVendoredStudio({
+  return startSrcStudio({
     mcpPort: DEFAULT_MCP_PORT,
     ...options
   });

@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { usePanelMeasurements } from '../_hooks/use-panel-measure';
 import { useStartProject } from '../_hooks/use-start-project';
+import { CssStudio } from '@/components/studio/css-studio';
 import { BottomBar } from './bottom-bar';
 import { Canvas } from './canvas';
 import { EditorBar } from './editor-bar';
@@ -81,13 +82,13 @@ export const Main = observer(() => {
         );
     }
 
-    const shouldHideLegacyChrome = studioMode !== 'off';
+    const shouldHideLegacyChrome = studioMode === 'native';
 
     return (
         <TooltipProvider>
             <div className="h-screen w-screen flex flex-row select-none relative overflow-hidden">
                 <Canvas />
-
+                {studioMode === 'native' && <CssStudio />}
                 <div className="absolute top-0 w-full">
                     <TopBar />
                 </div>

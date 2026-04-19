@@ -3,7 +3,7 @@
 import { useStudioRuntime, type StudioMode } from '@/components/studio/runtime';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@onlook/ui/tooltip';
 import { cn } from '@onlook/ui/utils';
-import { Layers3, Power, ScanSearch } from 'lucide-react';
+import { Layers3, Power } from 'lucide-react';
 
 const MODE_ITEMS: Array<{
     description: string;
@@ -15,35 +15,27 @@ const MODE_ITEMS: Array<{
         mode: 'off',
         label: 'Off',
         icon: Power,
-        description: 'Hide both studio overlays',
-    },
-    {
-        mode: 'original',
-        label: 'Original',
-        icon: ScanSearch,
-        description: 'Run the original CSS Studio overlay',
+        description: 'Hide the studio overlay',
     },
     {
         mode: 'native',
-        label: 'Native',
+        label: 'Studio',
         icon: Layers3,
-        description: 'Run the Onlook native studio clone',
+        description: 'Run the Onlook CSS Studio',
     },
 ];
 
 export function StudioModeToggle() {
     const { availability, mode, setMode } = useStudioRuntime();
 
-    if (!availability.original && !availability.native) {
+    if (!availability.native) {
         return null;
     }
 
     return (
         <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-background-onlook/60 px-1 py-1">
             {MODE_ITEMS.map((item) => {
-                const isUnavailable =
-                    (item.mode === 'original' && !availability.original) ||
-                    (item.mode === 'native' && !availability.native);
+                const isUnavailable = item.mode === 'native' && !availability.native;
                 const Icon = item.icon;
 
                 return (

@@ -1,0 +1,175 @@
+.gradientPicker {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+}
+
+.previewWrapper {
+  position: relative;
+  height: 20px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 2px;
+  cursor: crosshair;
+}
+
+.previewCheckerboard {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(45deg, #ccc 25%, transparent 25%),
+    linear-gradient(-45deg, #ccc 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ccc 75%),
+    linear-gradient(-45deg, transparent 75%, #ccc 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+}
+
+.previewGradient {
+  position: absolute;
+  inset: 0;
+}
+
+.stopBar {
+  position: relative;
+  height: 18px;
+  margin: 2px 0;
+}
+
+.stopThumb {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.8);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.4);
+  cursor: pointer;
+  transform: translateX(-50%);
+  top: 3px;
+}
+
+.selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px var(--cs-accent);
+}
+
+.stopEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stopColorRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stopSwatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  border: 1px solid var(--cs-border);
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+  flex-shrink: 0;
+}
+
+.stopSwatchColor {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.stopColorInput {
+  flex: 1;
+  background: var(--cs-input-bg);
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--cs-foreground);
+  font-family: var(--cs-font-mono, monospace);
+  font-size: 11px;
+  outline: none;
+  padding: 2px 6px;
+  min-width: 0;
+}
+
+.stopColorInput:focus {
+  border-color: var(--cs-input-border-strong);
+}
+
+.positionInput {
+  width: 48px;
+  background: var(--cs-input-bg);
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--cs-foreground);
+  font-family: var(--cs-font-mono, monospace);
+  font-size: 11px;
+  outline: none;
+  padding: 2px 4px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.positionInput:focus {
+  border-color: var(--cs-input-border-strong);
+}
+
+.deleteStopButton {
+  background: none;
+  border: none;
+  color: var(--cs-icon-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.deleteStopButton:hover {
+  background: var(--cs-feint);
+  color: var(--cs-danger);
+}
+
+.divider {
+  height: 1px;
+  background: var(--cs-border);
+  margin: 2px 0;
+}
+
+.typeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.typeSelect {
+  flex: 1;
+  background: var(--cs-input-bg);
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--cs-foreground);
+  font-size: 11px;
+  outline: none;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+.typeSelect:focus {
+  border-color: var(--cs-input-border-strong);
+}
+
+.repeatLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--cs-label-text);
+  white-space: nowrap;
+  cursor: pointer;
+}

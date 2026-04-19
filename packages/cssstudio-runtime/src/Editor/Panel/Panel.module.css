@@ -1,0 +1,132 @@
+.panel {
+    background: var(--cs-layer);
+    border: 1px solid var(--cs-border);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    pointer-events: auto;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 12px;
+    color: var(--cs-foreground);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    z-index: 4;
+}
+
+.dragging {
+    opacity: 0.9;
+    cursor: grabbing;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 4px 6px 4px 4px;
+    border-bottom: 1px solid var(--cs-border);
+    cursor: grab;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.label {
+    font-size: 11px;
+    color: var(--cs-secondary-text);
+    padding: 0 4px;
+    flex-shrink: 0;
+}
+
+.tabBar {
+    display: flex;
+    gap: 2px;
+    flex: 1;
+}
+
+.tab {
+    padding: 4px 8px;
+    background: none;
+    border: none;
+    border-radius: 5px;
+    color: var(--cs-secondary-text);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+    white-space: nowrap;
+}
+
+.tab:hover:not(:disabled) {
+    background: var(--cs-feint);
+    color: var(--cs-foreground);
+}
+
+.tab:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.tabActive {
+    color: var(--cs-foreground);
+    background: var(--cs-feint-solid);
+}
+
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.headerButton {
+    width: 22px;
+    height: 22px;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    color: var(--cs-icon-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.1s, color 0.1s;
+}
+
+.headerButton:hover {
+    background: var(--cs-feint);
+    color: var(--cs-foreground);
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.resizeEdge {
+    position: absolute;
+    z-index: 10;
+}
+
+.resizeEdgeLeft {
+    top: 0;
+    left: -3px;
+    width: 6px;
+    height: 100%;
+    cursor: ew-resize;
+}
+
+.resizeEdgeRight {
+    top: 0;
+    right: -3px;
+    width: 6px;
+    height: 100%;
+    cursor: ew-resize;
+}
+
+.resizeEdgeTop {
+    top: -3px;
+    left: 0;
+    height: 6px;
+    width: 100%;
+    cursor: ns-resize;
+}

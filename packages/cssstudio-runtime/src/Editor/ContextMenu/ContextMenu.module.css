@@ -1,0 +1,55 @@
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+}
+
+.menu {
+    position: fixed;
+    background: var(--cs-layer);
+    border: 1px solid var(--cs-border);
+    border-radius: 8px;
+    padding: 4px;
+    min-width: 180px;
+    z-index: 201;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 12px;
+    color: var(--cs-foreground);
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 6px 10px;
+    background: none;
+    border: none;
+    border-radius: 5px;
+    color: var(--cs-foreground);
+    font-size: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.1s;
+}
+
+.item:hover {
+    background: var(--cs-feint);
+}
+
+.danger {
+    color: var(--cs-red);
+}
+
+.separator {
+    height: 1px;
+    background: var(--cs-border);
+    margin: 4px 0;
+}
+
+.shortcut {
+    color: var(--cs-secondary-text);
+    font-size: 11px;
+    margin-left: 12px;
+}

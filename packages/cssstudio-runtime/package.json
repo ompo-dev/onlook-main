@@ -7,10 +7,14 @@
   "module": "./index.mjs",
   "types": "./index.d.ts",
   "scripts": {
-    "mcp": "bun ./dist/cli.mjs"
+    "mcp": "bun ./vendor/cli.mjs",
+    "sync:upstream": "bun ./scripts/sync-upstream-cssstudio.mjs",
+    "rebuild:bundle": "bun ./scripts/rebuild-cssstudio.mjs",
+    "build:src": "node ./scripts/build-src.mjs",
+    "typecheck": "tsc --noEmit"
   },
   "bin": {
-    "cssstudio-local": "./dist/cli.mjs"
+    "cssstudio-local": "./vendor/cli.mjs"
   },
   "exports": {
     ".": {
@@ -18,13 +22,24 @@
       "import": "./index.mjs",
       "default": "./index.mjs"
     },
-    "./cli": "./dist/cli.mjs"
+    "./cli": "./vendor/cli.mjs"
   },
   "files": [
     "dist/*.js",
     "dist/*.mjs",
-    "dist/*.css"
+    "dist/*.css",
+    "vendor/*.mjs",
+    "vendor/*.css"
   ],
+  "dependencies": {
+    "motion": "^12.0.0",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^5.0.0"
+  },
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18"

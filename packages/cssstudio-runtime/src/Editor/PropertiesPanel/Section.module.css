@@ -1,0 +1,49 @@
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 12px 2px;
+  gap: 4px;
+}
+
+.title {
+  color: var(--cs-secondary-text);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex: 1;
+}
+
+.headerAction {
+  background: none;
+  border: none;
+  color: var(--cs-icon-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+}
+
+.headerAction:hover {
+  background: var(--cs-feint);
+  color: var(--cs-foreground);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+}
+
+.divider {
+  height: 1px;
+  background: var(--cs-border);
+  margin: 4px 0;
+}

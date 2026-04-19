@@ -1,0 +1,28 @@
+.question {
+    color: var(--cs-foreground);
+    margin: 0 0 8px;
+    line-height: 1.5;
+    font-size: 12px;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.option {
+    padding: 6px 10px;
+    background: var(--cs-feint-solid);
+    border: 1px solid var(--cs-border);
+    border-radius: 6px;
+    color: var(--cs-foreground);
+    cursor: pointer;
+    font-size: 12px;
+    text-align: left;
+    transition: background 0.1s;
+}
+
+.option:hover {
+    background: var(--cs-input-bg-hover);
+}
