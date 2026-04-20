@@ -1,5 +1,6 @@
 import { useStore } from '../state/use-store';
 import { EditableInput } from './EditableInput';
+import { SelectInput } from '../PropertiesPanel/inputs/SelectInput';
 import { PlusIcon } from '../icons/PlusIcon';
 import styles from './AnimationsPanel.module.css';
 
@@ -33,21 +34,17 @@ export function KeyframesDropdown() {
     return (
         <>
             {rules.length > 0 && (
-                <select
-                    className={styles.dropdown}
-                    value={selected ?? ''}
-                    onChange={(e) => {
-                        const name = e.target.value || null;
-                        select(name);
+                <SelectInput
+                    bare
+                    value={selected ?? rules[0]?.name ?? ''}
+                    options={rules.map((r) => r.name)}
+                    onChange={(name) => {
+                        select(name || null);
                         if (name && selectedAnimIndex !== null) {
                             updateEntry(selectedAnimIndex, { name });
                         }
                     }}
-                >
-                    {rules.map((r) => (
-                        <option key={r.name} value={r.name}>{r.name}</option>
-                    ))}
-                </select>
+                />
             )}
             {selectedNodeId !== null && selected && (
                 <button

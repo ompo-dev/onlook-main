@@ -202,7 +202,6 @@ export function InPagePanel({ mcpPort, mode }: InPagePanelProps) {
                         { id: 'design', label: 'Design' },
                         { id: 'motion', label: 'Motion', disabled: isMultiSelect },
                         { id: 'variables', label: 'Variables', disabled: isMultiSelect },
-                        { id: 'html', label: 'HTML', disabled: isMultiSelect },
                     ]}
                     label={undefined}
                     headerSlot={

@@ -1,0 +1,96 @@
+.card {
+  background: var(--cs-card-bg, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--cs-border, rgba(255, 255, 255, 0.08));
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.card.selected {
+  border-color: var(--cs-accent, #7c6af7);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--cs-border, rgba(255, 255, 255, 0.08));
+}
+
+.headerLabel {
+  font-size: 10px;
+  color: var(--cs-text-muted, rgba(255, 255, 255, 0.4));
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex: 0 0 auto;
+}
+
+.headerContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.iconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: var(--cs-text-muted, rgba(255, 255, 255, 0.4));
+  cursor: pointer;
+  padding: 0;
+}
+
+.iconBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--cs-text, #fff);
+}
+
+.body {
+  padding: 4px 0;
+}
+
+.moreToggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--cs-border, rgba(255, 255, 255, 0.08));
+  color: var(--cs-text-muted, rgba(255, 255, 255, 0.4));
+  cursor: pointer;
+  font-size: 10px;
+  padding: 4px 8px;
+  text-align: left;
+}
+
+.moreToggle:hover {
+  color: var(--cs-text, #fff);
+}
+
+.moreChevron {
+  display: flex;
+  align-items: center;
+  transform: rotate(-90deg);
+  transition: transform 0.15s;
+}
+
+.moreChevron.expanded {
+  transform: rotate(0deg);
+}
+
+.secondary {
+  border-top: 1px solid var(--cs-border, rgba(255, 255, 255, 0.08));
+  padding: 4px 0;
+}

@@ -1,0 +1,448 @@
+.panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    outline: none;
+}
+
+.empty {
+    padding: 16px 12px;
+    color: var(--cs-secondary-text);
+    font-size: 12px;
+    text-align: center;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--cs-border);
+    flex-shrink: 0;
+}
+
+.timeline {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+    cursor: default;
+}
+
+.markersRow {
+    display: flex;
+    height: 20px;
+    border-bottom: 1px solid var(--cs-border);
+    position: sticky;
+    top: 0;
+    background: var(--cs-layer);
+    z-index: 2;
+}
+
+.markersTrack {
+    flex: 1;
+    position: relative;
+}
+
+.markerContainer {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+}
+
+.markerMajor {
+    font-size: 10px;
+    color: var(--cs-secondary-text);
+    font-family: var(--cs-font-mono, monospace);
+    user-select: none;
+}
+
+.markerMinor {
+    font-size: 10px;
+    color: var(--cs-feint-solid);
+    font-family: var(--cs-font-mono, monospace);
+    user-select: none;
+}
+
+.propertyRow {
+    display: flex;
+    align-items: center;
+    height: 28px;
+    border-bottom: 1px solid var(--cs-border);
+}
+
+.propertyLabel {
+    width: 120px;
+    flex-shrink: 0;
+    padding: 0 8px;
+    font-size: 11px;
+    color: var(--cs-foreground);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border-right: 1px solid var(--cs-border);
+    height: 100%;
+}
+
+.propertyLabelInput {
+    flex: 1;
+    background: var(--cs-input-bg);
+    border: 1px solid var(--cs-accent);
+    border-radius: 3px;
+    color: var(--cs-foreground);
+    font-family: var(--cs-font-mono, monospace);
+    font-size: 11px;
+    outline: none;
+    padding: 1px 4px;
+    min-width: 0;
+}
+
+.propertyDelete {
+    background: none;
+    border: none;
+    color: var(--cs-icon-muted);
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    border-radius: 3px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.propertyDelete:hover {
+    color: var(--cs-red);
+    background: var(--cs-feint);
+}
+
+.keyframesTrack {
+    flex: 1;
+    position: relative;
+    height: 100%;
+}
+
+.valueMarker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: var(--cs-accent);
+    border-radius: 2px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: border-color 0.1s;
+}
+
+.valueMarker:hover, .valueMarker[data-selected] {
+    border-color: var(--cs-foreground);
+}
+
+.scrubber {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--cs-accent);
+    z-index: 3;
+    pointer-events: none;
+}
+
+.scrubberHead {
+    position: absolute;
+    top: 0;
+    left: -4px;
+    cursor: ew-resize;
+    pointer-events: all;
+}
+
+.addPropertyRow {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    height: 28px;
+}
+
+.addPropertyBtn {
+    background: none;
+    border: none;
+    color: var(--cs-secondary-text);
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    transition: color 0.1s, background 0.1s;
+}
+
+.addPropertyBtn:hover {
+    color: var(--cs-foreground);
+    background: var(--cs-feint);
+}
+
+.addPropertyInput {
+    flex: 1;
+    background: var(--cs-input-bg);
+    border: 1px solid var(--cs-accent);
+    border-radius: 3px;
+    color: var(--cs-foreground);
+    font-family: var(--cs-font-mono, monospace);
+    font-size: 11px;
+    outline: none;
+    padding: 2px 6px;
+}
+
+.playback {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.playbackBtn {
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    color: var(--cs-foreground);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.1s;
+}
+
+.playbackBtn:hover {
+    background: var(--cs-feint);
+}
+
+.playbackDisabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.durationWrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+}
+
+.durationLabel {
+    font-size: 11px;
+    color: var(--cs-secondary-text);
+}
+
+.durationInput {
+    width: 52px;
+    background: var(--cs-input-bg);
+    border: 1px solid var(--cs-input-border);
+    border-radius: 4px;
+    color: var(--cs-foreground);
+    font-family: var(--cs-font-mono, monospace);
+    font-size: 11px;
+    outline: none;
+    padding: 2px 6px;
+    text-align: right;
+}
+
+.durationInput:focus {
+    border-color: var(--cs-accent);
+}
+
+.dropdown {
+    position: relative;
+    margin-left: 4px;
+}
+
+.currentTime {
+    font-family: var(--cs-font-mono, monospace);
+    font-size: 11px;
+    color: var(--cs-secondary-text);
+    min-width: 36px;
+    text-align: right;
+}
+
+.transitionBar {
+    position: absolute;
+    height: 4px;
+    background: var(--cs-accent);
+    opacity: 0.3;
+    border-radius: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.popover {
+    position: absolute;
+    background: var(--cs-layer);
+    border: 1px solid var(--cs-border);
+    border-radius: 8px;
+    padding: 8px;
+    z-index: 20;
+    min-width: 200px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+.popoverHeader {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--cs-secondary-text);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.popoverProp {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+    font-size: 11px;
+}
+
+.popoverTextInput {
+    flex: 1;
+    background: var(--cs-input-bg);
+    border: 1px solid var(--cs-input-border);
+    border-radius: 3px;
+    color: var(--cs-foreground);
+    font-family: var(--cs-font-mono, monospace);
+    font-size: 11px;
+    outline: none;
+    padding: 2px 4px;
+}
+
+.editBar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-top: 1px solid var(--cs-border);
+    background: var(--cs-layer);
+    flex-shrink: 0;
+}
+
+.editLabel {
+    font-size: 11px;
+    color: var(--cs-secondary-text);
+    min-width: 80px;
+}
+
+.editOffset {
+    font-family: var(--cs-font-mono, monospace);
+    font-size: 11px;
+    color: var(--cs-accent);
+}
+
+.editInput {
+    flex: 1;
+    background: var(--cs-input-bg);
+    border: 1px solid var(--cs-input-border);
+    border-radius: 3px;
+    color: var(--cs-foreground);
+    font-family: var(--cs-font-mono, monospace);
+    font-size: 11px;
+    outline: none;
+    padding: 2px 4px;
+}
+
+.editDelete {
+    background: none;
+    border: none;
+    color: var(--cs-icon-muted);
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    border-radius: 3px;
+}
+
+.editDelete:hover {
+    color: var(--cs-red);
+}
+
+.nameInput {
+    flex: 1;
+    background: var(--cs-input-bg);
+    border: 1px solid var(--cs-input-border);
+    border-radius: 4px;
+    color: var(--cs-foreground);
+    font-family: var(--cs-font-mono, monospace);
+    font-size: 11px;
+    outline: none;
+    padding: 2px 6px;
+}
+
+.popoverBody {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.popoverEasingRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+}
+
+.popoverEasingLabel {
+    font-size: 11px;
+    color: var(--cs-secondary-text);
+    min-width: 50px;
+}
+
+.popoverEasingName {
+    font-size: 11px;
+    color: var(--cs-foreground);
+    flex: 1;
+}
+
+.popoverEasingPreview {
+    width: 32px;
+    height: 20px;
+}
+
+.popoverEasingTrigger {
+    background: var(--cs-input-bg);
+    border: 1px solid var(--cs-input-border);
+    border-radius: 4px;
+    color: var(--cs-foreground);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 2px 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.popoverArrow {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--cs-layer);
+    border-left: 1px solid var(--cs-border);
+    border-top: 1px solid var(--cs-border);
+    transform: rotate(45deg);
+    top: -5px;
+    left: 50%;
+    margin-left: -4px;
+}
+
+.popoverArrowBottom {
+    top: auto;
+    bottom: -5px;
+    border-left: none;
+    border-top: none;
+    border-right: 1px solid var(--cs-border);
+    border-bottom: 1px solid var(--cs-border);
+    transform: rotate(45deg);
+}

@@ -1,0 +1,68 @@
+.container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 0;
+}
+
+.label {
+    color: var(--cs-secondary-text);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.swatches {
+    display: flex;
+    gap: 4px;
+}
+
+.swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.1s;
+}
+
+.swatch:hover {
+    transform: scale(1.2);
+}
+
+.activeSwatch {
+    border-color: var(--cs-foreground);
+}
+
+.modeButtons {
+    display: flex;
+    gap: 2px;
+}
+
+.modeButton {
+    padding: 3px 8px;
+    background: none;
+    border: 1px solid var(--cs-border);
+    border-radius: 4px;
+    color: var(--cs-secondary-text);
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+}
+
+.modeButton:hover {
+    background: var(--cs-feint);
+    color: var(--cs-foreground);
+}
+
+.modeButtonActive {
+    background: var(--cs-feint-solid);
+    color: var(--cs-foreground);
+}

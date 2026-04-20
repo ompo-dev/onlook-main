@@ -40,6 +40,7 @@ const DEFAULT_THEME_CSS = `
         --cs-secondary-text-hover: rgba(255,255,255,0.7);
         --cs-checker: rgba(255,255,255,0.15);
         --cs-on-accent: #000;
+        --cs-panel-bg: #1a1a28;
     }
     * { box-sizing: border-box; }
     button { font-family: inherit; }

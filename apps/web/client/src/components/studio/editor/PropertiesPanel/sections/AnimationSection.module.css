@@ -1,0 +1,16 @@
+.entrySelect {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--cs-text, #fff);
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+}
+
+.triggerLabel {
+  font-size: 10px;
+  color: var(--cs-text-muted, rgba(255, 255, 255, 0.4));
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

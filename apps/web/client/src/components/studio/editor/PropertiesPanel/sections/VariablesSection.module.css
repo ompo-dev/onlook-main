@@ -1,0 +1,101 @@
+.newRow {
+  display: flex;
+  gap: 4px;
+  padding: 4px 8px;
+}
+
+.newInput {
+  flex: 1;
+  min-width: 0;
+  background: var(--cs-feint, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--cs-border, rgba(255, 255, 255, 0.1));
+  border-radius: 3px;
+  color: var(--cs-foreground, #fff);
+  font-size: 11px;
+  font-family: var(--cs-font-mono, monospace);
+  outline: none;
+  padding: 2px 4px;
+}
+
+.newInput:focus {
+  border-color: var(--cs-accent, #7c6af7);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px 2px;
+}
+
+.groupLabel {
+  font-size: 10px;
+  color: var(--cs-secondary-text, rgba(255, 255, 255, 0.4));
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 8px 2px;
+}
+
+.groupAdd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: var(--cs-secondary-text, rgba(255, 255, 255, 0.4));
+  cursor: pointer;
+  padding: 0;
+}
+
+.groupAdd:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--cs-foreground, #fff);
+}
+
+.empty {
+  padding: 6px 8px;
+  color: var(--cs-secondary-text, rgba(255, 255, 255, 0.4));
+  font-size: 11px;
+  font-style: italic;
+}
+
+.emptyAdd {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px dashed var(--cs-border, rgba(255, 255, 255, 0.12));
+  border-radius: 4px;
+  color: var(--cs-accent, #7c6af7);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px 8px;
+  margin: 4px 8px;
+}
+
+.emptyAdd:hover {
+  background: rgba(124, 106, 247, 0.1);
+}
+
+.standalone {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.editNameInput {
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--cs-accent, #7c6af7);
+  outline: none;
+  color: var(--cs-foreground, #fff);
+  padding: 0;
+}

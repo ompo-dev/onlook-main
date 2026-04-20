@@ -560,6 +560,29 @@ function TransitionCard({
   );
 }
 
+interface AnimNameSelectProps {
+  value: string;
+  ruleNames: string[];
+  onChange: (name: string) => void;
+  onFocus?: () => void;
+}
+
+function AnimNameSelect({ value, ruleNames, onChange, onFocus }: AnimNameSelectProps) {
+  const allOptions = ['none', ...ruleNames.filter((n) => n !== 'none')];
+  if (!allOptions.includes(value) && value && value !== 'none') {
+    allOptions.unshift(value);
+  }
+  return (
+    <SelectInput
+      label=""
+      value={value || 'none'}
+      options={allOptions}
+      onChange={onChange}
+      onFocus={onFocus}
+    />
+  );
+}
+
 interface AnimationCardProps {
   entry: AnimationEntry;
   index: number;
@@ -610,19 +633,12 @@ function AnimationCard({
       hasNonDefaultSecondary={hasNonDefaultSecondary(entry)}
       headerLabel={TRIGGER_LABELS[entry.trigger]}
       headerContent={
-        <select
-          className={animStyles.entrySelect}
+        <AnimNameSelect
           value={entry.name}
-          onChange={(e) => onNameChange(e.target.value)}
+          ruleNames={ruleNames}
+          onChange={onNameChange}
           onFocus={onFocus}
-        >
-          <option value="none">none</option>
-          {ruleNames.map((name) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </select>
+        />
       }
       headerActions={
         <>
@@ -824,34 +840,24 @@ function RangeRow({ label, value, onChange }: RangeRowProps) {
   };
 
   return (
-    <div className={inputStyles.row} style={{ gridTemplateColumns: '76px 1fr 56px' }}>
-      <label className={inputStyles.label}>{label}</label>
-      <select
-        className={inputStyles.select}
-        value={name}
-        onChange={(e) => {
-          const v = e.target.value;
-          onChange(v === 'normal' ? 'normal' : `${v} ${offset}`);
-        }}
-      >
-        {RANGE_NAME_OPTIONS.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
-      {name !== 'normal' && (
-        <input
-          className={inputStyles.textInput}
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onBlur={commitOffset}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') commitOffset();
-          }}
-          placeholder="0%"
-        />
-      )}
-    </div>
+    <SelectInput
+      label={label}
+      value={name}
+      options={[...RANGE_NAME_OPTIONS]}
+      onChange={(v) => onChange(v === 'normal' ? 'normal' : `${v} ${offset}`)}
+      endContent={
+        name !== 'normal' ? (
+          <input
+            className={inputStyles.textInput}
+            style={{ width: 50, flexShrink: 0 }}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commitOffset}
+            onKeyDown={(e) => { if (e.key === 'Enter') commitOffset(); }}
+            placeholder="0%"
+          />
+        ) : undefined
+      }
+    />
   );
 }

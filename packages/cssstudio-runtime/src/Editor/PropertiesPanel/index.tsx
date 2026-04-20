@@ -21,8 +21,6 @@ import { SvgSection } from './sections/SvgSection';
 import { TextSection } from './sections/TextSection';
 import { MotionSection } from './sections/MotionSection';
 import { VariablesSection } from './sections/VariablesSection';
-import { AttributesSection } from './sections/AttributesSection';
-import { TextInput } from './inputs/TextInput';
 import styles from './PropertiesPanel.module.css';
 
 const PROTECTED_TAGS = new Set(['html', 'body', 'head']);
@@ -345,29 +343,6 @@ export const PropertiesPanel = forwardRef<PropertiesPanelHandle, PropertiesPanel
             />
           )}
 
-          {effectiveTab === 'html' && !isMultiSelect && (
-            <>
-              {selectedTag && !PROTECTED_TAGS.has(selectedTag) && (
-                <TextInput
-                  label="tag"
-                  displayName="Tag"
-                  value={selectedTag}
-                  onChange={(v) => {
-                    const trimmed = v.trim().toLowerCase();
-                    if (trimmed && trimmed !== selectedTag && selectedNodeId !== null) {
-                      onTagChange?.(selectedNodeId, trimmed);
-                    }
-                  }}
-                />
-              )}
-              <AttributesSection
-                attributes={selectedAttributes}
-                onAttributeChange={onAttributeChange ?? (() => {})}
-                onAttributeDelete={onAttributeDelete ?? (() => {})}
-                onAttributeRename={onAttributeRename}
-              />
-            </>
-          )}
         </div>
       </FilterContext.Provider>
     );

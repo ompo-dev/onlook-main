@@ -1,0 +1,191 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 12px;
+  min-height: 24px;
+}
+
+.indent {
+  padding-left: 24px;
+}
+
+.label {
+  color: var(--cs-label-text);
+  font-size: 11px;
+  min-width: 80px;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.mono {
+  font-family: var(--cs-font-mono, monospace);
+}
+
+.groupLabel {
+  color: var(--cs-secondary-text);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 6px 12px 2px;
+}
+
+.textInput {
+  flex: 1;
+  background: var(--cs-input-bg);
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--cs-foreground);
+  font-family: inherit;
+  font-size: 11px;
+  outline: none;
+  padding: 2px 6px;
+  min-width: 0;
+}
+
+.textInput:focus {
+  border-color: var(--cs-input-border-strong);
+}
+
+.textArea {
+  flex: 1;
+  background: var(--cs-input-bg);
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--cs-foreground);
+  font-family: inherit;
+  font-size: 11px;
+  outline: none;
+  padding: 4px 6px;
+  resize: none;
+  min-width: 0;
+}
+
+.textArea:focus {
+  border-color: var(--cs-input-border-strong);
+}
+
+.textAreaRow {
+  align-items: flex-start;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.select {
+  flex: 1;
+  background: var(--cs-input-bg);
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--cs-foreground);
+  font-family: inherit;
+  font-size: 11px;
+  outline: none;
+  padding: 2px 6px;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.select:focus {
+  border-color: var(--cs-input-border-strong);
+}
+
+.swatchWrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.swatchButton {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  border: 1px solid var(--cs-border);
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swatchColor {
+  width: 100%;
+  height: 100%;
+}
+
+.emptyColorSwatch {
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--cs-border),
+    var(--cs-border) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+}
+
+.colorGroup {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.colorText {
+  flex: 1;
+  background: var(--cs-input-bg);
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--cs-foreground);
+  font-family: var(--cs-font-mono, monospace);
+  font-size: 11px;
+  outline: none;
+  padding: 2px 6px;
+  min-width: 0;
+}
+
+.colorText:focus {
+  border-color: var(--cs-input-border-strong);
+}
+
+.toggleButton {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--cs-icon-muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+.toggleButton:hover {
+  background: var(--cs-feint);
+  color: var(--cs-foreground);
+}
+
+.deleteButton {
+  background: none;
+  border: none;
+  color: var(--cs-icon-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.deleteButton:hover {
+  background: var(--cs-feint);
+  color: var(--cs-danger);
+}

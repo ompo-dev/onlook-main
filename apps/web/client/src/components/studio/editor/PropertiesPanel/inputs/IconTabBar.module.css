@@ -1,0 +1,33 @@
+.bar {
+  display: flex;
+  align-items: center;
+  background: var(--cs-input-bg);
+  border-radius: 4px;
+  padding: 1px;
+  gap: 1px;
+  flex: 1;
+}
+
+.tab {
+  flex: 1;
+  background: none;
+  border: none;
+  border-radius: 3px;
+  color: var(--cs-icon-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  transition: background 0.1s, color 0.1s;
+}
+
+.tab:hover {
+  background: var(--cs-feint);
+  color: var(--cs-foreground);
+}
+
+.active {
+  background: var(--cs-layer-highlight);
+  color: var(--cs-foreground);
+}

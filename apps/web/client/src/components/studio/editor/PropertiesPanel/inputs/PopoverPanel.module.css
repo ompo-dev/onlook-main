@@ -1,0 +1,59 @@
+.popover {
+  position: fixed;
+  z-index: 9999;
+  background: var(--cs-panel-bg);
+  border: 1px solid var(--cs-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dragging {
+  user-select: none;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px 6px 12px;
+  border-bottom: 1px solid var(--cs-border);
+  cursor: grab;
+  user-select: none;
+  height: 33px;
+  flex-shrink: 0;
+}
+
+.header:active {
+  cursor: grabbing;
+}
+
+.title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--cs-foreground);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--cs-icon-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+}
+
+.closeButton:hover {
+  background: var(--cs-feint);
+  color: var(--cs-foreground);
+}
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+}

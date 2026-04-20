@@ -1,0 +1,102 @@
+.sliderGroup {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 4px;
+  min-width: 0;
+}
+
+.compact {
+  flex-direction: row;
+}
+
+.slider {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  appearance: none;
+  background: var(--cs-fill-bg, color-mix(in srgb, var(--cs-foreground) 12%, transparent));
+  cursor: pointer;
+  min-width: 0;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cs-foreground);
+  cursor: pointer;
+}
+
+.sliderTrack {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--cs-foreground) 12%, transparent);
+  position: relative;
+  min-width: 0;
+}
+
+.numberInputWrapper {
+  display: flex;
+  align-items: center;
+  background: var(--cs-input-bg);
+  border: 1px solid transparent;
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+  width: 64px;
+}
+
+.numberInputWrapper:focus-within {
+  border-color: var(--cs-input-border-strong);
+}
+
+.input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--cs-foreground);
+  font-family: var(--cs-font-mono, monospace);
+  font-size: 11px;
+  outline: none;
+  padding: 2px 4px;
+  min-width: 0;
+  text-align: right;
+}
+
+.unit {
+  color: var(--cs-secondary-text);
+  font-size: 10px;
+  padding-right: 4px;
+  flex-shrink: 0;
+}
+
+.steppers {
+  display: flex;
+  flex-direction: column;
+  cursor: ns-resize;
+  padding: 1px;
+  gap: 1px;
+  flex-shrink: 0;
+  touch-action: none;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cs-icon-muted);
+  width: 12px;
+  height: 8px;
+}
+
+.stepper svg {
+  width: 8px;
+  height: 5px;
+}
+
+.stepper:hover {
+  color: var(--cs-foreground);
+}

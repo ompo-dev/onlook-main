@@ -1,0 +1,22 @@
+.bezierInputRow {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.bezierField {
+  flex: 1;
+  min-width: 0;
+  background: var(--cs-input-bg, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--cs-border, rgba(255, 255, 255, 0.12));
+  border-radius: 4px;
+  color: var(--cs-text, #fff);
+  font-size: 11px;
+  padding: 2px 4px;
+  text-align: center;
+  outline: none;
+}
+
+.bezierField:focus {
+  border-color: var(--cs-accent, #7c6af7);
+}

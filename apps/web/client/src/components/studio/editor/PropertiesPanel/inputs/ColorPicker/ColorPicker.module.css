@@ -1,0 +1,205 @@
+.tabBar {
+  display: flex;
+  border-bottom: 1px solid var(--cs-border);
+  padding: 4px 8px 0;
+  gap: 2px;
+}
+
+.tab {
+  background: none;
+  border: none;
+  color: var(--cs-secondary-text);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px 4px 0 0;
+  border-bottom: 2px solid transparent;
+}
+
+.tab:hover {
+  color: var(--cs-foreground);
+}
+
+.active {
+  color: var(--cs-foreground);
+  border-bottom-color: var(--cs-accent);
+}
+
+.visualSection {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.svArea {
+  width: 100%;
+  height: 140px;
+  border-radius: 4px;
+  position: relative;
+  cursor: crosshair;
+  background-image:
+    linear-gradient(to top, #000, transparent),
+    linear-gradient(to right, #fff, transparent);
+}
+
+.thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.3);
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.sliderTrack {
+  width: 100%;
+  height: 12px;
+  border-radius: 6px;
+  position: relative;
+  cursor: pointer;
+}
+
+.hueTrack {
+  background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+}
+
+.alphaTrack {
+  background-image: linear-gradient(45deg, #ccc 25%, transparent 25%),
+    linear-gradient(-45deg, #ccc 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ccc 75%),
+    linear-gradient(-45deg, transparent 75%, #ccc 75%);
+  background-size: 6px 6px;
+  background-position: 0 0, 0 3px, 3px -3px, -3px 0;
+}
+
+.alphaGradient {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+}
+
+.sliderThumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.3);
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.channelGroup {
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.channelLabels {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.twoCol {
+  grid-template-columns: 3fr 1fr;
+}
+
+.channelLabel {
+  text-align: center;
+  color: var(--cs-secondary-text);
+  font-size: 10px;
+}
+
+.channelRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.channelInput {
+  background: var(--cs-input-bg);
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--cs-foreground);
+  font-family: var(--cs-font-mono, monospace);
+  font-size: 11px;
+  outline: none;
+  padding: 2px 4px;
+  text-align: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.channelInput:focus {
+  border-color: var(--cs-input-border-strong);
+}
+
+.scrubbable {
+  cursor: ew-resize;
+}
+
+.scrubbable:focus {
+  cursor: text;
+}
+
+.customInput {
+  background: var(--cs-input-bg);
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--cs-foreground);
+  font-family: var(--cs-font-mono, monospace);
+  font-size: 11px;
+  outline: none;
+  padding: 2px 6px;
+  width: 100%;
+}
+
+.customInput:focus {
+  border-color: var(--cs-input-border-strong);
+}
+
+.bottomRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px 8px;
+  gap: 8px;
+}
+
+.modeSelect {
+  background: var(--cs-input-bg);
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--cs-foreground);
+  font-size: 11px;
+  outline: none;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+.modeSelect:focus {
+  border-color: var(--cs-input-border-strong);
+}
+
+.eyedropperButton {
+  background: none;
+  border: none;
+  color: var(--cs-icon-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+}
+
+.eyedropperButton:hover {
+  background: var(--cs-feint);
+  color: var(--cs-foreground);
+}

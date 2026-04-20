@@ -1,0 +1,90 @@
+.trigger {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  background: var(--cs-input-bg);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--cs-foreground);
+  font-family: inherit;
+  font-size: 11px;
+  outline: none;
+  padding: 2px 6px;
+  min-width: 0;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.1s, background 0.1s;
+}
+
+.trigger:hover {
+  background: var(--cs-feint);
+}
+
+.trigger.open,
+.trigger:focus {
+  border-color: var(--cs-input-border-strong);
+}
+
+.triggerValue {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: var(--cs-icon-muted);
+  transition: transform 0.15s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 80px; /* align with trigger (after label) */
+  right: 0;
+  z-index: 200;
+  background: var(--cs-layer);
+  border: 1px solid var(--cs-border);
+  border-radius: 6px;
+  padding: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  min-width: 80px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--cs-foreground);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 5px 8px;
+  text-align: left;
+  transition: background 0.08s;
+}
+
+.option:hover {
+  background: var(--cs-feint);
+}
+
+.option.selected {
+  color: var(--cs-accent);
+}
+
+.check {
+  flex-shrink: 0;
+  color: var(--cs-accent);
+}

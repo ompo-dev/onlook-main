@@ -27,6 +27,7 @@
     ],
     "exclude": [
         "node_modules",
-        ".next"
+        ".next",
+        "src/components/studio/editor"
     ]
 }

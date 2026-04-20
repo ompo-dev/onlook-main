@@ -1,0 +1,21 @@
+.addButton {
+  background: none;
+  border: none;
+  color: var(--cs-icon-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+}
+
+.addButton:hover {
+  background: var(--cs-feint);
+  color: var(--cs-foreground);
+}
+
+.separator {
+  height: 1px;
+  background: var(--cs-border);
+  margin: 2px 12px;
+}
