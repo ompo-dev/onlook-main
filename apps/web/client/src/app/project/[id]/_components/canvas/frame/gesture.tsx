@@ -10,6 +10,11 @@ import { observer } from 'mobx-react-lite';
 import { useCallback, useEffect, useMemo } from 'react';
 import { RightClickMenu } from '../../right-click-menu';
 
+function isDestroyedConnectionError(error: unknown): boolean {
+    const message = error instanceof Error ? error.message : String(error);
+    return message.toLowerCase().includes('destroyed connection');
+}
+
 export const GestureScreen = observer(({ frame, isResizing }: { frame: Frame, isResizing: boolean }) => {
     const editorEngine = useEditorEngine();
 
@@ -90,6 +95,9 @@ export const GestureScreen = observer(({ frame, isResizing }: { frame: Frame, is
                         break;
                 }
             } catch (error) {
+                if (isDestroyedConnectionError(error)) {
+                    return;
+                }
                 console.error('Error handling mouse event:', error);
                 return;
             }

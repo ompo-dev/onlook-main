@@ -135,11 +135,11 @@ const routeSegmentMatchesDirectory = (directoryName: string, routeSegment: strin
 const extractMetadata = async (content: string | Uint8Array): Promise<PageMetadata | undefined> => {
     try {
         if (typeof content !== 'string') {
-            throw new Error('Content is not a string');
+            return undefined;
         }
-        const ast = getAstFromContent(content);
+        const ast = getAstFromContent(content, { logErrors: false });
         if (!ast) {
-            throw new Error('Failed to parse page file');
+            return undefined;
         }
 
         let metadata: PageMetadata | undefined;
@@ -213,8 +213,7 @@ const extractMetadata = async (content: string | Uint8Array): Promise<PageMetada
         });
 
         return metadata;
-    } catch (error) {
-        console.error(`Error reading metadata:`, error);
+    } catch {
         return undefined;
     }
 };

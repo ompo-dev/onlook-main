@@ -2,6 +2,7 @@ import { LOCAL_MODE_ENABLED } from '@/utils/local-mode';
 import {
     localGetProject,
     localGetProjectSettings,
+    localSetProjectPreviewUrl,
 } from '@/utils/local-mode/local-store';
 import { DefaultSettings } from '@onlook/constants';
 import { spawn, spawnSync, type ChildProcessWithoutNullStreams } from 'child_process';
@@ -19,6 +20,7 @@ interface LocalProcessRecord {
     folderPath: string | null;
     command: string;
     port: number;
+    previewUrl: string;
     status: LocalProcessStatus;
     output: string;
     process: ChildProcessWithoutNullStreams | null;
@@ -36,6 +38,7 @@ interface LocalProcessPayload {
 
 declare global {
     var __onlookLocalProcesses: Map<string, LocalProcessRecord> | undefined;
+    var __onlookLocalProcessLocks: Map<string, Promise<LocalProcessRecord>> | undefined;
 }
 
 function getRegistry(): Map<string, LocalProcessRecord> {
@@ -44,6 +47,14 @@ function getRegistry(): Map<string, LocalProcessRecord> {
     }
 
     return globalThis.__onlookLocalProcesses;
+}
+
+function getLockRegistry(): Map<string, Promise<LocalProcessRecord>> {
+    if (!globalThis.__onlookLocalProcessLocks) {
+        globalThis.__onlookLocalProcessLocks = new Map<string, Promise<LocalProcessRecord>>();
+    }
+
+    return globalThis.__onlookLocalProcessLocks;
 }
 
 function getProcessKey(projectId: string | null | undefined, folderPath: string | null): string {
@@ -71,30 +82,164 @@ function getPortFromUrl(url: string | null | undefined): number {
     }
 }
 
-async function isPortReachable(port: number): Promise<boolean> {
-    if (!Number.isInteger(port) || port <= 0) {
+function getPreviewUrlForPort(port: number): string {
+    return `http://localhost:${port}`;
+}
+
+function getConfiguredOnlookPort(): number | null {
+    const port = Number.parseInt(process.env.PORT ?? '', 10);
+    return Number.isInteger(port) && port > 0 ? port : null;
+}
+
+function getRequestPort(req: NextRequest): number | null {
+    try {
+        const parsedUrl = new URL(req.url);
+        if (parsedUrl.port) {
+            return Number.parseInt(parsedUrl.port, 10);
+        }
+        return parsedUrl.protocol === 'https:' ? 443 : 80;
+    } catch {
+        return null;
+    }
+}
+
+function getExcludedPorts(req?: NextRequest): Set<number> {
+    const ports = new Set([8083]);
+    const configuredPort = getConfiguredOnlookPort();
+    if (configuredPort) {
+        ports.add(configuredPort);
+    }
+
+    const requestPort = req ? getRequestPort(req) : null;
+    if (requestPort) {
+        ports.add(requestPort);
+    }
+    return ports;
+}
+
+function getCandidatePorts(preferredPort: number, excludedPorts = getExcludedPorts()): number[] {
+    const nearbyPorts = Array.from({ length: 21 }, (_, index) => preferredPort - 10 + index);
+    const nextPorts = Array.from({ length: 21 }, (_, index) => 3000 + index);
+    const vitePorts = Array.from({ length: 16 }, (_, index) => 5173 + index);
+    const candidates = [
+        preferredPort,
+        ...nearbyPorts,
+        ...nextPorts,
+        ...vitePorts,
+        4173,
+        4174,
+        4321,
+        8080,
+    ];
+
+    return Array.from(
+        new Set(
+            candidates.filter(
+                (port) =>
+                    Number.isInteger(port) &&
+                    port > 0 &&
+                    port <= 65535 &&
+                    !excludedPorts.has(port),
+            ),
+        ),
+    );
+}
+
+async function isPreviewServing(port: number): Promise<boolean> {
+    if (!Number.isInteger(port) || port <= 0 || port > 65535) {
         return false;
     }
 
-    return await new Promise<boolean>((resolve) => {
-        const socket = net.createConnection({
-            host: '127.0.0.1',
-            port,
+    const checkHost = (host: string) =>
+        new Promise<boolean>((resolve) => {
+            const socket = net.createConnection({ host, port });
+
+            const finish = (result: boolean) => {
+                socket.removeAllListeners();
+                if (!socket.destroyed) {
+                    socket.destroy();
+                }
+                resolve(result);
+            };
+
+            socket.setTimeout(500);
+            socket.once('connect', () => finish(true));
+            socket.once('error', () => finish(false));
+            socket.once('timeout', () => finish(false));
         });
 
-        const finish = (result: boolean) => {
-            socket.removeAllListeners();
-            if (!socket.destroyed) {
-                socket.destroy();
-            }
-            resolve(result);
-        };
+    return (await checkHost('127.0.0.1')) || (await checkHost('localhost'));
+}
 
-        socket.setTimeout(1_000);
-        socket.once('connect', () => finish(true));
-        socket.once('error', () => finish(false));
-        socket.once('timeout', () => finish(false));
-    });
+async function detectRunningPreviewPort(
+    preferredPort: number,
+    excludedPorts = getExcludedPorts(),
+): Promise<number | null> {
+    const candidates = getCandidatePorts(preferredPort, excludedPorts);
+    const results = await Promise.all(
+        candidates.map(async (port) => ({
+            port,
+            isServing: await isPreviewServing(port),
+        })),
+    );
+    const match = results.find((result) => result.isServing);
+    if (match) {
+        return match.port;
+    }
+
+    return null;
+}
+
+function wait(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function waitForRunningPreview(
+    record: LocalProcessRecord,
+    excludedPorts = getExcludedPorts(),
+    timeoutMs = 6_000,
+): Promise<void> {
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < timeoutMs) {
+        if (await isPreviewServing(record.port)) {
+            return;
+        }
+
+        const runningPort = await detectRunningPreviewPort(record.port, excludedPorts);
+        if (runningPort) {
+            updatePreviewPort(record, runningPort, 'detected running preview');
+            return;
+        }
+
+        await wait(300);
+    }
+}
+
+function extractPreviewPortFromOutput(
+    output: string,
+    excludedPorts = getExcludedPorts(),
+): number | null {
+    const patterns = [
+        /https?:\/\/(?:localhost|127\.0\.0\.1):(\d{2,5})/i,
+        /(?:port|PORT)\s*[:=]\s*(\d{2,5})/i,
+        /started server on .*:(\d{2,5})/i,
+    ];
+
+    for (const pattern of patterns) {
+        const match = pattern.exec(output);
+        const port = match?.[1] ? Number.parseInt(match[1], 10) : NaN;
+        if (
+            Number.isInteger(port) &&
+            port > 0 &&
+            port <= 65535 &&
+            !excludedPorts.has(port)
+        ) {
+            return port;
+        }
+    }
+
+    return null;
 }
 
 function appendOutput(record: LocalProcessRecord, chunk: string): void {
@@ -111,12 +256,43 @@ function appendOutput(record: LocalProcessRecord, chunk: string): void {
     record.updatedAt = new Date().toISOString();
 }
 
-async function reuseRunningPreview(record: LocalProcessRecord): Promise<boolean> {
-    const isReachable = await isPortReachable(record.port);
+function updatePreviewPort(record: LocalProcessRecord, port: number, reason: string): void {
+    if (record.port === port) {
+        return;
+    }
 
-    if (!isReachable) {
+    const previousPort = record.port;
+    record.port = port;
+    record.previewUrl = getPreviewUrlForPort(port);
+    record.updatedAt = new Date().toISOString();
+
+    if (record.projectId) {
+        localSetProjectPreviewUrl(record.projectId, record.previewUrl);
+    }
+
+    appendOutput(
+        record,
+        `[onlook] Preview port changed from ${previousPort} to ${port} (${reason})\n`,
+    );
+}
+
+async function reuseRunningPreview(
+    record: LocalProcessRecord,
+    excludedPorts = getExcludedPorts(),
+): Promise<boolean> {
+    let runningPort: number | null = null;
+
+    if (await isPreviewServing(record.port)) {
+        runningPort = record.port;
+    } else {
+        runningPort = await detectRunningPreviewPort(record.port, excludedPorts);
+    }
+
+    if (!runningPort) {
         return false;
     }
+
+    updatePreviewPort(record, runningPort, 'detected running preview');
 
     const statusChanged = record.status !== 'running';
     record.process = null;
@@ -141,6 +317,7 @@ function getStatusSummary(record: LocalProcessRecord): string {
         `[onlook] Folder: ${record.folderPath ?? '(missing)'}`,
         `[onlook] Command: ${record.command || '(missing)'}`,
         `[onlook] Port: ${record.port}`,
+        `[onlook] URL: ${record.previewUrl}`,
     ];
 
     if (!record.folderPath) {
@@ -171,6 +348,7 @@ function serializeRecord(record: LocalProcessRecord) {
         folderPath: record.folderPath,
         command: record.command,
         port: record.port,
+        previewUrl: record.previewUrl,
         status: record.status,
         output: record.output || getStatusSummary(record),
         pid: record.pid,
@@ -203,6 +381,7 @@ function createStatusRecord(projectId?: string | null, folderPath?: string | nul
         folderPath: config.folderPath,
         command: config.command,
         port: config.port,
+        previewUrl: getPreviewUrlForPort(config.port),
         status: 'idle',
         output: '',
         process: null,
@@ -235,6 +414,7 @@ function stopProcess(record: LocalProcessRecord, message = '[onlook] Preview pro
 async function ensureDevProcess(
     projectId?: string | null,
     folderPath?: string | null,
+    excludedPorts = getExcludedPorts(),
 ): Promise<LocalProcessRecord> {
     const registry = getRegistry();
     const config = resolveProjectConfig(projectId, folderPath);
@@ -245,6 +425,7 @@ async function ensureDevProcess(
     existingRecord.folderPath = config.folderPath;
     existingRecord.command = config.command;
     existingRecord.port = config.port;
+    existingRecord.previewUrl = getPreviewUrlForPort(config.port);
     existingRecord.updatedAt = new Date().toISOString();
 
     if (!config.folderPath) {
@@ -270,10 +451,18 @@ async function ensureDevProcess(
     }
 
     if (existingRecord.process && !existingRecord.process.killed) {
+        if (!(await isPreviewServing(existingRecord.port))) {
+            const runningPort = await detectRunningPreviewPort(existingRecord.port, excludedPorts);
+            if (runningPort) {
+                updatePreviewPort(existingRecord, runningPort, 'detected running preview');
+            } else {
+                await waitForRunningPreview(existingRecord, excludedPorts, 3_000);
+            }
+        }
         return existingRecord;
     }
 
-    if (await reuseRunningPreview(existingRecord)) {
+    if (await reuseRunningPreview(existingRecord, excludedPorts)) {
         registry.set(key, existingRecord);
         return existingRecord;
     }
@@ -299,13 +488,17 @@ async function ensureDevProcess(
     existingRecord.process = child;
     existingRecord.pid = child.pid ?? null;
 
-    child.stdout.on('data', (chunk: Buffer | string) => {
-        appendOutput(existingRecord, chunk.toString());
-    });
+    const handleOutput = (chunk: Buffer | string) => {
+        const text = chunk.toString();
+        appendOutput(existingRecord, text);
+        const detectedPort = extractPreviewPortFromOutput(text, excludedPorts);
+        if (detectedPort) {
+            updatePreviewPort(existingRecord, detectedPort, 'dev server output');
+        }
+    };
 
-    child.stderr.on('data', (chunk: Buffer | string) => {
-        appendOutput(existingRecord, chunk.toString());
-    });
+    child.stdout.on('data', handleOutput);
+    child.stderr.on('data', handleOutput);
 
     child.on('spawn', () => {
         existingRecord.status = 'running';
@@ -331,7 +524,7 @@ async function ensureDevProcess(
             `[onlook] Preview process exited with code ${code ?? 'null'}${signal ? ` (signal ${signal})` : ''}\n`,
         );
 
-        if (await reuseRunningPreview(existingRecord)) {
+        if (await reuseRunningPreview(existingRecord, excludedPorts)) {
             return;
         }
 
@@ -339,7 +532,28 @@ async function ensureDevProcess(
     });
 
     registry.set(key, existingRecord);
+    await waitForRunningPreview(existingRecord, excludedPorts);
     return existingRecord;
+}
+
+async function ensureDevProcessLocked(
+    projectId?: string | null,
+    folderPath?: string | null,
+    excludedPorts = getExcludedPorts(),
+): Promise<LocalProcessRecord> {
+    const config = resolveProjectConfig(projectId, folderPath);
+    const key = getProcessKey(config.projectId, config.folderPath);
+    const locks = getLockRegistry();
+    const existingLock = locks.get(key);
+    if (existingLock) {
+        return existingLock;
+    }
+
+    const lock = ensureDevProcess(projectId, folderPath, excludedPorts).finally(() => {
+        locks.delete(key);
+    });
+    locks.set(key, lock);
+    return lock;
 }
 
 async function runCommandOnce(
@@ -451,17 +665,20 @@ export async function POST(req: NextRequest) {
     try {
         const body = (await req.json()) as LocalProcessPayload;
         const { op, projectId, folderPath, command } = body;
+        const excludedPorts = getExcludedPorts(req);
         const record = createStatusRecord(projectId, folderPath);
         const registry = getRegistry();
 
         if (op === 'ensure-dev') {
-            return NextResponse.json(serializeRecord(await ensureDevProcess(projectId, folderPath)));
+            return NextResponse.json(
+                serializeRecord(await ensureDevProcessLocked(projectId, folderPath, excludedPorts)),
+            );
         }
 
         if (op === 'status') {
             const currentRecord = registry.get(record.key) ?? createStatusRecord(projectId, folderPath);
             if (!currentRecord.process) {
-                await reuseRunningPreview(currentRecord);
+                await reuseRunningPreview(currentRecord, excludedPorts);
             }
             registry.set(record.key, currentRecord);
             return NextResponse.json(
@@ -475,7 +692,9 @@ export async function POST(req: NextRequest) {
                 stopProcess(currentRecord, '[onlook] Restarting local preview\n');
             }
 
-            return NextResponse.json(serializeRecord(await ensureDevProcess(projectId, folderPath)));
+            return NextResponse.json(
+                serializeRecord(await ensureDevProcessLocked(projectId, folderPath, excludedPorts)),
+            );
         }
 
         if (op === 'stop-dev') {

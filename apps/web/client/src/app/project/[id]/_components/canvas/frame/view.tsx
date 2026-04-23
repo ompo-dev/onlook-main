@@ -45,6 +45,50 @@ function getEffectiveSrc(url: string): string {
     return getLocalPreviewIframeSrc(url);
 }
 
+interface LocalProcessRecord {
+    port?: number;
+    previewUrl?: string;
+}
+
+function replaceFrameUrlOrigin(frameUrl: string, previewUrl: string): string {
+    try {
+        const parsedFrameUrl = new URL(resolveLocalPreviewFrameUrl(frameUrl) ?? frameUrl);
+        const parsedPreviewUrl = new URL(previewUrl);
+        parsedFrameUrl.protocol = parsedPreviewUrl.protocol;
+        parsedFrameUrl.hostname = parsedPreviewUrl.hostname;
+        parsedFrameUrl.port = parsedPreviewUrl.port;
+        return parsedFrameUrl.toString().replace(/\/$/, '');
+    } catch {
+        return frameUrl;
+    }
+}
+
+async function resolveRunningLocalPreviewFrameUrl(
+    projectId: string,
+    frameUrl: string,
+): Promise<string> {
+    try {
+        const response = await fetch('/api/local-process', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ op: 'ensure-dev', projectId }),
+        });
+
+        if (!response.ok) {
+            return frameUrl;
+        }
+
+        const record = (await response.json()) as LocalProcessRecord;
+        const previewUrl =
+            record.previewUrl ??
+            (typeof record.port === 'number' ? `http://localhost:${record.port}` : null);
+
+        return previewUrl ? replaceFrameUrlOrigin(frameUrl, previewUrl) : frameUrl;
+    } catch {
+        return frameUrl;
+    }
+}
+
 async function registerProxyUpstream(url: string) {
     try {
         const upstreamUrl = resolveLocalPreviewFrameUrl(url);
@@ -413,11 +457,20 @@ export const FrameComponent = observer(
                 }
                 const url = frame.url;
                 if (!url) return;
-                registerProxyUpstream(url).then(() => {
-                    const proxySrc = getEffectiveSrc(url);
+                let cancelled = false;
+
+                void resolveRunningLocalPreviewFrameUrl(editorEngine.projectId, url).then(async (resolvedUrl) => {
+                    if (cancelled) return;
+                    await registerProxyUpstream(resolvedUrl);
+                    if (cancelled) return;
+                    const proxySrc = getEffectiveSrc(resolvedUrl);
                     // Reset connection state so the real load triggers a fresh Penpal handshake
                     if (connectionRef.current) {
-                        connectionRef.current.destroy();
+                        try {
+                            connectionRef.current.destroy();
+                        } catch {
+                            // Ignore stale Penpal teardown while changing preview ports.
+                        }
                         connectionRef.current = null;
                     }
                     isConnecting.current = false;
@@ -425,7 +478,10 @@ export const FrameComponent = observer(
                     allowConnection.current = true;
                     setEffectiveSrc(proxySrc);
                 });
-            }, [frame.url]);
+                return () => {
+                    cancelled = true;
+                };
+            }, [editorEngine.projectId, frame.url]);
 
             useEffect(() => {
                 if (!LOCAL_MODE_ENABLED) {
@@ -453,7 +509,11 @@ export const FrameComponent = observer(
             useEffect(() => {
                 return () => {
                     if (connectionRef.current) {
-                        connectionRef.current.destroy();
+                        try {
+                            connectionRef.current.destroy();
+                        } catch {
+                            // Penpal can throw if an in-flight method resolves after teardown.
+                        }
                         connectionRef.current = null;
                     }
                     setPenpalChild(null);

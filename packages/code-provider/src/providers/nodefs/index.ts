@@ -60,6 +60,7 @@ interface LocalProcessRecord {
     folderPath: string | null;
     command: string;
     port: number;
+    previewUrl?: string;
     status: LocalProcessStatus;
     output: string;
     pid: number | null;

@@ -29,10 +29,10 @@ export async function processGroupedRequests(groupedRequests: FileToRequests): P
     for (const [path, request] of groupedRequests) {
         const { oidToRequest, content } = request;
 
-        const ast = getAstFromContent(content);
+        const ast = getAstFromContent(content, { logErrors: false });
 
         if (!ast) {
-            throw new Error('No ast found for file');
+            continue;
         }
 
         const original = await getContentFromAst(ast, content);

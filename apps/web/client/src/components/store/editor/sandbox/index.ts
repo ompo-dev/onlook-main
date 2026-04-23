@@ -20,7 +20,7 @@ const PAGES_ROUTER_PATHS = ['src/pages', 'pages'];
 const ALLOWED_EXTENSIONS = ['.tsx', '.ts', '.jsx', '.js'];
 
 async function stripInjectedPreloadScript(content: string): Promise<string> {
-    const ast = getAstFromContent(content);
+    const ast = getAstFromContent(content, { logErrors: false });
     if (!ast) {
         return content;
     }

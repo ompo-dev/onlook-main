@@ -115,14 +115,10 @@ function readStore(): LocalStore {
             const normalizedProjects = store.projects.map((project) => {
                 const normalizedProject = {
                     ...project,
-                    sandboxUrl: normalizeLocalPreviewUrl(project.sandboxUrl) ?? project.sandboxUrl,
                     folderPath: normalizeLocalFolderPath(project.folderPath),
                 };
 
-                if (
-                    normalizedProject.sandboxUrl !== project.sandboxUrl ||
-                    normalizedProject.folderPath !== project.folderPath
-                ) {
+                if (normalizedProject.folderPath !== project.folderPath) {
                     didMutate = true;
                 }
 
@@ -134,21 +130,6 @@ function readStore(): LocalStore {
                 projects: normalizedProjects,
                 projectSettings: store.projectSettings ?? [],
             };
-
-            const normalizedFrames = store.frames.map((frame) => {
-                const normalizedFrame = {
-                    ...frame,
-                    url: normalizeStoredFrameUrl(normalizedStore, frame),
-                };
-
-                if (normalizedFrame.url !== frame.url) {
-                    didMutate = true;
-                }
-
-                return normalizedFrame;
-            });
-
-            normalizedStore.frames = normalizedFrames;
 
             if (didMutate) {
                 writeStore(normalizedStore);
@@ -174,6 +155,14 @@ function writeStore(store: LocalStore): void {
         fs.mkdirSync(STORE_DIR, { recursive: true });
     }
     fs.writeFileSync(STORE_PATH, JSON.stringify(store, null, 2), 'utf-8');
+}
+
+function stripTrailingSlash(value: string): string {
+    return value.replace(/\/$/, '');
+}
+
+function isLocalhostUrl(url: URL): boolean {
+    return url.hostname === 'localhost' || url.hostname === '127.0.0.1';
 }
 
 // ── Projects ──────────────────────────────────────────────────────────────────
@@ -305,6 +294,63 @@ export function localUpdateProject(
     store.projects[idx] = { ...store.projects[idx]!, ...updates, updatedAt: new Date().toISOString() };
     writeStore(store);
     return store.projects[idx]!;
+}
+
+export function localSetProjectPreviewUrl(projectId: string, previewUrl: string): void {
+    const store = readStore();
+    const normalizedPreviewUrl = stripTrailingSlash(previewUrl);
+    const project = store.projects.find((p) => p.id === projectId);
+    if (!project) {
+        return;
+    }
+
+    const previousUrl = project.sandboxUrl;
+    project.sandboxUrl = normalizedPreviewUrl;
+    project.updatedAt = new Date().toISOString();
+
+    const previousOrigin = (() => {
+        try {
+            return new URL(previousUrl).origin;
+        } catch {
+            return null;
+        }
+    })();
+    const nextUrl = (() => {
+        try {
+            return new URL(normalizedPreviewUrl);
+        } catch {
+            return null;
+        }
+    })();
+
+    const canvasIds = new Set(store.canvases.filter((c) => c.projectId === projectId).map((c) => c.id));
+    for (const frame of store.frames) {
+        if (!canvasIds.has(frame.canvasId)) {
+            continue;
+        }
+
+        if (!previousOrigin || !nextUrl) {
+            frame.url = normalizedPreviewUrl;
+            frame.updatedAt = project.updatedAt;
+            continue;
+        }
+
+        try {
+            const frameUrl = new URL(frame.url);
+            if (frameUrl.origin === previousOrigin || (isLocalhostUrl(frameUrl) && isLocalhostUrl(nextUrl))) {
+                frameUrl.protocol = nextUrl.protocol;
+                frameUrl.hostname = nextUrl.hostname;
+                frameUrl.port = nextUrl.port;
+                frame.url = frameUrl.toString().replace(/\/$/, '');
+                frame.updatedAt = project.updatedAt;
+            }
+        } catch {
+            frame.url = normalizedPreviewUrl;
+            frame.updatedAt = project.updatedAt;
+        }
+    }
+
+    writeStore(store);
 }
 
 export function localDeleteProject(projectId: string): void {
