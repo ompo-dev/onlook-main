@@ -54,7 +54,7 @@ export const FileTabs = ({
     }, [activeFile?.path]);
 
     return (
-        <div className="flex items-center justify-between h-10 pl-0 border-b-[0.5px] flex-shrink-0 relative">
+        <div className="relative flex h-10 flex-shrink-0 items-center justify-between border-b border-[var(--cs-border)] bg-[var(--cs-bg)] pl-0">
             <div className="flex items-center h-full overflow-x-auto w-full" ref={ref}>
                 {openedFiles.map((file) => (
                     <FileTab
@@ -67,23 +67,23 @@ export const FileTabs = ({
                     />
                 ))}
             </div>
-            <div className="flex items-center h-full border-l-[0.5px] p-1 bg-background w-11">
+            <div className="flex h-full w-11 items-center border-l border-[var(--cs-border)] bg-[var(--cs-bg-elevated)] p-1">
                 <DropdownMenu>
-                    <DropdownMenuTrigger className="text-muted-foreground hover:text-foreground hover:bg-foreground/5 p-1 rounded h-full w-full flex items-center justify-center px-2.5">
+                    <DropdownMenuTrigger className="flex h-full w-full items-center justify-center rounded-lg px-2.5 text-[var(--cs-icon)] hover:bg-[var(--cs-layer-hover)] hover:text-[var(--cs-foreground)]">
                         <Icons.DotsHorizontal className="h-4 w-4" />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="-mt-1">
+                    <DropdownMenuContent align="end" className="-mt-1 rounded-xl border border-[var(--cs-border)] bg-[var(--cs-bg-elevated)] text-[var(--cs-foreground)] shadow-2xl">
                         <DropdownMenuItem
                             onClick={() => activeFile && onCloseFile(activeFile.path)}
                             disabled={!activeFile}
-                            className="cursor-pointer"
+                            className="cursor-pointer rounded-lg focus:bg-[var(--cs-layer-hover)]"
                         >
                             Close file
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             onClick={onCloseAllFiles}
                             disabled={openedFiles.length === 0}
-                            className="cursor-pointer"
+                            className="cursor-pointer rounded-lg focus:bg-[var(--cs-layer-hover)]"
                         >
                             Close all
                         </DropdownMenuItem>

@@ -29,19 +29,19 @@ export const FileTab = ({
     }, [file.path, file.content, file.type, file.type === 'text' ? file.originalHash : null]);
 
     return (
-        <div className="h-full pl-3 pr-3 relative group min-w-28 overflow-hidden" data-active={dataActive}>
-            <div className="absolute right-0 h-[50%] w-[0.5px] bg-foreground/10 top-1/2 -translate-y-1/2"></div>
+        <div className="group relative h-full min-w-28 overflow-hidden px-2" data-active={dataActive}>
+            <div className="absolute right-0 top-1/2 h-[50%] w-px -translate-y-1/2 bg-[var(--cs-border)]"></div>
             <div className="flex items-center h-full relative overflow-hidden">
                 <button
                     className={cn(
-                        'text-sm h-full flex items-center focus:outline-none min-w-0 flex-1',
+                        'relative flex h-full min-w-0 flex-1 items-center rounded-lg px-2 text-sm focus:outline-none',
                         isActive
                             ? isFileDirty
-                                ? 'text-teal-300'
-                                : 'text-foreground'
+                                ? 'bg-[color:color-mix(in_srgb,var(--cs-accent)_16%,transparent)] text-[var(--cs-foreground)]'
+                                : 'bg-[var(--cs-layer)] text-[var(--cs-foreground)]'
                             : isFileDirty
-                                ? 'text-teal-500'
-                                : 'text-foreground-secondary/50',
+                                ? 'text-[var(--cs-accent)]'
+                                : 'text-[var(--cs-icon-muted)] hover:bg-[var(--cs-layer-hover)] hover:text-[var(--cs-foreground)]',
                     )}
                     onClick={onClick}
                 >
@@ -49,7 +49,7 @@ export const FileTab = ({
                     {isFileDirty && (
                         <span className={cn(
                             "ml-1 flex-shrink-0",
-                            isActive ? "text-teal-300" : "text-teal-500"
+                            "text-[var(--cs-accent)]"
                         )}>
                             ●
                         </span>
@@ -57,18 +57,18 @@ export const FileTab = ({
                     {isActive && (
                         <div className={cn(
                             "absolute bottom-0 left-0 w-full h-[2px]",
-                            isFileDirty ? "bg-teal-300" : "bg-foreground-hover"
+                            "bg-[var(--cs-accent)]"
                         )}></div>
                     )}
                     {!isActive && (
-                        <div className="absolute bottom-0 left-0 w-full h-[2px] bg-foreground-tertiary/50 opacity-0 group-hover:opacity-100"></div>
+                        <div className="absolute bottom-0 left-0 h-[2px] w-full bg-[color:color-mix(in_srgb,var(--cs-accent)_40%,transparent)] opacity-0 group-hover:opacity-100"></div>
                     )}
                 </button>
-                <div className="absolute right-[-3px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity group-hover:bg-background-primary rounded-md">
+                <div className="absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-md bg-[var(--cs-bg)] opacity-0 transition-opacity group-hover:opacity-100">
                     <button
                         className={cn(
-                            "cursor-pointer p-1.5 flex-shrink-0 hover:text-foreground-hover hover:bg-secondary hover:rounded-md",
-                            isActive ? "text-foreground-secondary" : "text-foreground-primary"
+                            "cursor-pointer rounded-md p-1.5 hover:bg-[var(--cs-layer-hover)] hover:text-[var(--cs-foreground)]",
+                            isActive ? "text-[var(--cs-icon)]" : "text-[var(--cs-icon-muted)]"
                         )}
                         onClick={(e) => {
                             e.stopPropagation();

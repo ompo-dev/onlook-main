@@ -68,16 +68,16 @@ export const BrandTab = observer(() => {
     }
 
     return (
-        <div className="flex flex-col h-full text-xs text-active flex-grow w-full p-0">
+        <div className="flex h-full w-full flex-grow flex-col bg-[var(--cs-bg)] p-0 text-xs text-[var(--cs-foreground)]">
             {/* Brand Palette Section */}
-            <div className="flex flex-col gap-3 px-4 pt-4 pb-6 border-b border-border">
+            <div className="flex flex-col gap-3 border-b border-[var(--cs-border)] px-4 pb-6 pt-4">
                 <div className="flex flex-col gap-2">
                     <div className="flex justify-between items-center">
-                        <span className="text-sm">Brand Colors</span>
+                        <span className="text-sm font-medium">Brand Colors</span>
                     </div>
 
                     <div
-                        className="grid grid-cols-12 gap-0 rounded-lg overflow-hidden h-[40px] max-h-[40px] bg-background-onlook border-[0.5px] border-white/50 hover:border-[0.5px] hover:border-white cursor-pointer hover:border-transparent transition-all duration-200"
+                        className="grid h-11 max-h-11 cursor-pointer grid-cols-12 overflow-hidden rounded-xl border border-[var(--cs-border)] bg-[var(--cs-layer)] transition-all duration-200 hover:border-[color:color-mix(in_srgb,var(--cs-accent)_35%,var(--cs-border))] hover:bg-[var(--cs-layer-hover)]"
                         onClick={() => (editorEngine.state.brandTab = BrandTabValue.COLORS)}
                     >
                         {brandColors.length > 0 ? (
@@ -97,7 +97,7 @@ export const BrandTab = observer(() => {
 
                 <Button
                     variant="ghost"
-                    className="w-full h-10 text-sm text-muted-foreground hover:text-foreground bg-background-secondary hover:bg-background-secondary/70 rounded-lg border border-white/5"
+                    className="h-10 w-full rounded-xl border border-[var(--cs-border)] bg-[var(--cs-layer)] text-sm text-[var(--cs-foreground)] hover:bg-[var(--cs-layer-hover)]"
                     onClick={() => (editorEngine.state.brandTab = BrandTabValue.COLORS)}
                 >
                     Manage brand colors
@@ -108,13 +108,13 @@ export const BrandTab = observer(() => {
             <div className="flex flex-col gap-1.5 px-4 pt-5 pb-6">
                 <div className="flex flex-col">
                     <div className="flex justify-between items-center">
-                        <span className="text-sm">Site Fonts</span>
+                        <span className="text-sm font-medium">Site Fonts</span>
                     </div>
                     <SystemFont />
                 </div>
                 <Button
                     variant="ghost"
-                    className="w-full h-10 text-sm text-muted-foreground hover:text-foreground bg-background-secondary hover:bg-background-secondary/70 rounded-lg border border-white/5"
+                    className="h-10 w-full rounded-xl border border-[var(--cs-border)] bg-[var(--cs-layer)] text-sm text-[var(--cs-foreground)] hover:bg-[var(--cs-layer-hover)]"
                     onClick={() => (editorEngine.state.brandTab = BrandTabValue.FONTS)}
                 >
                     Manage site fonts

@@ -7,16 +7,15 @@ export const FileTreeRow = ({ attrs, children, isHighlighted }: RowRendererProps
         <div
             {...attrs}
             className={cn(
-                'outline-none h-6 cursor-pointer min-w-0 w-auto rounded',
+                'h-7 min-w-0 w-auto cursor-pointer rounded-lg outline-none',
                 attrs['aria-selected'] ? [
-                    'bg-red-500/90 dark:bg-red-500/90',
-                    'text-primary dark:text-primary',
+                    'bg-[color:color-mix(in_srgb,var(--cs-accent)_18%,transparent)] text-[var(--cs-foreground)]',
                 ] : [
-                    isHighlighted && 'bg-background-onlook text-foreground-primary',
+                    isHighlighted && 'bg-[var(--cs-layer-hover)] text-[var(--cs-foreground)]',
                 ],
                 isHighlighted ?
-                    'text-foreground-primary bg-red-500/90 hover:bg-red-500' :
-                    'text-foreground-onlook/70 hover:bg-red-500/30 hover:text-foreground-primary'
+                    'bg-[var(--cs-layer-hover)] text-[var(--cs-foreground)]' :
+                    'text-[var(--cs-icon-muted)] hover:bg-[var(--cs-layer-hover)] hover:text-[var(--cs-foreground)]'
             )}
         >
             {children}

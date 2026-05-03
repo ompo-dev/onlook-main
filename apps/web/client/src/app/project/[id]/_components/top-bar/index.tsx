@@ -17,7 +17,6 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Members } from '../members';
 import { BranchDisplay } from './branch';
-import { ModeToggle } from './mode-toggle';
 import { ProjectBreadcrumb } from './project-breadcrumb';
 import { PublishButton } from './publish';
 import { StudioModeToggle } from './studio-mode-toggle';
@@ -51,7 +50,6 @@ export const TopBar = observer(() => {
                 <BranchDisplay />
             </div>
             <div className="flex items-center gap-2">
-                <ModeToggle />
                 <StudioModeToggle />
             </div>
             <div className="flex flex-grow basis-0 justify-end items-center gap-1.5 mr-2">

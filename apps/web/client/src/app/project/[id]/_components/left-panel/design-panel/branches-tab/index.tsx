@@ -45,16 +45,16 @@ export const BranchesTab = observer(() => {
     }
 
     return (
-        <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex h-full flex-col bg-[var(--cs-bg)] text-[var(--cs-foreground)]">
+            <div className="flex items-center justify-between border-b border-[var(--cs-border)] px-4 py-3">
                 <div className="flex items-center gap-2">
-                    <h2 className="text-sm">Branches</h2>
-                    <span className="text-xs text-muted-foreground">({branches.allBranches.length})</span>
+                    <h2 className="text-sm font-medium">Branches</h2>
+                    <span className="text-xs text-[var(--cs-icon-muted)]">({branches.allBranches.length})</span>
                 </div>
             </div>
 
             <div className="flex-1 overflow-auto">
-                <div className="p-2 space-y-1">
+                <div className="space-y-2 p-3">
                     {branches.allBranches.map((branch) => {
                         const isActive = branch.id === branches.activeBranch.id;
                         const isHovered = hoveredBranchId === branch.id;
@@ -63,10 +63,10 @@ export const BranchesTab = observer(() => {
                             <div
                                 key={branch.id}
                                 className={cn(
-                                    "group relative flex items-center gap-3 p-1 px-2 rounded-lg cursor-pointer transition-colors border",
+                                    "group relative flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 transition-colors",
                                     isActive
-                                        ? "bg-accent text-foreground border-border"
-                                        : "border-transparent hover:bg-accent/50 text-foreground-secondary hover:text-foreground"
+                                        ? "border-[var(--cs-accent)] bg-[color:color-mix(in_srgb,var(--cs-accent)_14%,transparent)] text-[var(--cs-foreground)]"
+                                        : "border-[var(--cs-border)] bg-[var(--cs-layer)] text-[var(--cs-foreground)] hover:border-[color:color-mix(in_srgb,var(--cs-accent)_35%,var(--cs-border))] hover:bg-[var(--cs-layer-hover)]"
                                 )}
                                 onClick={() => handleBranchSwitch(branch.id)}
                                 onMouseEnter={() => setHoveredBranchId(branch.id)}
@@ -74,15 +74,15 @@ export const BranchesTab = observer(() => {
                             >
                                 <div className="flex items-center gap-2 min-w-0 flex-1">
                                     {isActive ? (
-                                        <Icons.CheckCircled className="w-4 h-4 text-teal-400 flex-shrink-0" />
+                                        <Icons.CheckCircled className="h-4 w-4 flex-shrink-0 text-[var(--cs-accent)]" />
                                     ) : (
-                                        <Icons.Branch className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                        <Icons.Branch className="h-4 w-4 flex-shrink-0 text-[var(--cs-icon-muted)]" />
                                     )}
                                     <div className="min-w-0 flex-1 overflow-hidden">
-                                        <div className="font-medium text-sm truncate">
+                                        <div className="truncate text-sm font-medium">
                                             {branch.name}
                                         </div>
-                                        <div className="text-mini text-muted-foreground mb-1 truncate">
+                                        <div className="mb-1 truncate text-[11px] text-[var(--cs-icon-muted)]">
                                             {timeAgo(branch.updatedAt)}
                                         </div>
                                     </div>
@@ -92,7 +92,7 @@ export const BranchesTab = observer(() => {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="h-8 w-8 p-2 hover:bg-background opacity-50 hover:opacity-100 transition-opacity"
+                                        className="h-8 w-8 rounded-lg border border-[var(--cs-border)] bg-[var(--cs-bg-elevated)] p-2 text-[var(--cs-icon)] opacity-60 transition-opacity hover:bg-[var(--cs-layer-hover)] hover:text-[var(--cs-foreground)] hover:opacity-100"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             handleManageBranch(branch.id);

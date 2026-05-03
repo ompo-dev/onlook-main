@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useStore } from '../state/use-store';
 import { IconButton } from './IconButton';
-import { Bot, Cable, Copy, Square } from 'lucide-react';
+import { Bot, Cable, Code2, Copy, Square } from 'lucide-react';
 import { Settings } from '../Settings';
 import { Dropdown } from '../Dropdown';
 import { InstallPopover } from '../InstallPopover';
@@ -47,6 +47,7 @@ interface ToolbarProps {
     isDrawing: boolean;
     onTogglePicker: () => void;
     onToggleDraw: () => void;
+    onToggleCode: () => void;
     onLogin: () => void;
     onSendEdit: () => void;
     onAnswer: (answer: string) => void;
@@ -54,10 +55,11 @@ interface ToolbarProps {
     mode?: string;
 }
 
-export function Toolbar({ isPicking, isDrawing, onTogglePicker, onToggleDraw, onLogin, onSendEdit, onAnswer, onReconnect, mode }: ToolbarProps) {
+export function Toolbar({ isPicking, isDrawing, onTogglePicker, onToggleDraw, onToggleCode, onLogin, onSendEdit, onAnswer, onReconnect, mode }: ToolbarProps) {
     const { isAuthenticated, isAuthChecking, mcpStatus, agentPolling, autoApply, pendingChanges, stagedChanges, applying, panic, question, clearPendingChanges } = useStore();
     const navigatorOpen = useStore((s) => s.panels.navigator.open);
     const chatOpen = useStore((s) => s.panels.navigator.open && s.panels.navigator.activeTab === 'chat');
+    const codeOpen = useStore((s) => s.panels.code.open);
     const togglePanel = useStore((s) => s.togglePanel);
     const togglePanelTab = useStore((s) => s.togglePanelTab);
     const [collapsed, toggleCollapsed] = useToolbarCollapsed();
@@ -116,6 +118,9 @@ export function Toolbar({ isPicking, isDrawing, onTogglePicker, onToggleDraw, on
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M4 6h16M4 12h10M4 18h6" />
                         </svg>
+                    </IconButton>
+                    <IconButton active={codeOpen} onClick={onToggleCode} title="Toggle code panel">
+                        <Code2 size={16} />
                     </IconButton>
                     <div className={styles.separator} />
                     <IconButton active={isPicking} onClick={onTogglePicker} title="Select element (⌥C)">

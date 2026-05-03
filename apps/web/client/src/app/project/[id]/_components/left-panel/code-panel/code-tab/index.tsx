@@ -559,7 +559,8 @@ export const CodeTab = memo(forwardRef<CodeTabRef, CodeTabProps>(({ projectId, b
 
 
     return (
-        <div className="flex flex-col size-full">
+        <div className="size-full bg-[var(--cs-bg)] text-[var(--cs-foreground)]">
+            <div className="flex size-full flex-col">
             <CodeControls
                 isDirty={hasUnsavedChanges}
                 currentPath={getCurrentPath()}
@@ -622,6 +623,7 @@ export const CodeTab = memo(forwardRef<CodeTabRef, CodeTabProps>(({ projectId, b
                         onFocusChatInput={() => editorEngine.chat.focusChatInput()}
                     />
                 </div>
+            </div>
             </div>
         </div>
     );

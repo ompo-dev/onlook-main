@@ -36,12 +36,12 @@ export const SearchUploadBar = ({ search, setSearch, isUploading, onUpload }: Se
                     placeholder="Search images and videos..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="h-8 text-xs pr-8"
+                    className="h-9 rounded-xl border-[var(--cs-border)] bg-[var(--cs-layer)] pr-8 text-xs text-[var(--cs-foreground)] placeholder:text-[var(--cs-icon-muted)]"
                 />
                 {search && (
                     <button
                         onClick={() => setSearch('')}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-foreground-secondary hover:text-foreground-primary"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--cs-icon-muted)] hover:text-[var(--cs-foreground)]"
                     >
                         <Icons.CrossS className="w-3 h-3" />
                     </button>
@@ -52,7 +52,7 @@ export const SearchUploadBar = ({ search, setSearch, isUploading, onUpload }: Se
                     <Button
                         variant="default"
                         size="icon"
-                        className="h-8 w-8 text-foreground-primary border-border-primary hover:border-border-onlook bg-background-secondary hover:bg-background-onlook border"
+                        className="h-9 w-9 rounded-xl border border-[var(--cs-border)] bg-[var(--cs-layer)] text-[var(--cs-foreground)] hover:bg-[var(--cs-layer-hover)]"
                         onClick={handleUploadClick}
                         disabled={isUploading}
                     >

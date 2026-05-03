@@ -121,25 +121,25 @@ export const BranchManagement = observer(({ branch }: BranchManagementProps) => 
     };
 
     return (
-        <div className="flex flex-col h-full text-xs text-active flex-grow w-full p-0">
-            <div className="flex items-center justify-start border-b border-border py-3 pr-2.5 pl-3 gap-2">
+        <div className="flex h-full w-full flex-grow flex-col bg-[var(--cs-bg)] p-0 text-xs text-[var(--cs-foreground)]">
+            <div className="flex items-center justify-start gap-2 border-b border-[var(--cs-border)] px-3 py-3">
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="hover:bg-background-secondary h-7 w-7 rounded-md"
+                    className="h-7 w-7 rounded-lg border border-[var(--cs-border)] bg-[var(--cs-layer)] text-[var(--cs-icon)] hover:bg-[var(--cs-layer-hover)] hover:text-[var(--cs-foreground)]"
                     onClick={handleClose}
                 >
                     <Icons.ArrowLeft className="h-4 w-4" />
                 </Button>
-                <h2 className="text-foreground text-sm font-normal">Branch Settings</h2>
+                <h2 className="text-sm font-medium text-[var(--cs-foreground)]">Branch Settings</h2>
             </div>
 
-            <div className="p-4 border-b border-border space-y-4">
+            <div className="space-y-4 border-b border-[var(--cs-border)] p-4">
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                        <label className="text-sm text-foreground">Name</label>
+                        <label className="text-sm text-[var(--cs-foreground)]">Name</label>
                         {isActiveBranch && (
-                            <span className="text-xs bg-teal-800 text-teal-200 px-2 py-1 rounded">
+                            <span className="rounded-full border border-[color:color-mix(in_srgb,var(--cs-accent)_40%,transparent)] bg-[color:color-mix(in_srgb,var(--cs-accent)_15%,transparent)] px-2 py-1 text-[10px] font-medium text-[var(--cs-accent)]">
                                 Active
                             </span>
                         )}
@@ -150,16 +150,16 @@ export const BranchManagement = observer(({ branch }: BranchManagementProps) => 
                             onChange={(e) => setNewName(e.target.value)}
                             onKeyDown={handleKeyDown}
                             onBlur={handleRename}
-                            className="h-9 text-sm"
+                            className="h-9 border-[var(--cs-border)] bg-[var(--cs-layer)] text-sm text-[var(--cs-foreground)] placeholder:text-[var(--cs-icon-muted)]"
                             autoFocus
                         />
                     ) : (
                         <div
-                            className="flex items-start justify-between p-2 bg-background-secondary rounded-md cursor-pointer hover:bg-background-secondary/70 border"
+                            className="flex cursor-pointer items-start justify-between rounded-xl border border-[var(--cs-border)] bg-[var(--cs-layer)] p-3 hover:bg-[var(--cs-layer-hover)]"
                             onClick={() => setIsRenaming(true)}
                         >
                             <span className="font-medium break-words min-w-0 flex-1 mr-2 leading-tight">{branch.name}</span>
-                            <Icons.Pencil className="w-3 h-3 text-muted-foreground flex-shrink-0 mt-0.5" />
+                            <Icons.Pencil className="mt-0.5 h-3 w-3 flex-shrink-0 text-[var(--cs-icon-muted)]" />
                         </div>
                     )}
                 </div>
@@ -167,11 +167,11 @@ export const BranchManagement = observer(({ branch }: BranchManagementProps) => 
 
             <div className="flex-1 p-4 space-y-3">
                 <div className="space-y-2">
-                    <h3 className="text-sm text-foreground">Actions</h3>
+                    <h3 className="text-sm text-[var(--cs-foreground)]">Actions</h3>
                     <div className="flex flex-col items-center gap-2 w-full">
                         <Button
                             variant="outline"
-                            className="w-full"
+                            className="w-full justify-start gap-2 rounded-xl border-[var(--cs-border)] bg-[var(--cs-layer)] text-[var(--cs-foreground)] hover:bg-[var(--cs-layer-hover)]"
                             onClick={handleFork}
                             disabled={isForking}
                         >
@@ -190,7 +190,7 @@ export const BranchManagement = observer(({ branch }: BranchManagementProps) => 
 
                         <Button
                             variant="destructive"
-                            className="w-full"
+                            className="w-full justify-start gap-2 rounded-xl border border-[color:color-mix(in_srgb,#ef4444_40%,transparent)] bg-[color:color-mix(in_srgb,#ef4444_12%,transparent)] text-[#fca5a5] hover:bg-[color:color-mix(in_srgb,#ef4444_18%,transparent)]"
                             onClick={handleDelete}
                             disabled={isDeleting || isOnlyBranch}
                             title={
@@ -205,7 +205,7 @@ export const BranchManagement = observer(({ branch }: BranchManagementProps) => 
                                     <span>Deleting...</span>
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-2 text-red-400">
+                                <div className="flex items-center gap-2 text-[#fca5a5]">
                                     <Icons.Trash className="w-4 h-4" />
                                     <span>Delete</span>
                                 </div>
@@ -214,9 +214,9 @@ export const BranchManagement = observer(({ branch }: BranchManagementProps) => 
                     </div>
                 </div>
 
-                <div className="pt-4 border-t border-border">
+                <div className="border-t border-[var(--cs-border)] pt-4">
                     <div className="space-y-2">
-                        <div className="text-xs text-foreground-tertiary/80 space-y-1">
+                        <div className="space-y-1 text-xs text-[var(--cs-icon-muted)]">
                             <div>Created {timeAgo(branch.createdAt)} ago</div>
                             <div>Last modified {timeAgo(branch.updatedAt)} ago</div>
                         </div>

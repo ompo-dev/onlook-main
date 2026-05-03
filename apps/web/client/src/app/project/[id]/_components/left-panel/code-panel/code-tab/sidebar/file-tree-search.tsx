@@ -32,10 +32,10 @@ export const FileTreeSearch = forwardRef<HTMLInputElement, FileTreeSearchProps>(
     };
 
     return (
-        <div className="h-11 flex flex-row relative flex-shrink-0 justify-between items-center border-border-primary border-b-[0.5px] mb-2">
+        <div className="relative mb-2 flex h-12 flex-shrink-0 flex-row items-center justify-between border-b border-[var(--cs-border)] px-2">
             <Input
                 ref={ref}
-                className="m-2 h-8 text-small pr-8 focus-visible:ring-1 focus-visible:ring-border-secondary/50 focus-visible:ring-offset-0"
+                className="h-8 rounded-xl border-[var(--cs-border)] bg-[var(--cs-layer)] pr-8 text-xs text-[var(--cs-foreground)] placeholder:text-[var(--cs-icon-muted)] focus-visible:ring-1 focus-visible:ring-[var(--cs-accent)] focus-visible:ring-offset-0"
                 placeholder="Search files"
                 value={searchQuery}
                 disabled={isLoading}
@@ -44,10 +44,10 @@ export const FileTreeSearch = forwardRef<HTMLInputElement, FileTreeSearchProps>(
             />
             {searchQuery && (
                 <button
-                    className="absolute right-[1px] top-[1px] bottom-[1px] aspect-square hover:bg-background-onlook active:bg-transparent flex items-center justify-center rounded-r-[calc(theme(borderRadius.md)-1px)] group"
+                    className="group absolute bottom-2 right-2 top-2 flex aspect-square items-center justify-center rounded-r-[calc(theme(borderRadius.xl)-1px)] hover:bg-[var(--cs-layer-hover)]"
                     onClick={clearSearch}
                 >
-                    <Icons.CrossS className="h-3 w-3 text-foreground-primary/50 group-hover:text-foreground-primary" />
+                    <Icons.CrossS className="h-3 w-3 text-[var(--cs-icon-muted)] group-hover:text-[var(--cs-foreground)]" />
                 </button>
             )}
         </div>

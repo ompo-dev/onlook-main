@@ -95,16 +95,16 @@ export const ImageItem = ({ image, projectId, branchId, onImageDragStart, onImag
 
     if (loading) {
         return (
-            <div className="aspect-square bg-background-secondary rounded-md border border-border-primary flex items-center justify-center">
-                <Icons.Reload className="w-4 h-4 animate-spin text-foreground-secondary" />
+            <div className="flex aspect-square items-center justify-center rounded-xl border border-[var(--cs-border)] bg-[var(--cs-layer)]">
+                <Icons.Reload className="h-4 w-4 animate-spin text-[var(--cs-icon-muted)]" />
             </div>
         );
     }
 
     if (!imageUrl) {
         return (
-            <div className="aspect-square bg-background-secondary rounded-md border border-border-primary flex items-center justify-center">
-                <Icons.Image className="w-4 h-4 text-foreground-secondary" />
+            <div className="flex aspect-square items-center justify-center rounded-xl border border-[var(--cs-border)] bg-[var(--cs-layer)]">
+                <Icons.Image className="h-4 w-4 text-[var(--cs-icon-muted)]" />
             </div>
         );
     }
@@ -170,7 +170,7 @@ export const ImageItem = ({ image, projectId, branchId, onImageDragStart, onImag
     return (
         <div className="group">
             <div
-                className="aspect-square bg-background-secondary rounded-md border border-border-primary overflow-hidden cursor-pointer hover:border-border-onlook transition-colors relative"
+                className="relative aspect-square cursor-pointer overflow-hidden rounded-xl border border-[var(--cs-border)] bg-[var(--cs-layer)] transition-colors hover:border-[color:color-mix(in_srgb,var(--cs-accent)_35%,var(--cs-border))] hover:bg-[var(--cs-layer-hover)]"
                 onDragStart={handleDragStart}
                 onDragEnd={onImageDragEnd}
                 onDragOver={(e) => {
@@ -214,7 +214,7 @@ export const ImageItem = ({ image, projectId, branchId, onImageDragStart, onImag
                                 <Button
                                     size="icon"
                                     variant="secondary"
-                                    className="h-6 w-6 bg-background-secondary/90 hover:bg-background-onlook"
+                                    className="h-7 w-7 rounded-lg border border-[var(--cs-border)] bg-[color:color-mix(in_srgb,var(--cs-bg-elevated)_90%,transparent)] text-[var(--cs-foreground)] hover:bg-[var(--cs-layer-hover)]"
                                     onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
@@ -223,14 +223,14 @@ export const ImageItem = ({ image, projectId, branchId, onImageDragStart, onImag
                                     <Icons.DotsHorizontal className="h-3 w-3" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuContent align="end" className="w-44 rounded-xl border border-[var(--cs-border)] bg-[var(--cs-bg-elevated)] text-[var(--cs-foreground)] shadow-2xl">
                                 <DropdownMenuItem
                                     onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
                                         handleAddToChat();
                                     }}
-                                    className="flex items-center gap-2"
+                                    className="flex items-center gap-2 rounded-lg focus:bg-[var(--cs-layer-hover)]"
                                 >
                                     <Icons.Plus className="h-3 w-3" />
                                     Add to Chat
@@ -241,7 +241,7 @@ export const ImageItem = ({ image, projectId, branchId, onImageDragStart, onImag
                                         e.stopPropagation();
                                         setIsRenaming(true);
                                     }}
-                                    className="flex items-center gap-2"
+                                    className="flex items-center gap-2 rounded-lg focus:bg-[var(--cs-layer-hover)]"
                                 >
                                     <Icons.Edit className="h-3 w-3" />
                                     Rename
@@ -252,7 +252,7 @@ export const ImageItem = ({ image, projectId, branchId, onImageDragStart, onImag
                                         e.stopPropagation();
                                         setShowDeleteDialog(true);
                                     }}
-                                    className="flex items-center gap-2 text-red-500 hover:text-red-600 focus:text-red-600"
+                                    className="flex items-center gap-2 rounded-lg text-[#fca5a5] focus:bg-[color:color-mix(in_srgb,#ef4444_14%,transparent)] focus:text-[#fca5a5]"
                                 >
                                     <Icons.Trash className="h-3 w-3" />
                                     Delete
@@ -271,12 +271,12 @@ export const ImageItem = ({ image, projectId, branchId, onImageDragStart, onImag
                         onChange={(e) => setNewName(e.target.value)}
                         onKeyDown={handleKeyDown}
                         onBlur={() => void handleRename()}
-                        className="h-6 text-xs p-1 border-0 bg-transparent focus-visible:ring-1 focus-visible:ring-ring"
+                        className="h-7 rounded-lg border-[var(--cs-border)] bg-[var(--cs-layer)] p-1 text-xs text-[var(--cs-foreground)] focus-visible:ring-1 focus-visible:ring-[var(--cs-accent)]"
                         autoFocus
                         onClick={(e) => e.stopPropagation()}
                     />
                 ) : (
-                    <div className="text-xs text-foreground-primary truncate" title={image.name}>
+                    <div className="truncate text-xs text-[var(--cs-foreground)]" title={image.name}>
                         {image.name}
                     </div>
                 )}
@@ -284,7 +284,7 @@ export const ImageItem = ({ image, projectId, branchId, onImageDragStart, onImag
 
             {/* Delete confirmation dialog */}
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-                <AlertDialogContent>
+                <AlertDialogContent className="rounded-2xl border border-[var(--cs-border)] bg-[var(--cs-bg-elevated)] text-[var(--cs-foreground)]">
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete {isVideo ? 'Video' : 'Image'}</AlertDialogTitle>
                         <AlertDialogDescription>

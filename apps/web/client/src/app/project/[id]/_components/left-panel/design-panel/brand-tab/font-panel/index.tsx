@@ -119,14 +119,14 @@ const FontPanel = observer(() => {
     const uniqueSiteFonts = searchQuery ? fontManager.searchResults : fontManager.systemFonts;
 
     return (
-        <div className="flex flex-col h-full text-xs text-active flex-grow w-full p-0">
+        <div className="flex h-full w-full flex-grow flex-col bg-[var(--cs-bg)] p-0 text-xs text-[var(--cs-foreground)]">
             {/* Header Section */}
-            <div className="flex justify-between items-center pl-4 pr-2.5 py-1.5 border-b border-border">
-                <h2 className="text-sm font-normal text-foreground">Fonts</h2>
+            <div className="flex items-center justify-between border-b border-[var(--cs-border)] px-4 py-2">
+                <h2 className="text-sm font-medium text-[var(--cs-foreground)]">Fonts</h2>
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 rounded-md hover:bg-background-secondary"
+                    className="h-7 w-7 rounded-lg border border-[var(--cs-border)] bg-[var(--cs-layer)] text-[var(--cs-icon)] hover:bg-[var(--cs-layer-hover)] hover:text-[var(--cs-foreground)]"
                     onClick={handleClose}
                 >
                     <Icons.CrossS className="h-4 w-4" />
@@ -134,24 +134,24 @@ const FontPanel = observer(() => {
             </div>
 
             {/* Search Bar - Fixed below header */}
-            <div className="px-4 py-3 border-b border-border">
+            <div className="border-b border-[var(--cs-border)] px-4 py-3">
                 <div className="relative">
-                    <Icons.MagnifyingGlass className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Icons.MagnifyingGlass className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--cs-icon-muted)]" />
                     <Input
                         ref={inputRef}
                         type="text"
                         placeholder="Search for a new font..."
-                        className="h-9 text-xs pl-7 pr-8"
+                        className="h-9 rounded-xl border-[var(--cs-border)] bg-[var(--cs-layer)] pl-7 pr-8 text-xs text-[var(--cs-foreground)] placeholder:text-[var(--cs-icon-muted)]"
                         value={searchQuery}
                         onChange={(e) => handleSearch(e.target.value)}
                         onKeyDown={handleKeyDown}
                     />
                     {searchQuery && (
                         <button
-                            className="absolute right-[1px] top-[1px] bottom-[1px] aspect-square hover:bg-background-onlook active:bg-transparent flex items-center justify-center rounded-r-[calc(theme(borderRadius.md)-1px)] group"
+                            className="group absolute bottom-[1px] right-[1px] top-[1px] flex aspect-square items-center justify-center rounded-r-[calc(theme(borderRadius.xl)-1px)] hover:bg-[var(--cs-layer-hover)]"
                             onClick={() => handleSearch('')}
                         >
-                            <Icons.CrossS className="h-3 w-3 text-foreground-primary/50 group-hover:text-foreground-primary" />
+                            <Icons.CrossS className="h-3 w-3 text-[var(--cs-icon-muted)] group-hover:text-[var(--cs-foreground)]" />
                         </button>
                     )}
                     {isLoading && searchQuery && (
@@ -170,23 +170,23 @@ const FontPanel = observer(() => {
                         {/* System Fonts Header */}
                         <div className="px-4">
                             <div className="flex items-center gap-2">
-                                <h3 className="text-sm font-normal text-muted-foreground">
+                                <h3 className="text-sm font-medium text-[var(--cs-icon-muted)]">
                                     Added fonts
                                 </h3>
                                 {fontManager.isScanning && (
-                                    <Icons.LoadingSpinner className="h-3 w-3 animate-spin text-muted-foreground" />
+                                    <Icons.LoadingSpinner className="h-3 w-3 animate-spin text-[var(--cs-icon-muted)]" />
                                 )}
                             </div>
                         </div>
 
                         {/* System Font List */}
                         <div className="px-4">
-                            <div className="flex flex-col divide-y divide-border">
+                            <div className="flex flex-col divide-y divide-[var(--cs-border)]">
                                 {fontManager.isScanning ? (
-                                    <div className="flex justify-center items-center border-dashed border-default border-2 rounded-lg h-20 my-2">
+                                    <div className="my-2 flex h-20 items-center justify-center rounded-xl border border-dashed border-[var(--cs-border)] bg-[var(--cs-layer)]">
                                         <div className="flex items-center gap-2">
                                             <Icons.LoadingSpinner className="h-4 w-4 animate-spin text-muted-foreground" />
-                                            <span className="text-sm text-muted-foreground">
+                                            <span className="text-sm text-[var(--cs-icon-muted)]">
                                                 Scanning fonts...
                                             </span>
                                         </div>
@@ -205,8 +205,8 @@ const FontPanel = observer(() => {
                                         </div>
                                     ))
                                 ) : !fontManager.fonts.length ? (
-                                    <div className="flex justify-center items-center border-dashed border-default border-2 rounded-lg h-20 my-2">
-                                        <span className="text-sm text-muted-foreground">
+                                    <div className="my-2 flex h-20 items-center justify-center rounded-xl border border-dashed border-[var(--cs-border)] bg-[var(--cs-layer)]">
+                                        <span className="text-sm text-[var(--cs-icon-muted)]">
                                             No fonts added
                                         </span>
                                     </div>
@@ -250,14 +250,14 @@ const FontPanel = observer(() => {
                 <div className="flex flex-col gap-1 pt-6 pb-4">
                     {/* Site Fonts Header */}
                     <div className="px-4">
-                        <h3 className="text-sm text-muted-foreground font-normal">
+                        <h3 className="text-sm font-medium text-[var(--cs-icon-muted)]">
                             {searchQuery ? 'Search results' : 'Browse new fonts'}
                         </h3>
                     </div>
 
                     {/* Site Font List */}
                     <div className="px-4">
-                        <div className="flex flex-col divide-y divide-border">
+                        <div className="flex flex-col divide-y divide-[var(--cs-border)]">
                             {uniqueSiteFonts?.length > 0 ? (
                                 uniqueSiteFonts.map((font, index) => (
                                     <div key={`${font.family}-${index}`}>
@@ -279,8 +279,8 @@ const FontPanel = observer(() => {
                                     </div>
                                 ))
                             ) : (
-                                <div className="flex justify-center items-center h-20 my-2">
-                                    <span className="text-sm text-muted-foreground">
+                                <div className="my-2 flex h-20 items-center justify-center rounded-xl border border-dashed border-[var(--cs-border)] bg-[var(--cs-layer)]">
+                                    <span className="text-sm text-[var(--cs-icon-muted)]">
                                         No results were found
                                     </span>
                                 </div>
@@ -290,7 +290,7 @@ const FontPanel = observer(() => {
                         {fontManager.hasMoreFonts && !searchQuery && (
                             <Button
                                 variant="ghost"
-                                className="w-full mt-4 h-9 text-sm text-muted-foreground hover:text-foreground bg-background-secondary hover:bg-background-secondary/70 rounded-lg border border-white/5"
+                                className="mt-4 h-9 w-full rounded-xl border border-[var(--cs-border)] bg-[var(--cs-layer)] text-sm text-[var(--cs-foreground)] hover:bg-[var(--cs-layer-hover)]"
                                 onClick={handleLoadMore}
                                 disabled={isLoading}
                             >
@@ -309,10 +309,10 @@ const FontPanel = observer(() => {
             </div>
 
             {/* Upload Button - Fixed at bottom */}
-            <div className="p-4 border-t border-border mt-auto">
+            <div className="mt-auto border-t border-[var(--cs-border)] p-4">
                 <Button
                     variant="ghost"
-                    className="w-full h-11 text-sm text-muted-foreground hover:text-foreground bg-background-secondary hover:bg-background-secondary/70 rounded-lg border border-white/5"
+                    className="h-11 w-full rounded-xl border border-[var(--cs-border)] bg-[var(--cs-layer)] text-sm text-[var(--cs-foreground)] hover:bg-[var(--cs-layer-hover)]"
                     onClick={handleUploadFont}
                 >
                     Upload a custom font

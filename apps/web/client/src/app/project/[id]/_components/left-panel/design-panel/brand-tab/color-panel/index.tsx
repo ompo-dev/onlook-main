@@ -76,25 +76,27 @@ const ColorPanel = observer(() => {
     };
 
     return (
-        <div className="text-active flex h-full w-full flex-grow flex-col overflow-y-auto p-0 text-xs">
-            <div className="border-border bg-background fixed top-0 right-0 left-0 z-10 flex items-center justify-start border-b py-1.5 pr-2.5 pl-3 gap-2">
+        <div className="flex h-full w-full flex-grow flex-col overflow-y-auto bg-[var(--cs-bg)] p-0 text-xs text-[var(--cs-foreground)]">
+            <div className="fixed left-0 right-0 top-0 z-10 flex items-center justify-start gap-2 border-b border-[var(--cs-border)] bg-[var(--cs-bg)] px-3 py-2">
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="hover:bg-background-secondary h-7 w-7 rounded-md"
+                    className="h-7 w-7 rounded-lg border border-[var(--cs-border)] bg-[var(--cs-layer)] text-[var(--cs-icon)] hover:bg-[var(--cs-layer-hover)] hover:text-[var(--cs-foreground)]"
                     onClick={handleClose}
                 >
                     <Icons.ArrowLeft className="h-4 w-4" />
                 </Button>
-                <h2 className="text-foreground text-sm font-normal">Brand Colors</h2>
+                <h2 className="text-sm font-medium text-[var(--cs-foreground)]">Brand Colors</h2>
             </div>
             {/* Theme Toggle */}
-            <div className="border-border mt-[2.5rem] flex gap-2 border-b px-4 py-3">
+            <div className="mt-[2.75rem] flex gap-2 border-b border-[var(--cs-border)] px-4 py-3">
                 <Button
                     variant={theme === SystemTheme.LIGHT ? 'default' : 'outline'}
                     className={cn(
-                        'hover:bg-background-secondary w-full flex-1 gap-2 border-none bg-transparent px-0 text-gray-200 shadow-none',
-                        theme === SystemTheme.LIGHT && 'bg-gray-900 text-white',
+                        'w-full flex-1 gap-2 rounded-xl border px-0 shadow-none',
+                        theme === SystemTheme.LIGHT
+                            ? 'border-[var(--cs-accent)] bg-[color:color-mix(in_srgb,var(--cs-accent)_16%,transparent)] text-[var(--cs-foreground)]'
+                            : 'border-[var(--cs-border)] bg-[var(--cs-layer)] text-[var(--cs-icon)] hover:bg-[var(--cs-layer-hover)] hover:text-[var(--cs-foreground)]',
                     )}
                     onClick={() => setTheme(SystemTheme.LIGHT)}
                 >
@@ -104,8 +106,10 @@ const ColorPanel = observer(() => {
                 <Button
                     variant={theme === SystemTheme.DARK ? 'default' : 'outline'}
                     className={cn(
-                        'hover:bg-background-secondary w-full flex-1 gap-2 border-none bg-transparent px-0 text-gray-200 shadow-none',
-                        theme === SystemTheme.DARK && 'bg-gray-900 text-white',
+                        'w-full flex-1 gap-2 rounded-xl border px-0 shadow-none',
+                        theme === SystemTheme.DARK
+                            ? 'border-[var(--cs-accent)] bg-[color:color-mix(in_srgb,var(--cs-accent)_16%,transparent)] text-[var(--cs-foreground)]'
+                            : 'border-[var(--cs-border)] bg-[var(--cs-layer)] text-[var(--cs-icon)] hover:bg-[var(--cs-layer-hover)] hover:text-[var(--cs-foreground)]',
                     )}
                     onClick={() => setTheme(SystemTheme.DARK)}
                 >
@@ -115,7 +119,7 @@ const ColorPanel = observer(() => {
             </div>
 
             {/* Brand Palette Groups section */}
-            <div className="border-border flex flex-col gap-4 border-b px-4 py-[18px]">
+            <div className="flex flex-col gap-4 border-b border-[var(--cs-border)] px-4 py-[18px]">
                 <div className="flex flex-col gap-3">
                     {/* Theme color groups */}
                     {Object.entries(colorGroups).map(([groupName, colors]) => (
@@ -143,7 +147,7 @@ const ColorPanel = observer(() => {
                 ) : (
                     <Button
                         variant="ghost"
-                        className="text-muted-foreground hover:text-foreground bg-background-secondary hover:bg-background-secondary/70 h-10 w-full rounded-lg border border-white/5 text-sm"
+                        className="h-10 w-full rounded-xl border border-[var(--cs-border)] bg-[var(--cs-layer)] text-sm text-[var(--cs-foreground)] hover:bg-[var(--cs-layer-hover)]"
                         onClick={() => setIsAddingNewGroup(true)}
                     >
                         Add a new group
@@ -152,7 +156,7 @@ const ColorPanel = observer(() => {
             </div>
 
             {/* Color Palette section */}
-            <div className="border-border flex flex-col gap-4 border-b px-4 py-[18px]">
+            <div className="flex flex-col gap-4 border-b border-[var(--cs-border)] px-4 py-[18px]">
                 <h3 className="mb-1 text-sm font-medium">Default Colors</h3>
                 {Object.entries(colorDefaults).map(([colorName, colors]) => (
                     <BrandPalletGroup

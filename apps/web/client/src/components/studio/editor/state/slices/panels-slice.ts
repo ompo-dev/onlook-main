@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand';
 
-export type PanelId = 'inspector' | 'navigator' | 'timeline';
+export type PanelId = 'inspector' | 'navigator' | 'timeline' | 'code';
 export type PanelDock = 'left' | 'right' | 'bottom';
 
 export interface PanelState {
@@ -32,6 +32,7 @@ const DEFAULT_PANELS: Record<PanelId, PanelState> = {
     inspector: { open: false, dock: 'right', size: 320, activeTab: 'design' },
     navigator: { open: false, dock: 'left', size: 300, activeTab: 'elements' },
     timeline: { open: false, dock: 'bottom', size: 250, activeTab: 'animations' },
+    code: { open: false, dock: 'left', size: 520, activeTab: 'code' },
 };
 
 function recomputeClaims(panels: Record<string, PanelState>): DockedClaims {
