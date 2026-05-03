@@ -1,7 +1,5 @@
 'use client';
 
-import { SubscriptionModal } from '@/components/ui/pricing-modal';
-import { SettingsModalWithProjects } from '@/components/ui/settings-modal/with-project';
 import { EditorAttributes } from '@onlook/constants';
 import { Button } from '@onlook/ui/button';
 import { Icons } from '@onlook/ui/icons';
@@ -73,8 +71,6 @@ export const Main = observer(() => {
                     <TopBar />
                 </div>
             </div>
-            <SettingsModalWithProjects />
-            <SubscriptionModal />
         </TooltipProvider >
     );
 });

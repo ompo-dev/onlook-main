@@ -1,7 +1,5 @@
 "use client";
 
-import { CurrentUserAvatar } from "@/components/ui/avatar-dropdown";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@onlook/ui/tooltip";
 import { observer } from "mobx-react-lite";
 import { BranchDisplay } from "./branch";
 import { ProjectBreadcrumb } from "./project-breadcrumb";

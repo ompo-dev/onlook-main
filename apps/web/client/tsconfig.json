@@ -7,9 +7,6 @@
             "@/*": [
                 "./src/*"
             ],
-            "@onlook/cssstudio-runtime": [
-                "../../../packages/cssstudio-runtime"
-            ],
             "/*": [
                 "./*"
             ],
