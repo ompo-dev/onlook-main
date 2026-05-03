@@ -44,6 +44,12 @@ interface BridgeState {
     multiSelectEls: Map<number, HTMLElement>;
     multiSelectOverlaySet: WeakSet<Element>;
     _multiSelectRaf: number;
+    activeDocument: Document | null;
+}
+
+interface BridgeFrameTarget {
+    document: Document;
+    iframe: HTMLIFrameElement;
 }
 
 const state: BridgeState = {
@@ -84,7 +90,154 @@ const state: BridgeState = {
     multiSelectEls: new Map(),
     multiSelectOverlaySet: new WeakSet(),
     _multiSelectRaf: 0,
+    activeDocument: null,
 };
+
+let frameTargetsProvider: (() => BridgeFrameTarget[]) | null = null;
+
+export function setBridgeFrameTargetsProvider(
+    provider: (() => BridgeFrameTarget[]) | null,
+): void {
+    frameTargetsProvider = provider;
+    state.activeDocument = null;
+}
+
+function getFrameTargets(): BridgeFrameTarget[] {
+    if (!frameTargetsProvider) {
+        return [];
+    }
+
+    try {
+        return frameTargetsProvider().filter((target) => {
+            return (
+                !!target.document?.documentElement &&
+                !!target.iframe?.isConnected
+            );
+        });
+    } catch (error) {
+        console.error('[css-studio] Failed to resolve frame targets:', error);
+        return [];
+    }
+}
+
+function hasFrameTargetsProvider(): boolean {
+    return frameTargetsProvider !== null;
+}
+
+function setActiveDocument(doc: Document | null): void {
+    state.activeDocument = doc;
+}
+
+function getFallbackDocument(): Document {
+    return typeof document !== 'undefined' ? document : state.activeDocument ?? window.document;
+}
+
+function getPrimaryDocument(): Document {
+    const frameTargets = getFrameTargets();
+    if (state.activeDocument) {
+        const activeMatch = frameTargets.find((target) => target.document === state.activeDocument);
+        if (activeMatch) {
+            return activeMatch.document;
+        }
+    }
+
+    return frameTargets[0]?.document ?? state.activeDocument ?? getFallbackDocument();
+}
+
+function getDocumentRoot(doc: Document): HTMLElement {
+    return doc.documentElement ?? doc.body ?? getFallbackDocument().documentElement;
+}
+
+function getDocumentBody(doc: Document): HTMLElement {
+    return doc.body ?? doc.documentElement;
+}
+
+function getOverlayDocumentForElement(el: Element | null | undefined): Document {
+    return el?.ownerDocument ?? getPrimaryDocument();
+}
+
+function getDocumentElementAtPoint(doc: Document, x: number, y: number): Element | null {
+    for (const el of doc.elementsFromPoint(x, y)) {
+        if (el === doc.documentElement || el === doc.body) continue;
+        if (isOverlay(el)) continue;
+        return el;
+    }
+    return null;
+}
+
+function getHostPointForDocument(
+    doc: Document,
+    x: number,
+    y: number,
+): { x: number; y: number } {
+    const frameEl = doc.defaultView?.frameElement;
+    if (!(frameEl instanceof HTMLElement)) {
+        return { x, y };
+    }
+
+    const frameRect = frameEl.getBoundingClientRect();
+    return {
+        x: frameRect.left + x,
+        y: frameRect.top + y,
+    };
+}
+
+function createOverlayElement<T extends keyof HTMLElementTagNameMap>(
+    doc: Document,
+    tagName: T,
+    cssText: string,
+): HTMLElementTagNameMap[T] {
+    const el = doc.createElement(tagName);
+    el.style.cssText = cssText;
+    getDocumentRoot(doc).appendChild(el);
+    return el;
+}
+
+function ensureOverlayElement<T extends HTMLElement>(
+    current: T | null,
+    doc: Document,
+    create: () => T,
+): T {
+    if (current && current.ownerDocument === doc) {
+        return current;
+    }
+
+    current?.remove();
+    return create();
+}
+
+function addDocumentListeners(
+    type: string,
+    handler: EventListenerOrEventListenerObject,
+    options?: AddEventListenerOptions | boolean,
+): (() => void)[] {
+    const docs = getFrameTargets().map((target) => target.document);
+    const targetDocs =
+        docs.length > 0 ? docs : hasFrameTargetsProvider() ? [] : [getFallbackDocument()];
+
+    return targetDocs.map((doc) => {
+        doc.addEventListener(type, handler, options);
+        return () => doc.removeEventListener(type, handler, options);
+    });
+}
+
+function setCursorOnTargetDocuments(value: string): void {
+    const docs = getFrameTargets().map((target) => target.document);
+    const targetDocs =
+        docs.length > 0 ? docs : hasFrameTargetsProvider() ? [] : [getFallbackDocument()];
+    for (const doc of targetDocs) {
+        doc.documentElement.style.setProperty('cursor', value, 'important');
+    }
+}
+
+function clearCursorOnTargetDocuments(): void {
+    const docs = getFrameTargets().map((target) => target.document);
+    const targetDocs =
+        docs.length > 0 ? docs : hasFrameTargetsProvider() ? [] : [getFallbackDocument()];
+    for (const doc of targetDocs) {
+        doc.documentElement.style.cursor = '';
+    }
+}
 
 export function getId(el: Element): number {
     let id = state.reverseMap.get(el);
@@ -166,12 +319,40 @@ export function setOverlayBlocking(blocking: boolean): void {
 }
 
 export function getPageElementAtPoint(x: number, y: number): Element | null {
-    for (const el of document.elementsFromPoint(x, y)) {
-        if (el === document.documentElement || el === document.body) continue;
-        if (isOverlay(el)) continue;
-        return el;
+    const frameTargets = getFrameTargets();
+    if (frameTargets.length > 0 || hasFrameTargetsProvider()) {
+        for (const target of frameTargets) {
+            const frameRect = target.iframe.getBoundingClientRect();
+            if (
+                x < frameRect.left ||
+                x > frameRect.right ||
+                y < frameRect.top ||
+                y > frameRect.bottom
+            ) {
+                continue;
+            }
+
+            const element = getDocumentElementAtPoint(
+                target.document,
+                x - frameRect.left,
+                y - frameRect.top,
+            );
+
+            if (element) {
+                setActiveDocument(target.document);
+                return element;
+            }
+        }
+
+        return null;
     }
-    return null;
+
+    const fallbackDoc = getPrimaryDocument();
+    const element = getDocumentElementAtPoint(fallbackDoc, x, y);
+    if (element) {
+        setActiveDocument(fallbackDoc);
+    }
+    return element;
 }
 
 function getReactComponentInfo(el: Element): { component: string; source?: string } | null {
@@ -224,15 +405,16 @@ export function buildElementSelector(id: number): string | null {
 }
 
 export function findReplacementElement(selector: string, oldId: number): number | null {
+    const oldEl = getEl(oldId);
+    const doc = oldEl?.ownerDocument ?? getPrimaryDocument();
     try {
-        const candidates = document.querySelectorAll(selector);
+        const candidates = doc.querySelectorAll(selector);
         if (candidates.length === 0) return null;
         if (candidates.length === 1) {
             const el = candidates[0];
             if (el.isConnected && !isOverlay(el)) return getId(el);
             return null;
         }
-        const oldEl = getEl(oldId);
         for (let i = 0; i < candidates.length; i++) {
             const el = candidates[i];
             if (el !== oldEl && el.isConnected && !isOverlay(el)) {
@@ -258,6 +440,15 @@ export function initBridge(): boolean {
 }
 
 export function fetchDomTree(): any {
+    if (hasFrameTargetsProvider() && getFrameTargets().length === 0) {
+        return null;
+    }
+
+    const rootDoc = state.selectedId !== null
+        ? getEl(state.selectedId)?.ownerDocument ?? getPrimaryDocument()
+        : getPrimaryDocument();
+    setActiveDocument(rootDoc);
+
     function walk(el: Element): any {
         if (isOverlay(el)) return null;
         const id = getId(el);
@@ -286,12 +477,13 @@ export function fetchDomTree(): any {
             source: reactInfo?.source,
         };
     }
-    return walk(document.documentElement);
+    return rootDoc.documentElement ? walk(rootDoc.documentElement) : null;
 }
 
 export function fetchStyles(id: number): any {
     const el = getEl(id);
     if (!el) return null;
+    setActiveDocument(el.ownerDocument);
     const cs = getComputedStyle(el);
     const computed: Record<string, string> = {};
     for (let i = 0; i < cs.length; i++) {
@@ -305,7 +497,7 @@ export function fetchStyles(id: number): any {
     }
     const matched: { selector: string; properties: Record<string, string> }[] = [];
     try {
-        const sheets = document.styleSheets;
+        const sheets = el.ownerDocument.styleSheets;
         for (let s = 0; s < sheets.length; s++) {
             try {
                 const rules = sheets[s].cssRules;
@@ -332,11 +524,11 @@ export function fetchStyles(id: number): any {
 }
 
 export function setDocumentProperty(prop: string, value: string): void {
-    document.documentElement.style.setProperty(prop, value);
+    getPrimaryDocument().documentElement.style.setProperty(prop, value);
 }
 
 export function removeDocumentProperty(prop: string): void {
-    document.documentElement.style.removeProperty(prop);
+    getPrimaryDocument().documentElement.style.removeProperty(prop);
 }
 
 export function setStyleProperty(id: number, prop: string, value: string): void {
@@ -370,7 +562,8 @@ export function setTextContent(id: number, text: string): void {
 }
 
 export function fetchDesignTokens(): { name: string; value: string }[] {
-    const cs = getComputedStyle(document.documentElement);
+    const doc = getPrimaryDocument();
+    const cs = getComputedStyle(doc.documentElement);
     const tokens: { name: string; value: string }[] = [];
     for (let i = 0; i < cs.length; i++) {
         if (cs[i].startsWith('--')) {
@@ -381,47 +574,51 @@ export function fetchDesignTokens(): { name: string; value: string }[] {
 }
 
 function getMetaContent(selector: string): string {
-    return (document.querySelector(selector) as HTMLMetaElement)?.content ?? '';
+    const doc = getPrimaryDocument();
+    return (doc.querySelector(selector) as HTMLMetaElement)?.content ?? '';
 }
 
 export function fetchPageMetadata(): Record<string, string> {
+    const doc = getPrimaryDocument();
     return {
-        title: document.title,
+        title: doc.title,
         description: getMetaContent('meta[name="description"]'),
-        charset: document.querySelector('meta[charset]')?.getAttribute('charset') ?? '',
+        charset: doc.querySelector('meta[charset]')?.getAttribute('charset') ?? '',
         viewport: getMetaContent('meta[name="viewport"]'),
         ogTitle: getMetaContent('meta[property="og:title"]'),
         ogDescription: getMetaContent('meta[property="og:description"]'),
         ogImage: getMetaContent('meta[property="og:image"]'),
         favicon:
-            (document.querySelector('link[rel="icon"], link[rel="shortcut icon"]') as HTMLLinkElement)?.href ?? '',
+            (doc.querySelector('link[rel="icon"], link[rel="shortcut icon"]') as HTMLLinkElement)?.href ?? '',
     };
 }
 
 function ensureMeta(attr: string, value: string): HTMLMetaElement {
+    const doc = getPrimaryDocument();
     const selector = `meta[${attr}="${value}"]`;
-    let el = document.querySelector(selector) as HTMLMetaElement | null;
+    let el = doc.querySelector(selector) as HTMLMetaElement | null;
     if (!el) {
-        el = document.createElement('meta');
+        el = doc.createElement('meta');
         el.setAttribute(attr, value);
-        document.head.appendChild(el);
+        doc.head.appendChild(el);
     }
     return el;
 }
 
 export function setPageMetadataField(field: string, value: string): void {
+    const doc = getPrimaryDocument();
     switch (field) {
         case 'title':
-            document.title = value;
+            doc.title = value;
             break;
         case 'description':
             ensureMeta('name', 'description').content = value;
             break;
         case 'charset': {
-            let el = document.querySelector('meta[charset]') as HTMLMetaElement | null;
+            let el = doc.querySelector('meta[charset]') as HTMLMetaElement | null;
             if (!el) {
-                el = document.createElement('meta');
-                document.head.prepend(el);
+                el = doc.createElement('meta');
+                doc.head.prepend(el);
             }
             el.setAttribute('charset', value);
             break;
@@ -439,13 +636,13 @@ export function setPageMetadataField(field: string, value: string): void {
             ensureMeta('property', 'og:image').content = value;
             break;
         case 'favicon': {
-            let link = document.querySelector(
+            let link = doc.querySelector(
                 'link[rel="icon"], link[rel="shortcut icon"]',
             ) as HTMLLinkElement | null;
             if (!link) {
-                link = document.createElement('link');
+                link = doc.createElement('link');
                 link.rel = 'icon';
-                document.head.appendChild(link);
+                doc.head.appendChild(link);
             }
             link.href = value;
             break;
@@ -511,12 +708,18 @@ export function highlightElement(id: number | null): void {
     }
     const el = getEl(id);
     if (!el || !el.isConnected) return;
-    if (!state.highlightEl) {
-        state.highlightEl = document.createElement('div');
-        state.highlightEl.style.cssText =
-            'position:fixed;pointer-events:none;z-index:2147483640;transition:all 0.05s;';
-        document.documentElement.appendChild(state.highlightEl);
-    }
+    const doc = getOverlayDocumentForElement(el);
+    setActiveDocument(doc);
+    state.highlightEl = ensureOverlayElement(
+        state.highlightEl,
+        doc,
+        () =>
+            createOverlayElement(
+                doc,
+                'div',
+                'position:fixed;pointer-events:none;z-index:2147483640;transition:all 0.05s;',
+            ),
+    );
     const h = state.highlightEl;
     const quad = getElementQuad(el);
     if (quad.hasTransform) {
@@ -561,12 +764,18 @@ export function selectElement(id: number | null): void {
     setOverlayBlocking(true);
     const el = getEl(id);
     if (!el) return;
-    if (!state.selectEl) {
-        state.selectEl = document.createElement('div');
-        state.selectEl.style.cssText =
-            'position:fixed;pointer-events:none;z-index:2147483639;border:1px solid rgba(111,168,220,0.7);';
-        document.documentElement.appendChild(state.selectEl);
-    }
+    const doc = getOverlayDocumentForElement(el);
+    setActiveDocument(doc);
+    state.selectEl = ensureOverlayElement(
+        state.selectEl,
+        doc,
+        () =>
+            createOverlayElement(
+                doc,
+                'div',
+                'position:fixed;pointer-events:none;z-index:2147483639;border:1px solid rgba(111,168,220,0.7);',
+            ),
+    );
     const s = state.selectEl;
     let prevKey = '';
     function tick() {
@@ -593,12 +802,16 @@ export function selectElement(id: number | null): void {
                 const selfCs = getComputedStyle(el!);
                 const selfTransformed = selfCs.transform && selfCs.transform !== 'none';
                 if (selfTransformed) {
-                    if (!state.layoutBoxEl) {
-                        state.layoutBoxEl = document.createElement('div');
-                        state.layoutBoxEl.style.cssText =
-                            'position:fixed;pointer-events:none;z-index:2147483638;border:1px dashed rgba(111,168,220,0.45);background:none;';
-                        document.documentElement.appendChild(state.layoutBoxEl);
-                    }
+                    state.layoutBoxEl = ensureOverlayElement(
+                        state.layoutBoxEl,
+                        doc,
+                        () =>
+                            createOverlayElement(
+                                doc,
+                                'div',
+                                'position:fixed;pointer-events:none;z-index:2147483638;border:1px dashed rgba(111,168,220,0.45);background:none;',
+                            ),
+                    );
                     const lb = state.layoutBoxEl;
                     lb.style.display = 'block';
                     lb.style.top = quad.untransformedY + 'px';
@@ -645,7 +858,7 @@ function clearMultiSelectOverlays(): void {
     state.multiSelectEls.clear();
 }
 
-export function selectElements(ids: number[], primaryId: number): void {
+export function selectElements(ids: number[], primaryId: number | null): void {
     if (ids.length <= 1) {
         clearMultiSelectOverlays();
         selectElement(ids[0] ?? null);
@@ -662,10 +875,12 @@ export function selectElements(ids: number[], primaryId: number): void {
     }
     for (const id of secondaryIds) {
         if (!state.multiSelectEls.has(id)) {
-            const overlay = document.createElement('div');
-            overlay.style.cssText =
-                'position:fixed;pointer-events:none;z-index:2147483638;border:1px dashed rgba(111,168,220,0.7);background:rgba(111,168,220,0.08);';
-            document.documentElement.appendChild(overlay);
+            const doc = getOverlayDocumentForElement(getEl(id));
+            const overlay = createOverlayElement(
+                doc,
+                'div',
+                'position:fixed;pointer-events:none;z-index:2147483638;border:1px dashed rgba(111,168,220,0.7);background:rgba(111,168,220,0.08);',
+            );
             state.multiSelectEls.set(id, overlay);
             state.multiSelectOverlaySet.add(overlay);
         }
@@ -718,17 +933,24 @@ export function startPicker(onPick: (id: number) => void, onMarquee?: (ids: numb
     let dragging = false;
     let startX = 0;
     let startY = 0;
+    let activeDoc: Document | null = null;
     const DRAG_THRESHOLD = 5;
     function onMove(e: MouseEvent) {
         if (dragging) return;
-        const el = getPageElementAtPoint(e.clientX, e.clientY);
+        const sourceDoc = (e.target as Node | null)?.ownerDocument ?? getPrimaryDocument();
+        const el = getDocumentElementAtPoint(sourceDoc, e.clientX, e.clientY);
         if (!el) return;
-        if (!state.highlightEl) {
-            state.highlightEl = document.createElement('div');
-            state.highlightEl.style.cssText =
-                'position:fixed;pointer-events:none;z-index:2147483640;background:rgba(111,168,220,0.3);border:1px solid rgba(111,168,220,0.7);transition:all 0.05s;';
-            document.documentElement.appendChild(state.highlightEl);
-        }
+        setActiveDocument(sourceDoc);
+        state.highlightEl = ensureOverlayElement(
+            state.highlightEl,
+            sourceDoc,
+            () =>
+                createOverlayElement(
+                    sourceDoc,
+                    'div',
+                    'position:fixed;pointer-events:none;z-index:2147483640;background:rgba(111,168,220,0.3);border:1px solid rgba(111,168,220,0.7);transition:all 0.05s;',
+                ),
+        );
         const r = el.getBoundingClientRect();
         const h = state.highlightEl;
         h.style.display = 'block';
@@ -759,6 +981,7 @@ export function startPicker(onPick: (id: number) => void, onMarquee?: (ids: numb
     function onDragMove(e: PointerEvent) {
         e.preventDefault();
         e.stopImmediatePropagation();
+        if (!activeDoc) return;
         if (spaceHeld) {
             const dx2 = e.clientX - lastMoveX;
             const dy2 = e.clientY - lastMoveY;
@@ -773,15 +996,19 @@ export function startPicker(onPick: (id: number) => void, onMarquee?: (ids: numb
         if (!dragging) {
             dragging = true;
             if (state.highlightEl) state.highlightEl.style.display = 'none';
-            document.addEventListener('keydown', onSpaceDown, true);
-            document.addEventListener('keyup', onSpaceUp, true);
+            activeDoc.addEventListener('keydown', onSpaceDown, true);
+            activeDoc.addEventListener('keyup', onSpaceUp, true);
         }
-        if (!state.pickerMarqueeEl) {
-            state.pickerMarqueeEl = document.createElement('div');
-            state.pickerMarqueeEl.style.cssText =
-                'position:fixed;pointer-events:none;z-index:2147483640;border:2px solid rgba(111,168,220,0.7);border-radius:2px;';
-            document.documentElement.appendChild(state.pickerMarqueeEl);
-        }
+        state.pickerMarqueeEl = ensureOverlayElement(
+            state.pickerMarqueeEl,
+            activeDoc,
+            () =>
+                createOverlayElement(
+                    activeDoc!,
+                    'div',
+                    'position:fixed;pointer-events:none;z-index:2147483640;border:2px solid rgba(111,168,220,0.7);border-radius:2px;',
+                ),
+        );
         const m = state.pickerMarqueeEl;
         m.style.display = 'block';
         m.style.left = Math.min(startX, e.clientX) + 'px';
@@ -792,11 +1019,12 @@ export function startPicker(onPick: (id: number) => void, onMarquee?: (ids: numb
     function onDragUp(e: PointerEvent) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        document.removeEventListener('pointermove', onDragMove, true);
-        document.removeEventListener('pointerup', onDragUp, true);
+        activeDoc?.removeEventListener('pointermove', onDragMove, true);
+        activeDoc?.removeEventListener('pointerup', onDragUp, true);
         if (state.pickerMarqueeEl) state.pickerMarqueeEl.style.display = 'none';
         if (!dragging) {
-            const el = getPageElementAtPoint(e.clientX, e.clientY);
+            const sourceDoc = activeDoc ?? (e.target as Node | null)?.ownerDocument ?? getPrimaryDocument();
+            const el = getDocumentElementAtPoint(sourceDoc, e.clientX, e.clientY);
             if (!el) {
                 cleanup();
                 return;
@@ -818,10 +1046,11 @@ export function startPicker(onPick: (id: number) => void, onMarquee?: (ids: numb
             return;
         }
         const ids: number[] = [];
-        const all = document.body.querySelectorAll('*');
+        const all = getDocumentBody(activeDoc ?? getPrimaryDocument()).querySelectorAll('*');
         for (const el of all) {
             if (isOverlay(el)) continue;
-            if (el === document.body || el === document.documentElement) continue;
+            const doc = activeDoc ?? getPrimaryDocument();
+            if (el === doc.body || el === doc.documentElement) continue;
             const r = el.getBoundingClientRect();
             if (r.width === 0 && r.height === 0) continue;
             if (r.right < rx || r.left > rx + rw || r.bottom < ry || r.top > ry + rh) continue;
@@ -848,45 +1077,108 @@ export function startPicker(onPick: (id: number) => void, onMarquee?: (ids: numb
     function onDown(e: PointerEvent) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        const target = getPageElementAtPoint(e.clientX, e.clientY);
+        const sourceDoc = (e.target as Node | null)?.ownerDocument ?? getPrimaryDocument();
+        const target = getDocumentElementAtPoint(sourceDoc, e.clientX, e.clientY);
         if (!target) return;
+        activeDoc = sourceDoc;
+        setActiveDocument(sourceDoc);
         dragging = false;
         spaceHeld = false;
         startX = e.clientX;
         startY = e.clientY;
         lastMoveX = e.clientX;
         lastMoveY = e.clientY;
-        document.removeEventListener('pointerup', suppress as any, true);
-        document.addEventListener('pointermove', onDragMove, true);
-        document.addEventListener('pointerup', onDragUp, true);
+        sourceDoc.addEventListener('pointermove', onDragMove, true);
+        sourceDoc.addEventListener('pointerup', onDragUp, true);
     }
     function cleanup() {
-        document.documentElement.style.cursor = '';
-        document.removeEventListener('mousemove', onMove as any, true);
-        document.removeEventListener('pointerdown', onDown as any, true);
-        document.removeEventListener('pointermove', onDragMove, true);
-        document.removeEventListener('pointerup', onDragUp, true);
-        document.removeEventListener('pointerup', suppress as any, true);
-        document.removeEventListener('keydown', onSpaceDown, true);
-        document.removeEventListener('keyup', onSpaceUp, true);
+        clearCursorOnTargetDocuments();
+        clearDynamicListeners();
+        if (rebindTimer) {
+            clearInterval(rebindTimer);
+            rebindTimer = null;
+        }
+        activeDoc?.removeEventListener('pointermove', onDragMove, true);
+        activeDoc?.removeEventListener('pointerup', onDragUp, true);
+        activeDoc?.removeEventListener('keydown', onSpaceDown, true);
+        activeDoc?.removeEventListener('keyup', onSpaceUp, true);
         if (state.highlightEl) state.highlightEl.style.display = 'none';
         if (state.pickerMarqueeEl) state.pickerMarqueeEl.style.display = 'none';
         state.pickerCleanup = null;
         spaceHeld = false;
-        requestAnimationFrame(() => {
-            document.removeEventListener('mousedown', suppress as any, true);
-            document.removeEventListener('mouseup', suppress as any, true);
-            document.removeEventListener('click', suppress as any, true);
-        });
+        activeDoc = null;
     }
-    document.documentElement.style.setProperty('cursor', 'crosshair', 'important');
+
+    const dynamicListeners = new Map<
+        Document,
+        Array<() => void>
+    >();
+
+    function clearDynamicListeners() {
+        for (const cleanups of dynamicListeners.values()) {
+            for (const cleanup of cleanups) {
+                cleanup();
+            }
+        }
+        dynamicListeners.clear();
+    }
+
+    function getPickerDocuments(): Document[] {
+        const frameDocs = getFrameTargets().map((target) => target.document);
+        if (frameDocs.length > 0) {
+            return frameDocs;
+        }
+        return hasFrameTargetsProvider() ? [] : [getFallbackDocument()];
+    }
+
+    function bindToDocument(doc: Document) {
+        if (dynamicListeners.has(doc)) {
+            return;
+        }
+        dynamicListeners.set(doc, [
+            (() => {
+                doc.addEventListener('mousemove', onMove as any, true);
+                return () => doc.removeEventListener('mousemove', onMove as any, true);
+            })(),
+            (() => {
+                doc.addEventListener('pointerdown', onDown as any, true);
+                return () => doc.removeEventListener('pointerdown', onDown as any, true);
+            })(),
+            (() => {
+                doc.addEventListener('mousedown', suppress as any, true);
+                return () => doc.removeEventListener('mousedown', suppress as any, true);
+            })(),
+            (() => {
+                doc.addEventListener('mouseup', suppress as any, true);
+                return () => doc.removeEventListener('mouseup', suppress as any, true);
+            })(),
+            (() => {
+                doc.addEventListener('click', suppress as any, true);
+                return () => doc.removeEventListener('click', suppress as any, true);
+            })(),
+        ]);
+    }
+
+    function rebindDocuments() {
+        const nextDocs = new Set(getPickerDocuments());
+        for (const [doc, cleanups] of dynamicListeners) {
+            if (!nextDocs.has(doc)) {
+                for (const cleanup of cleanups) {
+                    cleanup();
+                }
+                dynamicListeners.delete(doc);
+            }
+        }
+        for (const doc of nextDocs) {
+            bindToDocument(doc);
+        }
+        setCursorOnTargetDocuments('crosshair');
+    }
+
+    rebindDocuments();
+    let rebindTimer: ReturnType<typeof setInterval> | null = setInterval(rebindDocuments, 250);
+    setCursorOnTargetDocuments('crosshair');
     state.pickerCleanup = cleanup;
-    document.addEventListener('mousemove', onMove as any, true);
-    document.addEventListener('pointerdown', onDown as any, true);
-    document.addEventListener('pointerup', suppress as any, true);
-    document.addEventListener('mousedown', suppress as any, true);
-    document.addEventListener('mouseup', suppress as any, true);
-    document.addEventListener('click', suppress as any, true);
 }
 
 export function stopPicker(): void {
@@ -904,6 +1196,7 @@ export function startDrawMode(onDraw: (parentId: number, rect: { x: number; y: n
     let spaceHeld = false;
     let isDragging = false;
     let detectedParent: Element | null = null;
+    let activeDoc: Document | null = null;
     function suppress(e: Event) {
         e.preventDefault();
         e.stopImmediatePropagation();
@@ -923,9 +1216,10 @@ export function startDrawMode(onDraw: (parentId: number, rect: { x: number; y: n
     function detectParent(rect: { x: number; y: number; w: number; h: number }): Element {
         const cx = rect.x + rect.w / 2;
         const cy = rect.y + rect.h / 2;
-        let candidate = getPageElementAtPoint(cx, cy);
-        if (!candidate) return document.body;
-        while (candidate && candidate !== document.body) {
+        const sourceDoc = activeDoc ?? getPrimaryDocument();
+        let candidate = getDocumentElementAtPoint(sourceDoc, cx, cy);
+        if (!candidate) return getDocumentBody(sourceDoc);
+        while (candidate && candidate !== sourceDoc.body) {
             const pr = candidate.getBoundingClientRect();
             if (
                 rect.x >= pr.left &&
@@ -935,43 +1229,54 @@ export function startDrawMode(onDraw: (parentId: number, rect: { x: number; y: n
             ) {
                 break;
             }
-            candidate = candidate.parentElement ?? document.body;
+            candidate = candidate.parentElement ?? getDocumentBody(sourceDoc);
         }
-        return candidate ?? document.body;
+        return candidate ?? getDocumentBody(sourceDoc);
     }
     function onDown(e: PointerEvent) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        const target = getPageElementAtPoint(e.clientX, e.clientY);
+        const sourceDoc = (e.target as Node | null)?.ownerDocument ?? getPrimaryDocument();
+        const target = getDocumentElementAtPoint(sourceDoc, e.clientX, e.clientY);
         if (!target) return;
+        activeDoc = sourceDoc;
+        setActiveDocument(sourceDoc);
         startX = e.clientX;
         startY = e.clientY;
         lastMoveX = e.clientX;
         lastMoveY = e.clientY;
         spaceHeld = false;
         isDragging = true;
-        document.addEventListener('keydown', onSpaceDown, true);
-        document.addEventListener('keyup', onSpaceUp, true);
-        if (!state.drawOverlayEl) {
-            state.drawOverlayEl = document.createElement('div');
-            state.drawOverlayEl.style.cssText =
-                'position:fixed;pointer-events:none;z-index:2147483640;background:rgba(111,168,220,0.15);border:2px solid rgba(111,168,220,0.7);border-radius:2px;';
-            document.documentElement.appendChild(state.drawOverlayEl);
-        }
+        sourceDoc.addEventListener('keydown', onSpaceDown, true);
+        sourceDoc.addEventListener('keyup', onSpaceUp, true);
+        state.drawOverlayEl = ensureOverlayElement(
+            state.drawOverlayEl,
+            sourceDoc,
+            () =>
+                createOverlayElement(
+                    sourceDoc,
+                    'div',
+                    'position:fixed;pointer-events:none;z-index:2147483640;background:rgba(111,168,220,0.15);border:2px solid rgba(111,168,220,0.7);border-radius:2px;',
+                ),
+        );
         state.drawOverlayEl.style.display = 'block';
         state.drawOverlayEl.style.left = startX + 'px';
         state.drawOverlayEl.style.top = startY + 'px';
         state.drawOverlayEl.style.width = '0px';
         state.drawOverlayEl.style.height = '0px';
-        if (!state.drawParentHighlightEl) {
-            state.drawParentHighlightEl = document.createElement('div');
-            state.drawParentHighlightEl.style.cssText =
-                'position:fixed;pointer-events:none;z-index:2147483639;border:2px solid rgba(111,168,220,0.5);border-radius:2px;';
-            document.documentElement.appendChild(state.drawParentHighlightEl);
-        }
+        state.drawParentHighlightEl = ensureOverlayElement(
+            state.drawParentHighlightEl,
+            sourceDoc,
+            () =>
+                createOverlayElement(
+                    sourceDoc,
+                    'div',
+                    'position:fixed;pointer-events:none;z-index:2147483639;border:2px solid rgba(111,168,220,0.5);border-radius:2px;',
+                ),
+        );
         state.drawParentHighlightEl.style.display = 'none';
-        document.addEventListener('pointermove', onMove, true);
-        document.addEventListener('pointerup', onUp, true);
+        sourceDoc.addEventListener('pointermove', onMove, true);
+        sourceDoc.addEventListener('pointerup', onUp, true);
     }
     function onMove(e: PointerEvent) {
         e.preventDefault();
@@ -1009,8 +1314,8 @@ export function startDrawMode(onDraw: (parentId: number, rect: { x: number; y: n
     function onUp(e: PointerEvent) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        document.removeEventListener('pointermove', onMove, true);
-        document.removeEventListener('pointerup', onUp, true);
+        activeDoc?.removeEventListener('pointermove', onMove, true);
+        activeDoc?.removeEventListener('pointerup', onUp, true);
         const w = Math.abs(e.clientX - startX);
         const h = Math.abs(e.clientY - startY);
         if (state.drawOverlayEl) state.drawOverlayEl.style.display = 'none';
@@ -1021,35 +1326,33 @@ export function startDrawMode(onDraw: (parentId: number, rect: { x: number; y: n
         }
         const x = Math.min(startX, e.clientX);
         const y = Math.min(startY, e.clientY);
-        const parent = detectedParent ?? document.body;
+        const parent = detectedParent ?? getDocumentBody(activeDoc ?? getPrimaryDocument());
         const parentId = getId(parent);
         cleanup();
         onDraw(parentId, { x, y, w: Math.round(w), h: Math.round(h) });
     }
     function cleanup() {
-        document.documentElement.style.cursor = '';
-        document.removeEventListener('pointerdown', onDown as any, true);
-        document.removeEventListener('pointermove', onMove, true);
-        document.removeEventListener('pointerup', onUp, true);
-        document.removeEventListener('keydown', onSpaceDown, true);
-        document.removeEventListener('keyup', onSpaceUp, true);
+        clearCursorOnTargetDocuments();
+        for (const remove of cleanupFns) remove();
+        activeDoc?.removeEventListener('pointermove', onMove, true);
+        activeDoc?.removeEventListener('pointerup', onUp, true);
+        activeDoc?.removeEventListener('keydown', onSpaceDown, true);
+        activeDoc?.removeEventListener('keyup', onSpaceUp, true);
         if (state.drawOverlayEl) state.drawOverlayEl.style.display = 'none';
         if (state.drawParentHighlightEl) state.drawParentHighlightEl.style.display = 'none';
         state.drawCleanup = null;
         spaceHeld = false;
         isDragging = false;
-        requestAnimationFrame(() => {
-            document.removeEventListener('mousedown', suppress as any, true);
-            document.removeEventListener('mouseup', suppress as any, true);
-            document.removeEventListener('click', suppress as any, true);
-        });
+        activeDoc = null;
     }
-    document.documentElement.style.setProperty('cursor', 'crosshair', 'important');
+    const cleanupFns = [
+        ...addDocumentListeners('pointerdown', onDown as any, true),
+        ...addDocumentListeners('mousedown', suppress as any, true),
+        ...addDocumentListeners('mouseup', suppress as any, true),
+        ...addDocumentListeners('click', suppress as any, true),
+    ];
+    setCursorOnTargetDocuments('crosshair');
     state.drawCleanup = cleanup;
-    document.addEventListener('pointerdown', onDown as any, true);
-    document.addEventListener('mousedown', suppress as any, true);
-    document.addEventListener('mouseup', suppress as any, true);
-    document.addEventListener('click', suppress as any, true);
 }
 
 export function stopDrawMode(): void {
@@ -1153,8 +1456,8 @@ export function startInlineEdit(callbacks: {
         htmlEl.contentEditable = 'true';
         htmlEl.style.outline = '2px solid rgba(111,168,220,0.7)';
         htmlEl.focus();
-        const sel = window.getSelection();
-        const range = document.createRange();
+        const sel = el.ownerDocument.defaultView?.getSelection();
+        const range = el.ownerDocument.createRange();
         const textNodes = getTextNodes(el);
         if (textNodes.length > 0) {
             range.setStart(textNodes[0], 0);
@@ -1209,7 +1512,8 @@ export function startInlineEdit(callbacks: {
         const target = e.target as Element;
         if (isOverlay(target)) return;
         const me = e as MouseEvent;
-        const el = getPageElementAtPoint(me.clientX, me.clientY);
+        const sourceDoc = target.ownerDocument ?? getPrimaryDocument();
+        const el = getDocumentElementAtPoint(sourceDoc, me.clientX, me.clientY);
         if (!el) return;
         if (state.selectedId) {
             const selEl = getEl(state.selectedId);
@@ -1224,18 +1528,20 @@ export function startInlineEdit(callbacks: {
         if (isOverlay(target)) return;
         if ((target as any).closest?.('[data-cs-visual-control]')) return;
         const me = e as MouseEvent;
-        const el = getPageElementAtPoint(me.clientX, me.clientY);
+        const sourceDoc = target.ownerDocument ?? getPrimaryDocument();
+        const el = getDocumentElementAtPoint(sourceDoc, me.clientX, me.clientY);
         if (!el) return;
         if (!hasTextContent(el)) return;
         e.preventDefault();
         e.stopPropagation();
         beginEdit(el);
     }
-    document.addEventListener('click', onClick, true);
-    document.addEventListener('dblclick', onDblClick, true);
+    const clickCleanups = [
+        ...addDocumentListeners('click', onClick, true),
+        ...addDocumentListeners('dblclick', onDblClick, true),
+    ];
     state.inlineEditCleanup = () => {
-        document.removeEventListener('click', onClick, true);
-        document.removeEventListener('dblclick', onDblClick, true);
+        for (const cleanup of clickCleanups) cleanup();
         state.inlineEditCleanup = null;
         state.inlineEditActive = false;
     };
@@ -1268,8 +1574,10 @@ export function observeBody(onDirty: () => void): void {
             onDirty();
         }, 500);
     });
-    if (document.body) {
-        state._bodyObserver.observe(document.body, { childList: true, subtree: true });
+    const doc = getPrimaryDocument();
+    const body = doc.body;
+    if (body) {
+        state._bodyObserver.observe(body, { childList: true, subtree: true });
     }
 }
 
@@ -1287,8 +1595,9 @@ export function detachElement(id: number): Element | null {
     if (state._bodyObserver) state._bodyObserver.disconnect();
     el.parentNode.removeChild(el);
     state.elements.delete(id);
-    if (state._bodyObserver && document.body) {
-        state._bodyObserver.observe(document.body, { childList: true, subtree: true });
+    const body = el.ownerDocument.body;
+    if (state._bodyObserver && body) {
+        state._bodyObserver.observe(body, { childList: true, subtree: true });
     }
     return el;
 }
@@ -1311,8 +1620,9 @@ export function reinsertElement(element: Element, parentId: number, beforeSiblin
     } else {
         parent.appendChild(element);
     }
-    if (state._bodyObserver && document.body) {
-        state._bodyObserver.observe(document.body, { childList: true, subtree: true });
+    const body = parent.ownerDocument.body;
+    if (state._bodyObserver && body) {
+        state._bodyObserver.observe(body, { childList: true, subtree: true });
     }
     return getId(element);
 }
@@ -1320,7 +1630,7 @@ export function reinsertElement(element: Element, parentId: number, beforeSiblin
 export function replaceTag(id: number, newTag: string): number | null {
     const el = getEl(id);
     if (!el || !el.parentNode) return null;
-    const newEl = document.createElement(newTag);
+    const newEl = el.ownerDocument.createElement(newTag);
     for (let i = 0; i < el.attributes.length; i++) {
         newEl.setAttribute(el.attributes[i].name, el.attributes[i].value);
     }
@@ -1358,7 +1668,7 @@ export function addChildElement(parentId: number, tag: string, beforeId?: number
     const parent = getEl(parentId);
     if (!parent) return null;
     if (state._bodyObserver) state._bodyObserver.disconnect();
-    const newEl = document.createElement(tag);
+    const newEl = parent.ownerDocument.createElement(tag);
     newEl.style.width = '100px';
     newEl.style.height = '100px';
     const before = beforeId != null ? getEl(beforeId) ?? null : null;
@@ -1368,8 +1678,9 @@ export function addChildElement(parentId: number, tag: string, beforeId?: number
         parent.appendChild(newEl);
     }
     state.localInsertedEls.add(newEl);
-    if (state._bodyObserver && document.body) {
-        state._bodyObserver.observe(document.body, { childList: true, subtree: true });
+    const body = parent.ownerDocument.body;
+    if (state._bodyObserver && body) {
+        state._bodyObserver.observe(body, { childList: true, subtree: true });
     }
     return getId(newEl);
 }
@@ -1378,13 +1689,14 @@ export function addSiblingElement(siblingId: number, tag: string): number | null
     const sibling = getEl(siblingId);
     if (!sibling || !sibling.parentNode) return null;
     if (state._bodyObserver) state._bodyObserver.disconnect();
-    const newEl = document.createElement(tag);
+    const newEl = sibling.ownerDocument.createElement(tag);
     newEl.style.width = '100px';
     newEl.style.height = '100px';
     sibling.parentNode.insertBefore(newEl, sibling.nextSibling);
     state.localInsertedEls.add(newEl);
-    if (state._bodyObserver && document.body) {
-        state._bodyObserver.observe(document.body, { childList: true, subtree: true });
+    const body = sibling.ownerDocument.body;
+    if (state._bodyObserver && body) {
+        state._bodyObserver.observe(body, { childList: true, subtree: true });
     }
     return getId(newEl);
 }
@@ -1396,8 +1708,9 @@ export function duplicateElement(id: number): number | null {
     const clone = el.cloneNode(true) as Element;
     el.parentNode.insertBefore(clone, el.nextSibling);
     state.localInsertedEls.add(clone);
-    if (state._bodyObserver && document.body) {
-        state._bodyObserver.observe(document.body, { childList: true, subtree: true });
+    const body = el.ownerDocument.body;
+    if (state._bodyObserver && body) {
+        state._bodyObserver.observe(body, { childList: true, subtree: true });
     }
     return getId(clone);
 }
@@ -1410,8 +1723,9 @@ export function moveElement(id: number, newParentId: number, beforeSiblingId: nu
     const before = beforeSiblingId !== null ? getEl(beforeSiblingId) ?? null : null;
     if (state._bodyObserver) state._bodyObserver.disconnect();
     parent.insertBefore(el, before);
-    if (state._bodyObserver && document.body) {
-        state._bodyObserver.observe(document.body, { childList: true, subtree: true });
+    const body = parent.ownerDocument.body;
+    if (state._bodyObserver && body) {
+        state._bodyObserver.observe(body, { childList: true, subtree: true });
     }
     return true;
 }
@@ -1458,10 +1772,12 @@ export function getChildRectsAndIds(parentId: number): { id: number; rect: DOMRe
 
 export function showReorderLine(rect: { x: number; y: number; w: number; h: number }): void {
     if (!state.reorderLineEl) {
-        state.reorderLineEl = document.createElement('div');
-        state.reorderLineEl.style.cssText =
-            'position:fixed;pointer-events:none;z-index:2147483641;background:rgba(111,168,220,0.7);border-radius:1px;';
-        document.documentElement.appendChild(state.reorderLineEl);
+        const doc = getPrimaryDocument();
+        state.reorderLineEl = createOverlayElement(
+            doc,
+            'div',
+            'position:fixed;pointer-events:none;z-index:2147483641;background:rgba(111,168,220,0.7);border-radius:1px;',
+        );
     }
     const s = state.reorderLineEl.style;
     s.display = 'block';
@@ -1479,12 +1795,17 @@ export function showReorderGhost(id: number): void {
     const el = getEl(id);
     if (!el) return;
     const r = el.getBoundingClientRect();
-    if (!state.reorderGhostEl) {
-        state.reorderGhostEl = document.createElement('div');
-        state.reorderGhostEl.style.cssText =
-            'position:fixed;pointer-events:none;z-index:2147483638;background:rgba(111,168,220,0.15);border-radius:4px;';
-        document.documentElement.appendChild(state.reorderGhostEl);
-    }
+    const doc = el.ownerDocument;
+    state.reorderGhostEl = ensureOverlayElement(
+        state.reorderGhostEl,
+        doc,
+        () =>
+            createOverlayElement(
+                doc,
+                'div',
+                'position:fixed;pointer-events:none;z-index:2147483638;background:rgba(111,168,220,0.15);border-radius:4px;',
+            ),
+    );
     const s = state.reorderGhostEl.style;
     s.display = 'block';
     s.left = r.left + 'px';
@@ -1609,7 +1930,8 @@ export function showPromptIcon(onClick?: (id: number) => void): void {
     const bg = t.layer || '#1e1e2e';
     const border = t.border || '#313244';
     const fg = t.white || '#cdd6f4';
-    const btn = document.createElement('button');
+    const doc = getOverlayDocumentForElement(state.selectedId !== null ? getEl(state.selectedId) : null);
+    const btn = doc.createElement('button');
     btn.style.cssText = `position:fixed;pointer-events:auto;z-index:1;width:28px;height:28px;border-radius:6px;border:1px solid ${border};background:${bg};color:${fg};cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 8px rgba(0,0,0,0.3);`;
     btn.innerHTML =
         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M12 8v6"/><path d="M9 11h6"/></svg>';
@@ -1619,7 +1941,7 @@ export function showPromptIcon(onClick?: (id: number) => void): void {
             state._promptIconCallback(state.selectedId);
         }
     });
-    const appendTarget = state.overlayRoot || document.documentElement;
+    const appendTarget = getDocumentRoot(doc);
     appendTarget.appendChild(btn);
     state.promptIconEl = btn;
 }
@@ -1632,17 +1954,21 @@ export function startContextMenuListener(onMenu: (result: { id: number; x: numbe
     if (state.contextMenuCleanup) return;
     function onContextMenu(e: MouseEvent) {
         if (state.selectedId === null) return;
-        const el = getPageElementAtPoint(e.clientX, e.clientY);
+        const sourceDoc = (e.target as Node | null)?.ownerDocument ?? getPrimaryDocument();
+        const el = getDocumentElementAtPoint(sourceDoc, e.clientX, e.clientY);
         if (!el) return;
         const selEl = getEl(state.selectedId!);
         if (!selEl) return;
         if (selEl !== el && !selEl.contains(el)) return;
         e.preventDefault();
-        if (onMenu) onMenu({ id: state.selectedId!, x: e.clientX, y: e.clientY });
+        if (onMenu) {
+            const point = getHostPointForDocument(sourceDoc, e.clientX, e.clientY);
+            onMenu({ id: state.selectedId!, x: point.x, y: point.y });
+        }
     }
-    document.addEventListener('contextmenu', onContextMenu, true);
+    const cleanupFns = addDocumentListeners('contextmenu', onContextMenu, true);
     state.contextMenuCleanup = () => {
-        document.removeEventListener('contextmenu', onContextMenu, true);
+        for (const cleanup of cleanupFns) cleanup();
         state.contextMenuCleanup = null;
     };
 }
@@ -1680,7 +2006,7 @@ export function fetchKeyframes(): {
 }[] {
     const result: ReturnType<typeof fetchKeyframes> = [];
     try {
-        const sheets = document.styleSheets;
+        const sheets = getPrimaryDocument().styleSheets;
         for (let s = 0; s < sheets.length; s++) {
             try {
                 const rules = sheets[s].cssRules;
@@ -1827,7 +2153,9 @@ export const hasScrollTimelineApi = typeof (window as any).ScrollTimeline !== 'u
 
 export function findScrollContainer(el: Element, scroller: string): Element {
     if (scroller === 'self') return el;
-    if (scroller === 'root') return document.scrollingElement || document.documentElement;
+    if (scroller === 'root') {
+        return el.ownerDocument.scrollingElement || el.ownerDocument.documentElement;
+    }
     let parent = el.parentElement;
     while (parent) {
         const style = getComputedStyle(parent);
@@ -1839,5 +2167,5 @@ export function findScrollContainer(el: Element, scroller: string): Element {
         if (isScrollable) return parent;
         parent = parent.parentElement;
     }
-    return document.scrollingElement || document.documentElement;
+    return el.ownerDocument.scrollingElement || el.ownerDocument.documentElement;
 }

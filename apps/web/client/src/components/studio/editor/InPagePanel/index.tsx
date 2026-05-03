@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { useStore } from '../state/use-store';
 import { useShallow } from 'zustand/react/shallow';
 import { useUndoStore } from '../state/use-undo';
@@ -26,6 +26,7 @@ import { MetadataPanel } from '../MetadataPanel';
 import { ChatPanel } from '../ChatPanel';
 import { AnimationsPanel } from '../AnimationsPanel';
 import { ContextMenu } from '../ContextMenu';
+import { StudioOnlookDocks } from '../docks';
 import { Search } from 'lucide-react';
 import { auth } from '../auth/Auth';
 
@@ -78,7 +79,9 @@ export function InPagePanel({ mcpPort, mode }: InPagePanelProps) {
     const navigatorOpen = useStore((s) => s.panels.navigator.open);
     const navigatorTab = useStore((s) => s.panels.navigator.activeTab);
     const timelineOpen = useStore((s) => s.panels.timeline.open);
+    const inspectorTab = useStore((s) => s.panels.inspector.activeTab);
     const setPanelOpen = useStore((s) => s.setPanelOpen);
+    const setPanelActiveTab = useStore((s) => s.setPanelActiveTab);
     const openChat = useStore((s) => s.openChat);
     const undoClear = useUndoStore((s) => s.clear);
 
@@ -98,7 +101,7 @@ export function InPagePanel({ mcpPort, mode }: InPagePanelProps) {
     useAbsDrag({ bridge, onPositionChange: ops.handleAbsPositionChange });
 
     useKeyboardShortcuts({
-        applyEntry,
+        applyEntry: (entry, direction) => applyEntry(entry as Parameters<typeof applyEntry>[0], direction),
         sendEdit,
         handleSelectNode: ops.handleSelectNode,
         handleToggleSelectNode: ops.handleToggleSelectNode,
@@ -125,6 +128,7 @@ export function InPagePanel({ mcpPort, mode }: InPagePanelProps) {
                 }
             } else {
                 const last = items[items.length - 1];
+                if (!last) return;
                 bridge.showReorderLine({ x: last.rect.left, y: last.rect.bottom - 1, w: last.rect.width, h: 2 });
             }
         },
@@ -132,7 +136,7 @@ export function InPagePanel({ mcpPort, mode }: InPagePanelProps) {
     );
 
     const { draggedNodeId, dropTarget, startDrag } = useTreeDrag({
-        containerRef: treeRef,
+        containerRef: treeRef as RefObject<HTMLElement>,
         onReorder: ops.handleReorder,
         showPageLine,
         hidePageLine: bridge.hideReorderLine,
@@ -177,6 +181,12 @@ export function InPagePanel({ mcpPort, mode }: InPagePanelProps) {
         if (panic) openChat();
     }, [panic, openChat]);
 
+    useEffect(() => {
+        if (inspectorTab === 'variables') {
+            setPanelActiveTab('inspector', 'design');
+        }
+    }, [inspectorTab, setPanelActiveTab]);
+
     const hasSelection = selectedNodeId !== null;
     const isMultiSelect = selectedNodeIds.length > 1;
 
@@ -193,6 +203,7 @@ export function InPagePanel({ mcpPort, mode }: InPagePanelProps) {
                 onReconnect={reconnect}
                 mode={mode}
             />
+            <StudioOnlookDocks />
 
             {hasSelection && (
                 <Panel
@@ -200,7 +211,6 @@ export function InPagePanel({ mcpPort, mode }: InPagePanelProps) {
                     tabs={[
                         { id: 'design', label: 'Design' },
                         { id: 'motion', label: 'Motion', disabled: isMultiSelect },
-                        { id: 'variables', label: 'Variables', disabled: isMultiSelect },
                     ]}
                     label={undefined}
                     headerSlot={
@@ -225,9 +235,7 @@ export function InPagePanel({ mcpPort, mode }: InPagePanelProps) {
                         onAttributeChange={ops.handleAttributeChange}
                         onAttributeDelete={ops.handleAttributeDelete}
                         onAttributeRename={ops.handleAttributeRename}
-                        onElementVariableChange={ops.handleElementVariableChange}
                         onTagChange={ops.handleTagChange}
-                        onNewElementVariable={ops.handleNewElementVariable}
                     />
                 </Panel>
             )}

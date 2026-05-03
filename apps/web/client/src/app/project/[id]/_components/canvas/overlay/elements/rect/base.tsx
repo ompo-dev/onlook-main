@@ -1,3 +1,4 @@
+import { useStudioRuntime } from '@/components/studio/runtime';
 import { EditorAttributes } from '@onlook/constants';
 import type { RectDimensions } from '@onlook/models';
 import { colors } from '@onlook/ui/tokens';
@@ -20,9 +21,23 @@ export const BaseRect: React.FC<RectProps> = ({
     children,
     strokeWidth = 2,
 }) => {
+    const { mode } = useStudioRuntime();
+    const isStudioMode = mode === 'native';
+
     if (width === undefined || height === undefined || top === undefined || left === undefined) {
         return null;
     }
+
+    const strokeColor = isStudioMode
+        ? '#45c3ff'
+        : isComponent
+          ? colors.purple[500]
+          : colors.red[500];
+    const fillColor = isStudioMode
+        ? strokeWidth <= 1
+            ? 'rgba(69, 195, 255, 0.08)'
+            : 'rgba(69, 195, 255, 0.12)'
+        : 'none';
 
     return (
         <div
@@ -45,8 +60,8 @@ export const BaseRect: React.FC<RectProps> = ({
                 <rect
                     width={width}
                     height={height}
-                    fill="none"
-                    stroke={isComponent ? colors.purple[500] : colors.red[500]}
+                    fill={fillColor}
+                    stroke={strokeColor}
                     strokeWidth={strokeWidth}
                     strokeLinecap="round"
                     strokeLinejoin="round"

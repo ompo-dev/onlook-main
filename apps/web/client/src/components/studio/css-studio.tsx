@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
-import type { Root } from 'react-dom/client';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { InPagePanel } from './editor/InPagePanel';
 
 const DEFAULT_THEME_CSS = `
     * { box-sizing: border-box; }
@@ -42,78 +43,41 @@ interface CssStudioProps {
     mode?: string;
 }
 
-let studioRoot: Root | null = null;
-let studioContainer: HTMLElement | null = null;
-let disposeTimer: ReturnType<typeof setTimeout> | null = null;
-let activeInstances = 0;
-let themeStyleOwned = false;
+const HOST_ID = 'css-studio-root';
+const THEME_STYLE_ID = 'cs-theme-vars';
 
 export function CssStudio({ mcpPort, mode }: CssStudioProps) {
+    const [container, setContainer] = useState<HTMLElement | null>(null);
+
     useEffect(() => {
-        let cancelled = false;
-        activeInstances += 1;
+        const existing = document.getElementById(HOST_ID);
+        existing?.remove();
 
-        if (disposeTimer) {
-            clearTimeout(disposeTimer);
-            disposeTimer = null;
-        }
-
-        // Inject theme CSS variables once
-        if (!document.getElementById('cs-theme-vars')) {
+        let themeStyleOwned = false;
+        if (!document.getElementById(THEME_STYLE_ID)) {
             const style = document.createElement('style');
-            style.id = 'cs-theme-vars';
+            style.id = THEME_STYLE_ID;
             style.textContent = DEFAULT_THEME_CSS;
             document.head.appendChild(style);
             themeStyleOwned = true;
         }
 
-        if (!studioContainer || !studioContainer.isConnected) {
-            studioContainer =
-                (document.getElementById('css-studio-root') as HTMLElement | null) ??
-                document.createElement('css-studio-panel');
-            studioContainer.id = 'css-studio-root';
-            studioContainer.setAttribute('data-cs-root', 'true');
-            studioContainer.style.cssText =
-                'position:fixed;top:0;left:0;width:100%;height:100%;z-index:2147483647;pointer-events:none;font-family:Inter,system-ui,sans-serif;font-size:12px;color:var(--cs-foreground);';
-            if (!studioContainer.isConnected) {
-                document.documentElement.appendChild(studioContainer);
-            }
-        }
-
-        // Dynamic import to avoid SSR issues
-        import('react-dom/client').then(({ createRoot }) => {
-            import('./editor/InPagePanel').then(({ InPagePanel }) => {
-                if (cancelled || !studioContainer?.isConnected) {
-                    return;
-                }
-                if (!studioRoot) {
-                    studioRoot = createRoot(studioContainer);
-                }
-                studioRoot.render(<InPagePanel mcpPort={mcpPort} mode={mode} />);
-            });
-        });
+        const nextContainer = document.createElement('css-studio-panel');
+        nextContainer.id = HOST_ID;
+        nextContainer.setAttribute('data-cs-root', 'true');
+        nextContainer.style.cssText =
+            'position:fixed;top:0;left:0;width:100%;height:100%;z-index:2147483647;pointer-events:none;font-family:Inter,system-ui,sans-serif;font-size:12px;color:var(--cs-foreground);';
+        document.documentElement.appendChild(nextContainer);
+        setContainer(nextContainer);
 
         return () => {
-            cancelled = true;
-            activeInstances = Math.max(0, activeInstances - 1);
-
-            // Avoid unmounting the nested root during an active React render pass.
-            disposeTimer = setTimeout(() => {
-                if (activeInstances > 0) {
-                    return;
-                }
-                studioRoot?.unmount();
-                studioRoot = null;
-                studioContainer?.remove();
-                studioContainer = null;
-                if (themeStyleOwned) {
-                    document.getElementById('cs-theme-vars')?.remove();
-                    themeStyleOwned = false;
-                }
-                disposeTimer = null;
-            }, 0);
+            setContainer(null);
+            nextContainer.remove();
+            if (themeStyleOwned) {
+                document.getElementById(THEME_STYLE_ID)?.remove();
+            }
         };
-    }, [mcpPort, mode]);
+    }, []);
 
-    return null;
+    return container ? createPortal(<InPagePanel mcpPort={mcpPort} mode={mode} />, container) : null;
 }

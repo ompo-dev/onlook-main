@@ -1,4 +1,5 @@
 import { useEditorEngine } from '@/components/store/editor';
+import { useStudioRuntime } from '@/components/studio/runtime';
 import { adaptValueToCanvas } from '@/components/store/editor/overlay/utils';
 import { colors } from '@onlook/ui/tokens';
 import React from 'react';
@@ -299,7 +300,13 @@ export const ResizeHandles: React.FC<ResizeHandlesProps> = ({
     styles,
 }) => {
     const editorEngine = useEditorEngine();
-    const color = isComponent ? colors.purple[500] : colors.red[500];
+    const { mode } = useStudioRuntime();
+    const color =
+        mode === 'native'
+            ? '#45c3ff'
+            : isComponent
+              ? colors.purple[500]
+              : colors.red[500];
     const enableWidth = styles.width?.endsWith('px');
     const enableHeight = styles.height?.endsWith('px');
 

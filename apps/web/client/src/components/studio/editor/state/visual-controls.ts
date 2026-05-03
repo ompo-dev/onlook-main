@@ -32,6 +32,14 @@ export function setVisualControlRoot(root: Element): void {
     vcRoot = root;
 }
 
+function getControlDocument(): Document {
+    return vcState.element?.ownerDocument ?? vcRoot?.ownerDocument ?? document;
+}
+
+function getControlRoot(): Element {
+    return vcState.element?.ownerDocument?.documentElement ?? vcRoot ?? document.documentElement;
+}
+
 const vcState: {
     activeControls: VcControl[];
     element: Element | null;
@@ -106,14 +114,14 @@ export function suspendControls(): void {
         cancelFrame(tick);
         vcState.running = false;
     }
-    const root = vcRoot || document.documentElement;
+    const root = getControlRoot();
     for (const el of root.querySelectorAll('[data-cs-visual-control]')) {
         (el as HTMLElement).style.visibility = 'hidden';
     }
 }
 
 export function resumeControls(): void {
-    const root = vcRoot || document.documentElement;
+    const root = getControlRoot();
     for (const el of root.querySelectorAll('[data-cs-visual-control]')) {
         (el as HTMLElement).style.visibility = '';
     }
@@ -167,11 +175,11 @@ function buildContext(): VcContext | null {
 
 function getTransformContainer(ctx: VcContext): HTMLElement {
     if (!vcState.transformContainer) {
-        vcState.transformContainer = document.createElement('div');
+        vcState.transformContainer = getControlDocument().createElement('div');
         vcState.transformContainer.setAttribute('data-cs-visual-control', 'transform-root');
         vcState.transformContainer.style.cssText =
             'position:fixed;pointer-events:none;z-index:1;box-sizing:border-box;';
-        const appendTarget = vcRoot || document.documentElement;
+        const appendTarget = getControlRoot();
         appendTarget.appendChild(vcState.transformContainer);
     }
     syncTransformContainer(ctx);
@@ -278,30 +286,30 @@ function createDragIndicator(
     skipHover = false,
     appendTo?: HTMLElement | null,
 ): DragIndicator {
-    const container = document.createElement('div');
+    const container = getControlDocument().createElement('div');
     container.setAttribute('data-cs-visual-control', name);
     const positionType = appendTo ? 'absolute' : 'fixed';
     container.style.cssText = `position:${positionType};pointer-events:none;z-index:1;display:none;box-sizing:border-box;`;
-    const line = document.createElement('div');
+    const line = getControlDocument().createElement('div');
     line.setAttribute('data-cs-visual-control', `${name}-line`);
     line.style.cssText = `position:absolute;inset:0;background:${hexToRgba(color, 0.08)};border-radius:2px;box-sizing:border-box;pointer-events:none;opacity:0;transition:opacity 0.15s;`;
     container.appendChild(line);
-    const hitArea = document.createElement('div');
+    const hitArea = getControlDocument().createElement('div');
     hitArea.setAttribute('data-cs-visual-control', `${name}-handle`);
     hitArea.style.cssText =
         'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:24px;height:24px;pointer-events:auto;display:flex;align-items:center;justify-content:center;';
     container.appendChild(hitArea);
-    const grip = document.createElement('div');
+    const grip = getControlDocument().createElement('div');
     grip.setAttribute('data-cs-visual-control', `${name}-grip`);
     grip.style.cssText = 'border-radius:2px;transition:transform 0.15s,filter 0.15s;';
     hitArea.appendChild(grip);
     const t = ctx.theme;
-    const label = document.createElement('div');
+    const label = getControlDocument().createElement('div');
     label.setAttribute('data-cs-visual-control', `${name}-tooltip`);
     label.style.cssText = `position:absolute;padding:2px 6px;border-radius:4px;font-size:10px;font-family:monospace;white-space:nowrap;background:${t.layer || '#1a1a28'};color:${color};border:1px solid ${t.border || 'rgba(255,255,255,0.10)'};z-index:1;pointer-events:none;opacity:0;transition:opacity 0.15s;`;
     container.appendChild(label);
     if (!skipHover) setupHoverFeedback(hitArea, line, label, grip);
-    const appendTarget = appendTo || vcRoot || document.documentElement;
+    const appendTarget = appendTo || getControlRoot();
     appendTarget.appendChild(container);
     return { container, line, hitArea, grip, label };
 }
@@ -345,8 +353,9 @@ function startDragHelper(
     const base = getGripBaseTransform(grip) || baseTransform;
     grip.style.transform = base + ' scale(1.3)';
     grip.style.filter = 'brightness(1.8)';
-    document.documentElement.style.cursor = cursor;
-    document.documentElement.style.userSelect = 'none';
+    const controlDoc = getControlDocument();
+    controlDoc.documentElement.style.cursor = cursor;
+    controlDoc.documentElement.style.userSelect = 'none';
 }
 
 function endDragHelper(
@@ -361,8 +370,9 @@ function endDragHelper(
 ): void {
     target.releasePointerCapture(e.pointerId);
     delete target.dataset.dragging;
-    document.documentElement.style.cursor = '';
-    document.documentElement.style.userSelect = '';
+    const controlDoc = getControlDocument();
+    controlDoc.documentElement.style.cursor = '';
+    controlDoc.documentElement.style.userSelect = '';
     target.removeEventListener('pointermove', onMove);
     target.removeEventListener('pointerup', onUp);
     target.removeEventListener('lostpointercapture', onUp);
@@ -880,26 +890,26 @@ function createRadiusElement(
     ctx: VcContext,
 ): { container: HTMLElement; handle: HTMLElement; arc: HTMLElement; label: HTMLElement } {
     const color = themeAccent(ctx);
-    const container = document.createElement('div');
+    const container = getControlDocument().createElement('div');
     container.setAttribute('data-cs-visual-control', 'radius');
     container.style.cssText = 'position:fixed;pointer-events:none;z-index:3;display:none;overflow:visible;';
-    const arc = document.createElement('div');
+    const arc = getControlDocument().createElement('div');
     arc.style.cssText = 'display:none;';
-    const handle = document.createElement('div');
+    const handle = getControlDocument().createElement('div');
     handle.setAttribute('data-cs-visual-control', 'radius-handle');
     handle.style.cssText = `position:absolute;width:12px;height:12px;border-radius:50%;background:${hexToRgba(color, 0.25)};pointer-events:auto;cursor:nwse-resize;transform:translate(-50%,-50%);transition:transform 0.15s,filter 0.15s;`;
-    const inner = document.createElement('div');
+    const inner = getControlDocument().createElement('div');
     inner.style.cssText = `position:absolute;top:50%;left:50%;width:4px;height:4px;border-radius:50%;background:${color};transform:translate(-50%,-50%);`;
     handle.appendChild(inner);
     container.appendChild(handle);
     const t = ctx.theme;
-    const label = document.createElement('div');
+    const label = getControlDocument().createElement('div');
     label.setAttribute('data-cs-visual-control', 'radius-tooltip');
     label.style.cssText = `position:absolute;left:12px;top:-6px;padding:2px 6px;border-radius:4px;font-size:10px;font-family:monospace;white-space:nowrap;background:${t.layer || '#1a1a28'};color:${color};border:1px solid ${t.border || 'rgba(255,255,255,0.10)'};z-index:1;pointer-events:none;opacity:0;transition:opacity 0.15s;`;
     container.appendChild(label);
     setupHoverFeedback(handle, arc, label, handle, 'translate(-50%,-50%)');
     setupRadiusDrag(handle, arc, label);
-    const appendTarget = vcRoot || document.documentElement;
+    const appendTarget = getControlRoot();
     appendTarget.appendChild(container);
     return { container, handle, arc, label };
 }
@@ -916,8 +926,9 @@ function setupRadiusDrag(handle: HTMLElement, arc: HTMLElement, label: HTMLEleme
         label.style.opacity = '1';
         handle.style.transform = 'translate(-50%,-50%) scale(1.3)';
         handle.style.filter = 'brightness(1.8)';
-        document.documentElement.style.cursor = 'nwse-resize';
-        document.documentElement.style.userSelect = 'none';
+        const controlDoc = getControlDocument();
+        controlDoc.documentElement.style.cursor = 'nwse-resize';
+        controlDoc.documentElement.style.userSelect = 'none';
         handle.addEventListener('pointermove', onMove);
         handle.addEventListener('pointerup', onUp);
         handle.addEventListener('lostpointercapture', onUp);
@@ -953,8 +964,9 @@ function setupRadiusDrag(handle: HTMLElement, arc: HTMLElement, label: HTMLEleme
         const el = getEl() as HTMLElement;
         handle.releasePointerCapture(e.pointerId);
         delete handle.dataset.dragging;
-        document.documentElement.style.cursor = '';
-        document.documentElement.style.userSelect = '';
+        const controlDoc = getControlDocument();
+        controlDoc.documentElement.style.cursor = '';
+        controlDoc.documentElement.style.userSelect = '';
         handle.removeEventListener('pointermove', onMove);
         handle.removeEventListener('pointerup', onUp);
         handle.removeEventListener('lostpointercapture', onUp);
@@ -998,10 +1010,10 @@ function createRotateHandler(): VcControl {
     function create(ctx: VcContext) {
         destroy();
         const tc = getTransformContainer(ctx);
-        wrapper = document.createElement('div');
+        wrapper = getControlDocument().createElement('div');
         wrapper.setAttribute('data-cs-visual-control', 'rotate');
         wrapper.style.cssText = 'position:absolute;top:-12px;left:-12px;width:1px;height:1px;overflow:visible;pointer-events:none;z-index:2;';
-        hitArea = document.createElement('div');
+        hitArea = getControlDocument().createElement('div');
         hitArea.setAttribute('data-cs-visual-control', 'rotate-handle');
         hitArea.style.cssText = `position:absolute;width:24px;height:24px;pointer-events:auto;cursor:${ROTATE_CURSOR};transform:translate(-50%,-50%);`;
         wrapper.appendChild(hitArea);
@@ -1059,8 +1071,9 @@ function setupRotateDrag(zone: HTMLElement): void {
         const cy = q ? (q.corners[0].y + q.corners[2].y) / 2 : 0;
         startAngle = angle(cx, cy, e.clientX, e.clientY);
         startRotation = currentRotation();
-        document.documentElement.style.cursor = ROTATE_CURSOR;
-        document.documentElement.style.userSelect = 'none';
+        const controlDoc = getControlDocument();
+        controlDoc.documentElement.style.cursor = ROTATE_CURSOR;
+        controlDoc.documentElement.style.userSelect = 'none';
         zone.addEventListener('pointermove', onMove);
         zone.addEventListener('pointerup', onUp);
         zone.addEventListener('lostpointercapture', onUp);
@@ -1079,8 +1092,9 @@ function setupRotateDrag(zone: HTMLElement): void {
     function onUp(e: PointerEvent) {
         zone.releasePointerCapture(e.pointerId);
         delete zone.dataset.dragging;
-        document.documentElement.style.cursor = '';
-        document.documentElement.style.userSelect = '';
+        const controlDoc = getControlDocument();
+        controlDoc.documentElement.style.cursor = '';
+        controlDoc.documentElement.style.userSelect = '';
         zone.removeEventListener('pointermove', onMove);
         zone.removeEventListener('pointerup', onUp);
         zone.removeEventListener('lostpointercapture', onUp);
@@ -1108,14 +1122,14 @@ function createScaleHandler(): VcControl {
         const q = ctx.quad;
         const oX = q.hasTransform ? 14 / q.scaleX : 14;
         const oY = q.hasTransform ? 14 / q.scaleY : 14;
-        wrapper = document.createElement('div');
+        wrapper = getControlDocument().createElement('div');
         wrapper.setAttribute('data-cs-visual-control', 'scale');
         wrapper.style.cssText = `position:absolute;width:1px;height:1px;overflow:visible;pointer-events:none;z-index:2;top:${q.height - oY}px;left:${q.width - oX}px;`;
-        hitArea = document.createElement('div');
+        hitArea = getControlDocument().createElement('div');
         hitArea.setAttribute('data-cs-visual-control', 'scale-handle');
         hitArea.style.cssText =
             'position:absolute;width:28px;height:28px;pointer-events:auto;cursor:nwse-resize;display:flex;align-items:center;justify-content:center;border-radius:4px;transform:translate(-50%,-50%);';
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        const svg = getControlDocument().createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('width', '12');
         svg.setAttribute('height', '12');
         svg.setAttribute('viewBox', '0 0 8 8');
@@ -1187,8 +1201,9 @@ function setupScaleDrag(zone: HTMLElement, svg: SVGElement): void {
         const scales = currentScaleXY();
         startSx = scales.sx;
         startSy = scales.sy;
-        document.documentElement.style.cursor = 'nwse-resize';
-        document.documentElement.style.userSelect = 'none';
+        const controlDoc = getControlDocument();
+        controlDoc.documentElement.style.cursor = 'nwse-resize';
+        controlDoc.documentElement.style.userSelect = 'none';
         zone.addEventListener('pointermove', onMove);
         zone.addEventListener('pointerup', onUp);
         zone.addEventListener('lostpointercapture', onUp);
@@ -1233,8 +1248,9 @@ function setupScaleDrag(zone: HTMLElement, svg: SVGElement): void {
         zone.releasePointerCapture(e.pointerId);
         delete zone.dataset.dragging;
         (svg as HTMLElement).style.opacity = '0.8';
-        document.documentElement.style.cursor = '';
-        document.documentElement.style.userSelect = '';
+        const controlDoc = getControlDocument();
+        controlDoc.documentElement.style.cursor = '';
+        controlDoc.documentElement.style.userSelect = '';
         zone.removeEventListener('pointermove', onMove);
         zone.removeEventListener('pointerup', onUp);
         zone.removeEventListener('lostpointercapture', onUp);
@@ -1279,20 +1295,20 @@ function createViewTimelineOverlay(): VcControl {
         return s.animTimeline === 'view';
     }
     function makeLineContainer() {
-        const container = document.createElement('div');
+        const container = getControlDocument().createElement('div');
         container.setAttribute('data-cs-visual-control', 'view-range');
         container.style.cssText = `position: fixed; left: 0; right: 0; height: 0; pointer-events: none; z-index: 5; border-top: 1px dashed ${hexToRgba(VIEW_INSET_COLOR, 0.4)}; transition: border-color 0.15s;`;
         return container;
     }
     function makeHitArea() {
-        const hit = document.createElement('div');
+        const hit = getControlDocument().createElement('div');
         hit.setAttribute('data-cs-visual-control', 'view-range-handle');
         hit.style.cssText =
             'position: absolute; left: 0; right: 0; top: -8px; height: 16px; pointer-events: auto; cursor: row-resize;';
         return hit;
     }
     function makeLabel(text: string) {
-        const label = document.createElement('div');
+        const label = getControlDocument().createElement('div');
         label.setAttribute('data-cs-visual-control', 'view-range-label');
         label.style.cssText = `position: absolute; left: 12px; top: 4px; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-family: monospace; white-space: nowrap; background: rgba(26,26,40,0.9); color: ${VIEW_INSET_COLOR}; border: 1px solid rgba(255,255,255,0.10); pointer-events: none; opacity: 0; transition: opacity 0.15s;`;
         label.textContent = text;
@@ -1328,8 +1344,9 @@ function createViewTimelineOverlay(): VcControl {
             cachedBounds = rangeBounds(range.name, scrollportTop, scrollportBottom, elRect);
             container.style.borderTopColor = hexToRgba(VIEW_INSET_COLOR, 1);
             label.style.opacity = '1';
-            document.documentElement.style.cursor = 'row-resize';
-            document.documentElement.style.userSelect = 'none';
+            const controlDoc = getControlDocument();
+            controlDoc.documentElement.style.cursor = 'row-resize';
+            controlDoc.documentElement.style.userSelect = 'none';
             hit.addEventListener('pointermove', onMove);
             hit.addEventListener('pointerup', onUp);
             hit.addEventListener('lostpointercapture', onUp);
@@ -1345,8 +1362,9 @@ function createViewTimelineOverlay(): VcControl {
         function onUp(e: PointerEvent) {
             hit.releasePointerCapture(e.pointerId);
             delete hit.dataset.dragging;
-            document.documentElement.style.cursor = '';
-            document.documentElement.style.userSelect = '';
+            const controlDoc = getControlDocument();
+            controlDoc.documentElement.style.cursor = '';
+            controlDoc.documentElement.style.userSelect = '';
             hit.removeEventListener('pointermove', onMove);
             hit.removeEventListener('pointerup', onUp);
             hit.removeEventListener('lostpointercapture', onUp);
@@ -1366,7 +1384,7 @@ function createViewTimelineOverlay(): VcControl {
     }
     function create() {
         destroy();
-        const root = vcRoot || document.documentElement;
+        const root = getControlRoot();
         startContainer = makeLineContainer();
         const startHit = makeHitArea();
         startLabel = makeLabel('start');
@@ -1383,10 +1401,10 @@ function createViewTimelineOverlay(): VcControl {
         setupHover(endContainer, endHit, endLabel);
         setupDrag(endContainer, endHit, endLabel, false);
         root.appendChild(endContainer);
-        progressLine = document.createElement('div');
+        progressLine = getControlDocument().createElement('div');
         progressLine.setAttribute('data-cs-visual-control', 'view-progress');
         progressLine.style.cssText = `position: fixed; left: 0; right: 0; height: 0; pointer-events: none; z-index: 4; border-top: 2px solid ${hexToRgba(VIEW_INSET_COLOR, 0.7)};`;
-        progressLabel = document.createElement('div');
+        progressLabel = getControlDocument().createElement('div');
         progressLabel.setAttribute('data-cs-visual-control', 'view-progress-label');
         progressLabel.style.cssText = `position: absolute; left: 12px; top: 4px; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-family: monospace; white-space: nowrap; background: ${hexToRgba(VIEW_INSET_COLOR, 0.9)}; color: #fff; pointer-events: none;`;
         progressLine.appendChild(progressLabel);

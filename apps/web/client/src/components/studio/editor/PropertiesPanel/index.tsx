@@ -20,7 +20,6 @@ import { TransformSection } from './sections/TransformSection';
 import { SvgSection } from './sections/SvgSection';
 import { TextSection } from './sections/TextSection';
 import { MotionSection } from './sections/MotionSection';
-import { VariablesSection } from './sections/VariablesSection';
 
 const PROTECTED_TAGS = new Set(['html', 'body', 'head']);
 const VOID_ELEMENTS = new Set([
@@ -94,8 +93,6 @@ interface PropertiesPanelProps {
   onAttributeChange?: (name: string, value: string) => void;
   onAttributeDelete?: (name: string) => void;
   onAttributeRename?: (oldName: string, newName: string) => void;
-  onElementVariableChange?: (name: string, value: string, originNodeId: number | null) => void;
-  onNewElementVariable?: (name: string, value: string) => void;
   onTagChange?: (nodeId: number, tag: string) => void;
   selectedNodeId?: number | null;
   computedStyles?: Record<string, string>;
@@ -114,8 +111,6 @@ export const PropertiesPanel = forwardRef<PropertiesPanelHandle, PropertiesPanel
       onAttributeChange,
       onAttributeDelete,
       onAttributeRename,
-      onElementVariableChange,
-      onNewElementVariable,
       onTagChange,
     } = props;
 
@@ -128,7 +123,6 @@ export const PropertiesPanel = forwardRef<PropertiesPanelHandle, PropertiesPanel
         selectedAttributes: s.selectedAttributes,
         domTree: s.domTree,
         properties: (s as any).properties as Array<{ name: string }>,
-        elementVariables: s.elementVariables,
         activeEditTab: s.panels.inspector.activeTab,
       })),
     );
@@ -144,14 +138,6 @@ export const PropertiesPanel = forwardRef<PropertiesPanelHandle, PropertiesPanel
       [computedStyles],
     );
 
-    const handleElementVariableChange = useCallback(
-      (name: string, value: string) => {
-        const v = store.elementVariables.find((ev: any) => ev.name === name);
-        onElementVariableChange?.(name, value, v?.originNodeId ?? null);
-      },
-      [store.elementVariables, onElementVariableChange],
-    );
-
     const explicitPropertyNames = useMemo(
       () => new Set((store.properties ?? []).map((p) => p.name)),
       [store.properties],
@@ -164,15 +150,13 @@ export const PropertiesPanel = forwardRef<PropertiesPanelHandle, PropertiesPanel
     useImperativeHandle(ref, () => ({ toggleFilter: () => setFilterOpen((v) => !v) }), []);
 
     const isMultiSelect = store.selectedNodeIds.length > 1;
-    const activeTab = store.activeEditTab;
+    const activeTab = store.activeEditTab === 'variables' ? 'design' : store.activeEditTab;
     const effectiveTab = isMultiSelect && activeTab !== 'design' ? 'design' : activeTab;
 
     const panelRef = useRef<HTMLDivElement>(null);
     const scrollByTabRef = useRef<Record<string, number>>({
       design: 0,
       motion: 0,
-      variables: 0,
-      html: 0,
     });
     const prevTabRef = useRef(effectiveTab);
     const effectiveTabRef = useRef(effectiveTab);
@@ -211,7 +195,7 @@ export const PropertiesPanel = forwardRef<PropertiesPanelHandle, PropertiesPanel
     useEffect(() => {
       setFilter('');
       setFilterOpen(false);
-      scrollByTabRef.current = { design: 0, motion: 0, variables: 0, html: 0 };
+      scrollByTabRef.current = { design: 0, motion: 0 };
       const el = getScrollEl();
       if (el) el.scrollTop = 0;
     }, [selectedNodeId, getScrollEl]);
@@ -327,19 +311,6 @@ export const PropertiesPanel = forwardRef<PropertiesPanelHandle, PropertiesPanel
 
           {effectiveTab === 'motion' && !isMultiSelect && (
             <MotionSection getValue={getValue} onChange={onPropertyChange} />
-          )}
-
-          {effectiveTab === 'variables' && !isMultiSelect && (
-            <VariablesSection
-              title="Variables"
-              variables={store.elementVariables as Array<{ name: string; value: string }>}
-              onChange={handleElementVariableChange}
-              onAdd={onNewElementVariable ?? (() => {})}
-              addTitle="Add variable"
-              resetKey={selectedNodeId ?? undefined}
-              standalone={true}
-              emptyMessage="No variables on this element"
-            />
           )}
 
         </div>

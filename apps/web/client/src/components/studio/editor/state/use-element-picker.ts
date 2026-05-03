@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from 'react';
+import { useStudioRuntime } from '@/components/studio/runtime';
 import { useStore } from './use-store';
 import { startPicker, stopPicker } from './dom-bridge';
 
@@ -6,28 +7,34 @@ export function useElementPicker(
     onElementPicked: (id: number) => void,
     onMarqueePicked?: (ids: number[]) => void,
 ) {
+    const { mode } = useStudioRuntime();
     const { isPickingElement, setPickingElement } = useStore();
+    const useCanvasPicker = mode === 'native';
 
     const togglePicker = useCallback(() => {
         if (isPickingElement) {
-            stopPicker();
+            if (!useCanvasPicker) {
+                stopPicker();
+            }
             setPickingElement(false);
         } else {
             setPickingElement(true);
-            startPicker(
-                (pickedId) => {
-                    setPickingElement(false);
-                    onElementPicked(pickedId);
-                },
-                onMarqueePicked
-                    ? (ids) => {
-                          setPickingElement(false);
-                          onMarqueePicked(ids);
-                      }
-                    : undefined,
-            );
+            if (!useCanvasPicker) {
+                startPicker(
+                    (pickedId) => {
+                        setPickingElement(false);
+                        onElementPicked(pickedId);
+                    },
+                    onMarqueePicked
+                        ? (ids) => {
+                              setPickingElement(false);
+                              onMarqueePicked(ids);
+                          }
+                        : undefined,
+                );
+            }
         }
-    }, [isPickingElement, setPickingElement, onElementPicked, onMarqueePicked]);
+    }, [isPickingElement, setPickingElement, onElementPicked, onMarqueePicked, useCanvasPicker]);
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
@@ -41,8 +48,8 @@ export function useElementPicker(
     }, [togglePicker]);
 
     useEffect(() => {
-        if (!isPickingElement) stopPicker();
-    }, [isPickingElement]);
+        if (!isPickingElement && !useCanvasPicker) stopPicker();
+    }, [isPickingElement, useCanvasPicker]);
 
     return { isPickingElement, togglePicker };
 }

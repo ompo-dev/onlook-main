@@ -1,4 +1,5 @@
 import { useEditorEngine } from '@/components/store/editor';
+import { useStudioRuntime } from '@/components/studio/runtime';
 import type { ClickRectState } from '@/components/store/editor/overlay/state';
 import { EditorAttributes } from '@onlook/constants';
 import { EditorMode } from '@onlook/models';
@@ -15,6 +16,7 @@ import { TextEditor } from './elements/text';
 
 export const Overlay = observer(() => {
     const editorEngine = useEditorEngine();
+    const { mode: studioMode } = useStudioRuntime();
     const overlayState = editorEngine.overlay.state;
     const isSingleSelection = editorEngine.elements.selected.length === 1;
     const isTextEditing = editorEngine.text.isEditing;
@@ -64,7 +66,7 @@ export const Overlay = observer(() => {
                     toRect={overlayState.measurement.toRect}
                 />
             )}
-            {overlayState.clickRects.length > 0 && (
+            {studioMode !== 'native' && overlayState.clickRects.length > 0 && (
                 <OverlayButtons />
             )}
             <SnapGuidelines />

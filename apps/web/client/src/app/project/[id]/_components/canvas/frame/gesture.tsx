@@ -1,4 +1,6 @@
 import { useEditorEngine } from '@/components/store/editor';
+import { useStore as useCssStudioStore } from '@/components/studio/editor/state/use-store';
+import { useStudioRuntime } from '@/components/studio/runtime';
 import type { FrameData } from '@/components/store/editor/frames';
 import { getRelativeMousePositionToFrameView } from '@/components/store/editor/overlay/utils';
 import type { DomElement, ElementPosition, Frame } from '@onlook/models';
@@ -17,6 +19,9 @@ function isDestroyedConnectionError(error: unknown): boolean {
 
 export const GestureScreen = observer(({ frame, isResizing }: { frame: Frame, isResizing: boolean }) => {
     const editorEngine = useEditorEngine();
+    const { mode: studioMode } = useStudioRuntime();
+    const studioActive = studioMode === 'native';
+    const isStudioPicking = useCssStudioStore((state) => state.isPickingElement);
 
     const getFrameData: () => FrameData | null = useCallback(() => {
         return editorEngine.frames.get(frame.id);
@@ -107,6 +112,12 @@ export const GestureScreen = observer(({ frame, isResizing }: { frame: Frame, is
 
     const throttledMouseMove = useMemo(() =>
         throttle(async (e: React.MouseEvent<HTMLDivElement>) => {
+            if (studioActive) {
+                if (isStudioPicking) {
+                    await handleMouseEvent(e, MouseAction.MOVE);
+                }
+                return;
+            }
             // Skip hover events during drag selection
             if (editorEngine.state.isDragSelecting) {
                 return;
@@ -124,7 +135,7 @@ export const GestureScreen = observer(({ frame, isResizing }: { frame: Frame, is
                 editorEngine.insert.draw(e);
             }
         }, 16),
-        [editorEngine.state.isDragSelecting, editorEngine.state.editorMode, editorEngine.insert.isDrawing, getRelativeMousePosition, handleMouseEvent],
+        [editorEngine.state.isDragSelecting, editorEngine.state.editorMode, editorEngine.insert.isDrawing, handleMouseEvent, isStudioPicking, studioActive],
     );
 
     useEffect(() => {
@@ -134,13 +145,19 @@ export const GestureScreen = observer(({ frame, isResizing }: { frame: Frame, is
     }, [throttledMouseMove]);
 
     const handleClick = useCallback(
-        (e: React.MouseEvent<HTMLDivElement>) => {
+        () => {
+            if (studioActive) {
+                return;
+            }
             editorEngine.frames.select([frame]);
         },
-        [editorEngine.frames],
+        [editorEngine.frames, frame, studioActive],
     );
 
     async function handleDoubleClick(e: React.MouseEvent<HTMLDivElement>) {
+        if (studioActive) {
+            return;
+        }
         if (editorEngine.state.editorMode === EditorMode.PREVIEW) {
             return;
         }
@@ -148,6 +165,13 @@ export const GestureScreen = observer(({ frame, isResizing }: { frame: Frame, is
     }
 
     async function handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+        if (studioActive) {
+            if (isStudioPicking) {
+                await handleMouseEvent(e, MouseAction.MOUSE_DOWN);
+                useCssStudioStore.getState().setPickingElement(false);
+            }
+            return;
+        }
         if (editorEngine.state.editorMode === EditorMode.DESIGN || editorEngine.state.editorMode === EditorMode.CODE) {
             await handleMouseEvent(e, MouseAction.MOUSE_DOWN);
         } else if (
@@ -215,15 +239,23 @@ export const GestureScreen = observer(({ frame, isResizing }: { frame: Frame, is
     const gestureScreenClassName = useMemo(() => {
         return cn(
             'absolute inset-0 bg-transparent',
+            studioActive
+                ? (isStudioPicking ? 'pointer-events-auto visible cursor-crosshair' : 'pointer-events-none hidden')
+                : undefined,
             editorEngine.state.editorMode === EditorMode.PREVIEW && !isResizing
                 ? 'hidden'
                 : 'visible',
             editorEngine.state.insertMode === InsertMode.INSERT_DIV && 'cursor-crosshair',
             editorEngine.state.insertMode === InsertMode.INSERT_TEXT && 'cursor-text',
         );
-    }, [editorEngine.state.editorMode, isResizing]);
+    }, [editorEngine.state.editorMode, editorEngine.state.insertMode, isResizing, isStudioPicking, studioActive]);
 
     const handleMouseOut = () => {
+        if (studioActive) {
+            editorEngine.elements.clearHoveredElement();
+            editorEngine.overlay.state.removeHoverRect();
+            return;
+        }
         editorEngine.elements.clearHoveredElement();
         editorEngine.overlay.state.removeHoverRect();
     };

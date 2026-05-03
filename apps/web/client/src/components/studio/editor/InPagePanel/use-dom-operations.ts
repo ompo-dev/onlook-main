@@ -1,7 +1,11 @@
+import { useEditorEngine } from '@/components/store/editor';
+import { EditorAttributes } from '@onlook/constants';
+import type { DomElement } from '@onlook/models';
 import { useCallback, useEffect, useRef } from 'react';
 import { useStore } from '../state/use-store';
 import { useUndoStore } from '../state/use-undo';
 import type { PageBridge } from '../state/use-page-bridge';
+import { getOnlookBridgeRef } from '../state/onlook-bridge-map';
 import {
     selectElements,
     getElement,
@@ -29,6 +33,7 @@ export function useDomOperations({
     contextMenu: ContextMenu | null;
     setContextMenu: (cm: ContextMenu | null) => void;
 }) {
+    const editorEngine = useEditorEngine();
     const {
         selectedNodeId,
         selectedNodeIds,
@@ -54,6 +59,75 @@ export function useDomOperations({
     const handlePropertyChangeRef = useRef<(prop: string, val: string) => void>(() => {});
     const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastHoveredIdRef = useRef<number | null>(null);
+
+    const syncEditorSelectionFromBridgeIds = useCallback(
+        async (ids: number[]) => {
+            if (ids.length === 0) {
+                editorEngine.elements.clear();
+                editorEngine.overlay.clearUI();
+                return;
+            }
+
+            const selectedElements = (
+                await Promise.all(
+                    ids.map(async (id) => {
+                        const localRef = getOnlookBridgeRef(id);
+                        if (localRef) {
+                            const frameData = editorEngine.frames.get(localRef.frameId);
+                            if (!frameData?.view) {
+                                return null;
+                            }
+
+                            return (await frameData.view.getElementByDomId(
+                                localRef.domId,
+                                true,
+                            )) as Awaited<ReturnType<typeof frameData.view.getElementByDomId>>;
+                        }
+
+                        const el = getElement(id) as HTMLElement | undefined;
+                        if (!el) {
+                            return null;
+                        }
+
+                        const domId =
+                            el.getAttribute(EditorAttributes.DATA_ONLOOK_DOM_ID) ??
+                            el.getAttribute('data-odid');
+                        const frameElement = el.ownerDocument.defaultView?.frameElement;
+                        if (!domId || !(frameElement instanceof HTMLIFrameElement)) {
+                            return null;
+                        }
+
+                        const frameData = editorEngine.frames.get(frameElement.id);
+                        if (!frameData?.view) {
+                            return null;
+                        }
+
+                        return (await frameData.view.getElementByDomId(
+                            domId,
+                            true,
+                        )) as Awaited<ReturnType<typeof frameData.view.getElementByDomId>>;
+                    }),
+                )
+            ).filter((element): element is DomElement => element !== null);
+
+            if (selectedElements.length === 0) {
+                editorEngine.elements.clear();
+                editorEngine.overlay.clearUI();
+                return;
+            }
+
+            const firstSelected = selectedElements[0];
+            if (firstSelected) {
+                const frameData = editorEngine.frames.get(firstSelected.frameId);
+                if (frameData) {
+                    editorEngine.frames.select([frameData.frame]);
+                }
+            }
+
+            editorEngine.elements.click(selectedElements);
+        },
+        [editorEngine],
+    );
 
     useEffect(() => {
         if (selectedNodeId === null || selectedNodeIds.length > 1) {
@@ -83,6 +157,7 @@ export function useDomOperations({
             selectNode(nodeId);
             expandToNode(nodeId);
             selectElements([nodeId], nodeId);
+            void syncEditorSelectionFromBridgeIds([nodeId]);
             bridge.fetchStyles(nodeId);
             const state = useStore.getState();
             const node = findNodeInTree(state.domTree, nodeId);
@@ -91,7 +166,14 @@ export function useDomOperations({
                 setSelectedTextContent(node.textContent ?? '');
             }
         },
-        [selectNode, expandToNode, bridge, setSelectedAttributes, setSelectedTextContent],
+        [
+            bridge,
+            expandToNode,
+            selectNode,
+            setSelectedAttributes,
+            setSelectedTextContent,
+            syncEditorSelectionFromBridgeIds,
+        ],
     );
 
     const handleToggleSelectNode = useCallback(
@@ -102,6 +184,7 @@ export function useDomOperations({
             const ids = state.selectedNodeIds;
             const primaryId = state.selectedNodeId;
             selectElements(ids, primaryId);
+            void syncEditorSelectionFromBridgeIds(ids);
             if (primaryId !== null) {
                 bridge.fetchStyles(primaryId);
                 const node = findNodeInTree(state.domTree, primaryId);
@@ -111,7 +194,14 @@ export function useDomOperations({
                 }
             }
         },
-        [toggleNodeSelection, expandToNode, bridge, setSelectedAttributes, setSelectedTextContent],
+        [
+            bridge,
+            expandToNode,
+            setSelectedAttributes,
+            setSelectedTextContent,
+            syncEditorSelectionFromBridgeIds,
+            toggleNodeSelection,
+        ],
     );
 
     const handleSelectNodes = useCallback(
@@ -122,6 +212,7 @@ export function useDomOperations({
             const ids = state.selectedNodeIds;
             const primaryId = state.selectedNodeId;
             selectElements(ids, primaryId);
+            void syncEditorSelectionFromBridgeIds(ids);
             if (primaryId !== null) {
                 bridge.fetchStyles(primaryId);
                 const node = findNodeInTree(state.domTree, primaryId);
@@ -131,7 +222,14 @@ export function useDomOperations({
                 }
             }
         },
-        [selectNodes, expandToNode, bridge, setSelectedAttributes, setSelectedTextContent],
+        [
+            bridge,
+            expandToNode,
+            selectNodes,
+            setSelectedAttributes,
+            setSelectedTextContent,
+            syncEditorSelectionFromBridgeIds,
+        ],
     );
 
     const handleInlineTextEdit = useCallback(
@@ -293,10 +391,11 @@ export function useDomOperations({
             selectNode(newId);
             expandToNode(newId);
             bridge.selectElement(newId);
+            void syncEditorSelectionFromBridgeIds([newId]);
             bridge.fetchStyles(newId);
             queueEdit({ type: 'tag', ...info, value: `${oldTag} → ${newTag}` });
         },
-        [bridge, selectNode, expandToNode, queueEdit],
+        [bridge, selectNode, expandToNode, queueEdit, syncEditorSelectionFromBridgeIds],
     );
 
     const deleteElement = useCallback(
@@ -316,14 +415,16 @@ export function useDomOperations({
             if (state.selectedNodeIds.length > 1) {
                 removeFromSelection(nodeId);
                 selectElements(useStore.getState().selectedNodeIds, useStore.getState().selectedNodeId);
+                void syncEditorSelectionFromBridgeIds(useStore.getState().selectedNodeIds);
             } else if (state.selectedNodeId === nodeId) {
                 clearSelection();
                 selectElements([], null);
+                void syncEditorSelectionFromBridgeIds([]);
             }
             bridge.fetchDomTree();
             queueEdit({ type: 'delete', ...info });
         },
-        [bridge, removeFromSelection, clearSelection, undoPushDom, queueEdit],
+        [bridge, removeFromSelection, clearSelection, syncEditorSelectionFromBridgeIds, undoPushDom, queueEdit],
     );
 
     const handleDeleteElement = useCallback(() => {
@@ -351,10 +452,11 @@ export function useDomOperations({
         selectNode(newId);
         expandToNode(newId);
         bridge.selectElement(newId);
+        void syncEditorSelectionFromBridgeIds([newId]);
         bridge.fetchStyles(newId);
         scrollElementIntoView(newId);
         queueEdit({ type: 'add-child', ...info, value: 'div' });
-    }, [contextMenu, bridge, expandToNode, selectNode, undoPushDom, queueEdit]);
+    }, [contextMenu, bridge, expandToNode, selectNode, syncEditorSelectionFromBridgeIds, undoPushDom, queueEdit]);
 
     const handleAddSibling = useCallback(() => {
         if (!contextMenu) return;
@@ -371,10 +473,11 @@ export function useDomOperations({
         selectNode(newId);
         expandToNode(newId);
         bridge.selectElement(newId);
+        void syncEditorSelectionFromBridgeIds([newId]);
         bridge.fetchStyles(newId);
         scrollElementIntoView(newId);
         queueEdit({ type: 'add-sibling', ...info, value: 'div' });
-    }, [contextMenu, bridge, selectNode, expandToNode, undoPushDom, queueEdit]);
+    }, [contextMenu, bridge, selectNode, expandToNode, syncEditorSelectionFromBridgeIds, undoPushDom, queueEdit]);
 
     const duplicateElement = useCallback(
         (nodeId: number) => {
@@ -392,11 +495,12 @@ export function useDomOperations({
             selectNode(newId);
             expandToNode(newId);
             bridge.selectElement(newId);
+            void syncEditorSelectionFromBridgeIds([newId]);
             bridge.fetchStyles(newId);
             scrollElementIntoView(newId);
             queueEdit({ type: 'duplicate', ...info });
         },
-        [bridge, selectNode, expandToNode, undoPushDom, queueEdit],
+        [bridge, selectNode, expandToNode, syncEditorSelectionFromBridgeIds, undoPushDom, queueEdit],
     );
 
     const handleDuplicateElement = useCallback(() => {
@@ -416,14 +520,15 @@ export function useDomOperations({
             selectNode(movedId);
             expandToNode(movedId);
             bridge.selectElement(movedId);
+            void syncEditorSelectionFromBridgeIds([movedId]);
             bridge.fetchStyles(movedId);
             queueEdit({ type: 'reorder', ...getElementInfoById(movedId) });
         },
-        [bridge, selectNode, expandToNode, queueEdit],
+        [bridge, selectNode, expandToNode, queueEdit, syncEditorSelectionFromBridgeIds],
     );
 
     const handleDrawElement = useCallback(
-        (parentId: number, rect: { w: number; h: number }) => {
+        (parentId: number, rect: { x: number; y: number; w: number; h: number }) => {
             const info = getElementInfoById(parentId);
             const beforeId = bridge.findInsertionSibling(parentId, rect);
             const newId = bridge.addChildElement(parentId, 'div', beforeId);
@@ -439,11 +544,12 @@ export function useDomOperations({
             selectNode(newId);
             expandToNode(newId);
             bridge.selectElement(newId);
+            void syncEditorSelectionFromBridgeIds([newId]);
             bridge.fetchStyles(newId);
             scrollElementIntoView(newId);
             queueEdit({ type: 'add-child', ...info, value: `div (${rect.w}×${rect.h})` });
         },
-        [bridge, expandToNode, selectNode, undoPushDom, queueEdit],
+        [bridge, expandToNode, selectNode, syncEditorSelectionFromBridgeIds, undoPushDom, queueEdit],
     );
 
     const handleAbsPositionChange = useCallback(

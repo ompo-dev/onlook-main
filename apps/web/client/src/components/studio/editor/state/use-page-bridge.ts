@@ -1,8 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { reaction } from 'mobx';
+import { useEditorEngine } from '@/components/store/editor';
 import { useStore } from './use-store';
+import type { CssProperty } from './slices/styles-slice';
 import { convertTree } from '../utils/convert-tree';
+import type { DomNode } from '../utils/convert-tree';
 import { findNodeInTree } from '../utils/find-node';
 import { SHORTHAND_CONFIGS, synthesizeShorthand, synthesizeBorderShorthand } from '../utils/css-shorthand';
+import { getOnlookBridgeId, getOnlookBridgeRef } from './onlook-bridge-map';
 import {
     initBridge,
     destroyBridge,
@@ -53,9 +58,12 @@ import {
     buildElementSelector,
     findReplacementElement,
     purgeDetachedElements,
+    setBridgeFrameTargetsProvider,
 } from './dom-bridge';
 import { refreshControls } from './visual-controls';
 import { getTheme } from './dom-bridge';
+import type { DomElement, LayerNode } from '@onlook/models';
+import { EditorAttributes } from '@onlook/constants';
 
 const AUTO_EXPAND_TAGS = ['html', 'body'];
 const RESELECT_RETRY_DELAY_MS = 120;
@@ -88,10 +96,12 @@ export interface PageBridgeOptions {
 }
 
 export function usePageBridge(options?: PageBridgeOptions) {
+    const editorEngine = useEditorEngine();
     const userEditsRef = useRef<Record<string, string>>({});
     const contextMenuRef = useRef(options?.onContextMenu);
     contextMenuRef.current = options?.onContextMenu;
     const reselectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const initTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const {
         setDomTree,
@@ -108,7 +118,58 @@ export function usePageBridge(options?: PageBridgeOptions) {
 
     const fetchDomTree2 = useCallback(() => {
         try {
+            if (resolveBridgeFrameTargets().length === 0 && editorEngine.frames.getAll().some((frameData) => !!frameData.view)) {
+                const roots = editorEngine.ast.mappings.filteredLayers;
+                const buildNode = (layerNode: LayerNode): DomNode => ({
+                    id: getOnlookBridgeId(layerNode.frameId, layerNode.domId),
+                    localName: layerNode.tagName.toLowerCase(),
+                    className: '',
+                    attributes: {
+                        [EditorAttributes.DATA_ONLOOK_DOM_ID]: layerNode.domId,
+                        ...(layerNode.oid ? { [EditorAttributes.DATA_ONLOOK_ID]: layerNode.oid } : {}),
+                        ...(layerNode.instanceId ? { [EditorAttributes.DATA_ONLOOK_INSTANCE_ID]: layerNode.instanceId } : {}),
+                    },
+                    children: (layerNode.children ?? [])
+                        .map((childDomId) =>
+                            editorEngine.ast.mappings.getLayerNode(layerNode.frameId, childDomId),
+                        )
+                        .filter((childNode): childNode is LayerNode => !!childNode)
+                        .map(buildNode),
+                    textContent: layerNode.textContent ?? '',
+                    component: layerNode.component ?? undefined,
+                    source: {
+                        frameId: layerNode.frameId,
+                        domId: layerNode.domId,
+                    },
+                });
+
+                const tree: DomNode = {
+                    id: getOnlookBridgeId('__root__', 'html'),
+                    localName: 'html',
+                    className: '',
+                    attributes: {},
+                    textContent: '',
+                    children: [
+                        {
+                            id: getOnlookBridgeId('__root__', 'body'),
+                            localName: 'body',
+                            className: '',
+                            attributes: {},
+                            textContent: '',
+                            children: roots.map(buildNode),
+                        },
+                    ],
+                };
+
+                setDomTree(tree);
+                autoExpandDefaults(tree);
+                return tree;
+            }
+
             const raw = fetchDomTree();
+            if (!raw) {
+                return null;
+            }
             const tree = convertTree(raw);
             setDomTree(tree);
             autoExpandDefaults(tree);
@@ -121,10 +182,17 @@ export function usePageBridge(options?: PageBridgeOptions) {
 
     const fetchStyles2 = useCallback(
         (id: number) => {
-            try {
-                const result = fetchStyles(id);
+            const applyStyleResult = (
+                result: {
+                    computed?: Record<string, string>;
+                    inline?: Record<string, string>;
+                    matched?: Array<{ selector: string; properties: Record<string, string> }>;
+                    parentDisplay?: string;
+                } | null,
+                variables: Array<{ name: string; value: string; originNodeId: number | null }> = [],
+            ) => {
                 if (!result) return;
-                const properties: { name: string; value: string; source: string; selector?: string }[] = [];
+                const properties: CssProperty[] = [];
                 const computed = result.computed ?? {};
                 const authored: Record<string, string> = {};
                 if (result.matched) {
@@ -166,17 +234,58 @@ export function usePageBridge(options?: PageBridgeOptions) {
                 }
                 setProperties(properties);
                 setComputedStyles(display);
-                setParentDisplay(result.parentDisplay);
-                try {
-                    setElementVariables(fetchElementVariables(id));
-                } catch {
-                    //
-                }
+                setParentDisplay(result.parentDisplay ?? '');
+                setElementVariables(variables);
+            };
+
+            const localRef = getOnlookBridgeRef(id);
+            if (localRef) {
+                void (async () => {
+                    try {
+                        const frameData = editorEngine.frames.get(localRef.frameId);
+                        if (!frameData?.view) {
+                            return;
+                        }
+
+                        const element = (await frameData.view.getElementByDomId(
+                            localRef.domId,
+                            true,
+                        )) as DomElement | null;
+                        if (!element) {
+                            return;
+                        }
+
+                        const parentStyles = element.parent
+                            ? ((await frameData.view.getComputedStyleByDomId(
+                                  element.parent.domId,
+                              )) as Record<string, string> | null)
+                            : null;
+
+                        const styleResult = {
+                            computed: element.styles?.computed ?? {},
+                            inline: element.styles?.defined ?? {},
+                            matched: element.styles?.defined
+                                ? [{ selector: layerSelector(localRef.domId), properties: element.styles.defined }]
+                                : [],
+                            parentDisplay: parentStyles?.display ?? '',
+                        };
+
+                        applyStyleResult(styleResult, []);
+                    } catch (error) {
+                        console.error('[css-studio] Failed to fetch styles from Onlook bridge:', error);
+                    }
+                })();
+                return;
+            }
+
+            try {
+                const result = fetchStyles(id);
+                applyStyleResult(result, fetchElementVariables(id));
             } catch (e) {
                 console.error('[css-studio] Failed to fetch styles:', e);
             }
         },
-        [setProperties, setComputedStyles, setParentDisplay, setElementVariables],
+        [editorEngine.frames, setProperties, setComputedStyles, setParentDisplay, setElementVariables],
     );
 
     const fetchTokens = useCallback(() => {
@@ -201,6 +310,33 @@ export function usePageBridge(options?: PageBridgeOptions) {
             reselectTimerRef.current = null;
         }
     }, []);
+
+    const resolveBridgeFrameTargets = useCallback(() => {
+        const selectedFrames = editorEngine.frames.selected;
+        const selectedIds = new Set(selectedFrames.map((frameData) => frameData.frame.id));
+        const orderedFrames = [
+            ...selectedFrames,
+            ...editorEngine.frames
+                .getAll()
+                .filter((frameData) => !selectedIds.has(frameData.frame.id)),
+        ];
+
+        return orderedFrames.flatMap((frameData) => {
+            const iframe = frameData.view;
+            const frameDocument = iframe?.contentDocument;
+
+            if (!iframe || !frameDocument?.documentElement) {
+                return [];
+            }
+
+            return [
+                {
+                    document: frameDocument,
+                    iframe,
+                },
+            ];
+        });
+    }, [editorEngine]);
 
     const applyRecoveredSelection = useCallback(
         (newId: number, tree: ReturnType<typeof convertTree> | null) => {
@@ -261,6 +397,16 @@ export function usePageBridge(options?: PageBridgeOptions) {
             return;
         }
         userEditsRef.current = {};
+        const tree = fetchDomTree2();
+        fetchStyles2(selectedNodeId);
+        if (tree) {
+            const node = findNodeInTree(tree, selectedNodeId);
+            if (node) {
+                setSelectedAttributes(node.attributes ?? {});
+                setSelectedTextContent(node.textContent ?? '');
+            }
+        }
+        refreshControls(useStore.getState().computedStyles, getTheme());
         observeElement(selectedNodeId, () => {
             const nodeId = useStore.getState().selectedNodeId;
             if (nodeId !== null) {
@@ -269,9 +415,18 @@ export function usePageBridge(options?: PageBridgeOptions) {
                 refreshControls(useStore.getState().computedStyles, getTheme());
             }
         });
-    }, [selectedNodeId, fetchStyles2, fetchDomTree2, cancelPendingReselect]);
+    }, [
+        selectedNodeId,
+        fetchStyles2,
+        fetchDomTree2,
+        cancelPendingReselect,
+        setSelectedAttributes,
+        setSelectedTextContent,
+    ]);
 
     useEffect(() => {
+        setBridgeFrameTargetsProvider(resolveBridgeFrameTargets);
+
         let cancelled = false;
         function handleBodyDirty() {
             const { selectedNodeId: selId } = useStore.getState();
@@ -299,6 +454,15 @@ export function usePageBridge(options?: PageBridgeOptions) {
             purgeDetachedElements();
         }
         function init() {
+            if (resolveBridgeFrameTargets().length === 0 && editorEngine.frames.getAll().some((frameData) => !!frameData.view)) {
+                fetchDomTree2();
+                fetchTokens();
+                return;
+            }
+            if (resolveBridgeFrameTargets().length === 0) {
+                initTimerRef.current = setTimeout(init, 100);
+                return;
+            }
             initBridge();
             if (cancelled) return;
             startContextMenuListener((result) => {
@@ -316,10 +480,77 @@ export function usePageBridge(options?: PageBridgeOptions) {
         }
         return () => {
             cancelled = true;
+            if (initTimerRef.current) {
+                clearTimeout(initTimerRef.current);
+                initTimerRef.current = null;
+            }
+            setBridgeFrameTargetsProvider(null);
             cancelPendingReselect();
             destroyBridge();
         };
-    }, [applyRecoveredSelection, cancelPendingReselect, fetchDomTree2, fetchStyles2, scheduleReselect]);
+    }, [
+        applyRecoveredSelection,
+        cancelPendingReselect,
+        editorEngine.frames,
+        fetchDomTree2,
+        fetchStyles2,
+        fetchTokens,
+        resolveBridgeFrameTargets,
+        scheduleReselect,
+    ]);
+
+    useEffect(() => {
+        return reaction(
+            () =>
+                editorEngine.elements.selected.map((element) => ({
+                    frameId: element.frameId,
+                    domId: element.domId,
+                    textContent: element.tagName,
+                })),
+            (selectedElements) => {
+                if (resolveBridgeFrameTargets().length > 0) {
+                    return;
+                }
+
+                const ids = selectedElements.map((element) =>
+                    getOnlookBridgeId(element.frameId, element.domId),
+                );
+                const store = useStore.getState();
+                store.selectNodes(ids);
+                const primaryId = ids.at(-1) ?? null;
+                if (primaryId !== null) {
+                    store.expandToNode(primaryId);
+                    fetchStyles2(primaryId);
+                    const tree = fetchDomTree2();
+                    const node = tree ? findNodeInTree(tree, primaryId) : null;
+                    if (node) {
+                        store.setSelectedAttributes(node.attributes ?? {});
+                        store.setSelectedTextContent(node.textContent ?? '');
+                    }
+                } else {
+                    store.clearSelection();
+                }
+            },
+            { fireImmediately: true },
+        );
+    }, [editorEngine.elements, fetchDomTree2, fetchStyles2, resolveBridgeFrameTargets]);
+
+    useEffect(() => {
+        return reaction(
+            () =>
+                editorEngine.ast.mappings.filteredLayers.map((layerNode) => ({
+                    frameId: layerNode.frameId,
+                    domId: layerNode.domId,
+                    children: layerNode.children?.length ?? 0,
+                })),
+            () => {
+                if (resolveBridgeFrameTargets().length === 0) {
+                    fetchDomTree2();
+                }
+            },
+            { fireImmediately: true },
+        );
+    }, [editorEngine.ast.mappings, fetchDomTree2, resolveBridgeFrameTargets]);
 
     return useMemo(
         () => ({
@@ -369,3 +600,7 @@ export function usePageBridge(options?: PageBridgeOptions) {
 }
 
 export type PageBridge = ReturnType<typeof usePageBridge>;
+
+function layerSelector(domId: string): string {
+    return `[${EditorAttributes.DATA_ONLOOK_DOM_ID}="${domId}"]`;
+}
