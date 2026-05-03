@@ -1,5 +1,6 @@
 import { EditorMode, type CodeNavigationTarget } from "@onlook/models";
 import { makeAutoObservable } from "mobx";
+import { recoverJsxMetadataForOid } from "../code/metadata-recovery";
 import type { EditorEngine } from "../engine";
 
 export class IdeManager {
@@ -29,7 +30,11 @@ export class IdeManager {
             }
 
             // Get element metadata
-            const metadata = await branchData.codeEditor.getJsxElementMetadata(oid);
+            const metadata = await recoverJsxMetadataForOid(
+                branchData.codeEditor,
+                branchData.sandbox.session.provider,
+                oid,
+            );
             if (!metadata) {
                 console.warn(`[IdeManager] No metadata found for OID: ${oid}`);
                 return;

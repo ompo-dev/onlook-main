@@ -33,8 +33,7 @@ const DEFAULT_NATIVE_SETTINGS: NativeStudioSettings = {
     highContrast: false,
     scheme: 'indigo',
 };
-const DEFAULT_STUDIO_MODE: StudioMode =
-    process.env.NODE_ENV === 'development' ? 'native' : 'off';
+const DEFAULT_STUDIO_MODE: StudioMode = 'native';
 const DEFAULT_STUDIO_AVAILABILITY: StudioAvailability = {
     native: false,
 };
@@ -58,25 +57,24 @@ function normalizeMode(value: unknown): StudioMode {
     if (value === 'native' || value === 'off') {
         return value;
     }
-    return process.env.NODE_ENV === 'development' ? 'native' : 'off';
+    return 'native';
 }
 
 export function getStudioAvailability(pathname?: string): StudioAvailability {
-    const isDevelopment = process.env.NODE_ENV === 'development';
     const currentPath = pathname ?? (typeof window !== 'undefined' ? window.location.pathname : '');
     const isProjectRoute = currentPath.startsWith('/project/');
 
     return {
-        native: isDevelopment && isProjectRoute,
+        native: isProjectRoute,
     };
 }
 
-function resolveModeForAvailability(mode: StudioMode, availability: StudioAvailability): StudioMode {
-    if (mode === 'native' && !availability.native) {
+function resolveModeForAvailability(_mode: StudioMode, availability: StudioAvailability): StudioMode {
+    if (!availability.native) {
         return 'off';
     }
 
-    return mode;
+    return 'native';
 }
 
 function getRuntimeSnapshot(pathname?: string): StudioRuntimeSnapshot {

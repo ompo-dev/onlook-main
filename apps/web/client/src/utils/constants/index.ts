@@ -1,3 +1,6 @@
+export const ACTIVE_PROJECT_ID = 'da209aed-103f-4313-9b71-280c9b06871d' as const;
+export const ACTIVE_PROJECT_ROUTE = `/project/${ACTIVE_PROJECT_ID}` as const;
+
 export const Routes = {
     // Landing page
     HOME: '/',
@@ -25,7 +28,7 @@ export const Routes = {
     DEMO_ONLY: '/see-a-demo',
 
     // Dashboard
-    PROJECTS: '/projects',
+    PROJECTS: ACTIVE_PROJECT_ROUTE,
     PROJECT: '/project',
     IMPORT_PROJECT: '/projects/import',
     IMPORT_GITHUB: '/projects/import/github',

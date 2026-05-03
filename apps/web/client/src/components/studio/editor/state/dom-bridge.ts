@@ -280,6 +280,23 @@ function isStudioUiElement(el: Element): boolean {
     );
 }
 
+function isStudioUiEventTarget(
+    target: EventTarget | null,
+    composedPath: EventTarget[] = [],
+): boolean {
+    if (target instanceof Element && isOverlay(target)) {
+        return true;
+    }
+
+    for (const entry of composedPath) {
+        if (entry instanceof Element && isOverlay(entry)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 export function isOverlay(el: Element): boolean {
     return (
         isStudioUiElement(el) ||
@@ -1953,6 +1970,10 @@ export function hidePromptIcon(): void {
 export function startContextMenuListener(onMenu: (result: { id: number; x: number; y: number }) => void): void {
     if (state.contextMenuCleanup) return;
     function onContextMenu(e: MouseEvent) {
+        const composedPath = Array.from(e.composedPath()).filter(
+            (entry): entry is EventTarget => entry !== undefined,
+        );
+        if (isStudioUiEventTarget(e.target, composedPath)) return;
         if (state.selectedId === null) return;
         const sourceDoc = (e.target as Node | null)?.ownerDocument ?? getPrimaryDocument();
         const el = getDocumentElementAtPoint(sourceDoc, e.clientX, e.clientY);

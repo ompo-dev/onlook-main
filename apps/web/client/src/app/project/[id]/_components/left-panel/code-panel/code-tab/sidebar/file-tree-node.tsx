@@ -58,7 +58,6 @@ export const FileTreeNode = ({
     };
 
     const handleRename = () => {
-        if (node.data.isDirectory) return;
         if (isEditing) return;
 
         setIsEditing(true);
@@ -143,12 +142,12 @@ export const FileTreeNode = ({
                 icon: <Icons.Copy className="w-4 h-4" />,
                 separator: false,
             },
-            !isDirectory ? {
+            {
                 label: 'Rename',
                 action: handleRename,
                 icon: <Icons.Edit className="w-4 h-4" />,
                 separator: false,
-            } : null,
+            },
             {
                 label: 'Delete',
                 action: () => {
@@ -162,12 +161,20 @@ export const FileTreeNode = ({
 
     return (
         <ContextMenu>
-            <ContextMenuTrigger>
+            <ContextMenuTrigger asChild>
                 <div
                     style={style}
-                    className="flex items-center h-6 cursor-pointer rounded"
+                    className="flex h-6 w-full cursor-pointer items-center rounded"
+                    onContextMenuCapture={(e) => {
+                        e.stopPropagation();
+                        node.select();
+                    }}
                     onClick={handleClick}
-                    onDoubleClick={(e) => handleRename()}
+                    onDoubleClick={() => {
+                        if (!isDirectory) {
+                            handleRename();
+                        }
+                    }}
                 >
                     <span className="w-4 h-4 flex-none relative">
                         {isDirectory && (
@@ -203,7 +210,7 @@ export const FileTreeNode = ({
                     )} */}
                 </div>
             </ContextMenuTrigger>
-            <ContextMenuContent>
+            <ContextMenuContent className="z-[2147483647]">
                 {menuItems.filter(item => item !== null).map((item, index) => (
                     <div key={item.label}>
                         <ContextMenuItem

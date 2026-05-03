@@ -274,7 +274,7 @@ export const Canvas = observer(() => {
         <HotkeysArea>
             <div
                 ref={containerRef}
-                className="overflow-hidden bg-background-onlook flex flex-grow relative"
+                className="relative flex flex-grow overflow-hidden bg-[#12131a]"
                 onMouseDown={handleCanvasMouseDown}
                 onMouseMove={handleCanvasMouseMove}
                 onMouseUp={handleCanvasMouseUp}
@@ -289,6 +289,16 @@ export const Canvas = observer(() => {
                     }
                 }}
             >
+                <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0"
+                    style={{
+                        backgroundImage:
+                            'radial-gradient(circle, rgba(255,255,255,0.14) 1.2px, transparent 1.2px)',
+                        backgroundSize: '18px 18px',
+                        backgroundPosition: '0 0',
+                    }}
+                />
                 <div id={EditorAttributes.CANVAS_CONTAINER_ID} style={transformStyle}>
                     <Frames framesInDragSelection={framesInSelection} />
                 </div>

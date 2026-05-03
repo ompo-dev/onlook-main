@@ -118,14 +118,6 @@ export function TreeNode({ node, depth, onSelect, onToggleSelect, onHover, onCon
         [node.id, onSelect, onToggleSelect],
     );
 
-    const handleChevronClick = useCallback(
-        (e: React.MouseEvent) => { e.stopPropagation(); toggleNode(node.id); },
-        [node.id, toggleNode],
-    );
-
-    const handleMouseEnter = useCallback(() => onHover(node.id), [node.id, onHover]);
-    const handleMouseLeave = useCallback(() => onHover(null), [onHover]);
-
     const handleContextMenu = useCallback(
         (e: React.MouseEvent) => {
             e.preventDefault();
@@ -134,6 +126,14 @@ export function TreeNode({ node, depth, onSelect, onToggleSelect, onHover, onCon
         },
         [node.id, onContextMenu],
     );
+
+    const handleChevronClick = useCallback(
+        (e: React.MouseEvent) => { e.stopPropagation(); toggleNode(node.id); },
+        [node.id, toggleNode],
+    );
+
+    const handleMouseEnter = useCallback(() => onHover(node.id), [node.id, onHover]);
+    const handleMouseLeave = useCallback(() => onHover(null), [onHover]);
 
     useEffect(() => {
         if (isPrimary && nodeRef.current) nodeRef.current.scrollIntoView({ block: 'nearest' });

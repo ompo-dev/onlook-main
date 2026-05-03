@@ -48,6 +48,7 @@ interface ContextMenuState {
     nodeId: number;
     x: number;
     y: number;
+    source: 'canvas' | 'tree';
 }
 
 export function InPagePanel({ mcpPort, mode }: InPagePanelProps) {
@@ -57,7 +58,7 @@ export function InPagePanel({ mcpPort, mode }: InPagePanelProps) {
     const handleContextMenuEvent = useCallback((result: { id: number; x: number; y: number }) => {
         const node = findNodeInTree(useStore.getState().domTree, result.id);
         if (node && !PROTECTED_TAGS4.has(node.localName)) {
-            setContextMenu({ nodeId: result.id, x: result.x, y: result.y });
+            setContextMenu({ nodeId: result.id, x: result.x, y: result.y, source: 'canvas' });
         }
     }, []);
 
@@ -91,6 +92,7 @@ export function InPagePanel({ mcpPort, mode }: InPagePanelProps) {
     const setPanelActiveTab = useStore((s) => s.setPanelActiveTab);
     const openChat = useStore((s) => s.openChat);
     const undoClear = useUndoStore((s) => s.clear);
+    const selectedElement = editorEngine.elements.selected[0];
 
     function handleLogin() {
         window.open(LOGIN_URL, 'cssstudio-auth', 'width=500,height=600');
@@ -427,21 +429,129 @@ export function InPagePanel({ mcpPort, mode }: InPagePanelProps) {
                     x={contextMenu.x}
                     y={contextMenu.y}
                     items={
-                        selectedNodeIds.length > 1
+                        contextMenu.source === 'tree'
                             ? [
+                                  ...(selectedElement?.instanceId
+                                      ? [
+                                            {
+                                                label: 'View instance code',
+                                                onClick: () => {
+                                                    void editorEngine.ide.openCodeBlock(
+                                                        selectedElement.instanceId!,
+                                                    );
+                                                },
+                                                disabled: !selectedElement.instanceId,
+                                            },
+                                        ]
+                                      : []),
                                   {
-                                      label: `Duplicate ${selectedNodeIds.length} elements`,
-                                      onClick: ops.handleDuplicateElement,
-                                      shortcut: 'Cmd+D',
+                                      label: `View ${selectedElement?.instanceId ? 'component' : 'element'} in Code Panel`,
+                                      onClick: () => {
+                                          const oid = selectedElement?.instanceId ?? selectedElement?.oid;
+                                          if (!oid) {
+                                              return;
+                                          }
+                                          void editorEngine.ide.openCodeBlock(oid);
+                                      },
+                                      disabled: !(selectedElement?.instanceId ?? selectedElement?.oid),
+                                  },
+                                  {
+                                      label: 'Add to AI Chat',
+                                      onClick: () => ops.handlePromptIconClick(contextMenu.nodeId),
+                                      shortcut: 'Ctrl ⇧ L',
+                                      disabled: selectedNodeIds.length === 0,
+                                  },
+                                  {
+                                      label: 'New AI Chat',
+                                      onClick: () => {
+                                          editorEngine.chat.conversation.startNewConversation();
+                                          ops.handlePromptIconClick(contextMenu.nodeId);
+                                      },
+                                      shortcut: 'Ctrl L',
                                   },
                                   { separator: true },
                                   {
-                                      label: `Delete ${selectedNodeIds.length} elements`,
-                                      onClick: ops.handleDeleteElement,
+                                      label: 'Group',
+                                      onClick: () => {
+                                          void editorEngine.group.groupSelectedElements();
+                                      },
+                                      shortcut: 'Ctrl G',
+                                      disabled: !editorEngine.group.canGroupElements(),
+                                  },
+                                  {
+                                      label: 'Ungroup',
+                                      onClick: () => {
+                                          void editorEngine.group.ungroupSelectedElement();
+                                      },
+                                      shortcut: 'Ctrl ⇧ G',
+                                      disabled: !editorEngine.group.canUngroupElement(),
+                                  },
+                                  { separator: true },
+                                  {
+                                      label: 'Edit text',
+                                      onClick: () => {
+                                          void editorEngine.text.editSelectedElement();
+                                      },
+                                      shortcut: 'Enter',
+                                      disabled: selectedNodeIds.length === 0,
+                                  },
+                                  {
+                                      label: 'Copy',
+                                      onClick: () => {
+                                          void editorEngine.copy.copy();
+                                      },
+                                      shortcut: 'Ctrl C',
+                                      disabled: selectedNodeIds.length === 0,
+                                  },
+                                  {
+                                      label: 'Paste',
+                                      onClick: () => {
+                                          void editorEngine.copy.paste();
+                                      },
+                                      shortcut: 'Ctrl V',
+                                      disabled: !editorEngine.copy.copied || selectedNodeIds.length === 0,
+                                  },
+                                  {
+                                      label: 'Cut',
+                                      onClick: () => {
+                                          void editorEngine.copy.cut();
+                                      },
+                                      shortcut: 'Ctrl X',
+                                      disabled: selectedNodeIds.length === 0,
+                                  },
+                                  {
+                                      label: 'Duplicate',
+                                      onClick: () => {
+                                          void editorEngine.copy.duplicate();
+                                      },
+                                      shortcut: 'Ctrl D',
+                                      disabled: selectedNodeIds.length === 0,
+                                  },
+                                  {
+                                      label: 'Delete',
+                                      onClick: () => {
+                                          void editorEngine.elements.delete();
+                                      },
                                       danger: true,
-                                      shortcut: 'Backspace',
+                                      shortcut: 'Delete',
+                                      disabled: selectedNodeIds.length === 0,
                                   },
                               ]
+                            : selectedNodeIds.length > 1
+                              ? [
+                                    {
+                                        label: `Duplicate ${selectedNodeIds.length} elements`,
+                                        onClick: ops.handleDuplicateElement,
+                                        shortcut: 'Cmd+D',
+                                    },
+                                    { separator: true },
+                                    {
+                                        label: `Delete ${selectedNodeIds.length} elements`,
+                                        onClick: ops.handleDeleteElement,
+                                        danger: true,
+                                        shortcut: 'Backspace',
+                                    },
+                                ]
                             : [
                                   { label: 'Add child element', onClick: ops.handleAddChild },
                                   { label: 'Add sibling element', onClick: ops.handleAddSibling },

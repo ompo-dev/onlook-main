@@ -209,6 +209,7 @@ export const CodeTab = memo(forwardRef<CodeTabRef, CodeTabProps>(({ projectId, b
         }
 
         await branchData.codeEditor.writeFile(filePath, file.content || '');
+        await branchData.sandbox.syncFileToProvider(filePath);
 
         if (file.type === 'text') {
             const newHash = await hashContent(file.content);

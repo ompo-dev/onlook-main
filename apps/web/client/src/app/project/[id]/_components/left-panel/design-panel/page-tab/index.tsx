@@ -8,8 +8,8 @@ import { observer } from 'mobx-react-lite';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { type NodeApi, type RowRendererProps, Tree, type TreeApi } from 'react-arborist';
 import useResizeObserver from 'use-resize-observer';
-import { PageTreeNode } from '../layers-tab/tree/page-tree-node';
-import { PageTreeRow } from '../layers-tab/tree/page-tree-row';
+import { PageTreeNode } from './tree/page-tree-node';
+import { PageTreeRow } from './tree/page-tree-row';
 import { PageModal } from './page-modal';
 
 export const PagesTab = observer(() => {

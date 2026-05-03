@@ -164,7 +164,7 @@ export const RightClickMenu = observer(({ children }: RightClickMenuProps) => {
     return (
         <ContextMenu>
             <ContextMenuTrigger>{children}</ContextMenuTrigger>
-            <ContextMenuContent className="w-64 bg-background/95 backdrop-blur-lg">
+            <ContextMenuContent className="z-[2147483647] w-64 bg-background/95 backdrop-blur-lg">
                 {menuItems.map((group, groupIndex) => (
                     <div key={groupIndex}>
                         {group.map((item) => (

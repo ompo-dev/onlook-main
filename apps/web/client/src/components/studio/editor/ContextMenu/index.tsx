@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 
 interface ContextMenuItem {
@@ -6,6 +6,8 @@ interface ContextMenuItem {
     onClick: () => void;
     danger?: boolean;
     shortcut?: string;
+    disabled?: boolean;
+    icon?: ReactNode;
 }
 
 interface SeparatorItem {
@@ -52,14 +54,22 @@ export function ContextMenu({ x, y, items, onClose, animate = false, transformOr
             <button
                 type="button"
                 key={menuItem.label}
+                disabled={menuItem.disabled}
                 className={`flex w-full items-center justify-between gap-4 rounded-md px-2 py-1.5 text-left text-[11px] transition ${
+                    menuItem.disabled
+                        ? 'cursor-not-allowed opacity-45'
+                        : 'cursor-pointer'
+                } ${
                     menuItem.danger
                         ? 'text-[var(--cs-red)] hover:bg-[color-mix(in_srgb,var(--cs-red)_10%,transparent)]'
                         : 'text-[var(--cs-foreground)] hover:bg-[var(--cs-feint)]'
                 }`}
                 onClick={() => { menuItem.onClick(); onClose(); }}
             >
-                <span>{menuItem.label}</span>
+                <span className="flex min-w-0 items-center gap-2">
+                    {menuItem.icon ? <span className="shrink-0">{menuItem.icon}</span> : null}
+                    <span className="truncate">{menuItem.label}</span>
+                </span>
                 {menuItem.shortcut && (
                     <span className="shrink-0 font-mono text-[10px] text-[var(--cs-secondary-text)]">
                         {menuItem.shortcut}
@@ -72,7 +82,7 @@ export function ContextMenu({ x, y, items, onClose, animate = false, transformOr
     const menuProps = {
         ref: menuRef,
         className:
-            'fixed z-[210] min-w-[180px] overflow-hidden rounded-lg border border-[var(--cs-border)] bg-[var(--cs-layer)] p-1 shadow-[0_12px_32px_rgba(0,0,0,0.4)]',
+            'fixed pointer-events-auto z-[2147483647] min-w-[240px] overflow-hidden rounded-lg border border-[var(--cs-border)] bg-[var(--cs-layer)] p-1 shadow-[0_12px_32px_rgba(0,0,0,0.4)]',
         style: { left: x, top: y },
     };
 
@@ -81,18 +91,30 @@ export function ContextMenu({ x, y, items, onClose, animate = false, transformOr
             {...menuProps}
             initial={{ opacity: 0, scale: 0.9, filter: 'blur(2px)' }}
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            onMouseDown={(event) => event.stopPropagation()}
+            onPointerDown={(event) => event.stopPropagation()}
             transition={{ duration: 0.12, ease: 'easeOut' }}
             style={{ ...menuProps.style, transformOrigin }}
         >
             {content}
         </motion.div>
     ) : (
-        <div {...menuProps}>{content}</div>
+        <div
+            {...menuProps}
+            onMouseDown={(event) => event.stopPropagation()}
+            onPointerDown={(event) => event.stopPropagation()}
+        >
+            {content}
+        </div>
     );
 
     return (
         <>
-            <div className="fixed inset-0 z-[209]" onMouseDown={onClose} />
+            <div
+                className="fixed inset-0 pointer-events-auto z-[2147483646]"
+                onMouseDown={onClose}
+                onPointerDown={(event) => event.stopPropagation()}
+            />
             {menu}
         </>
     );

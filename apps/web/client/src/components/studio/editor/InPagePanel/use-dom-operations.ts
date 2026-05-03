@@ -22,6 +22,7 @@ interface ContextMenu {
     nodeId: number;
     x: number;
     y: number;
+    source: 'canvas' | 'tree';
 }
 
 export function useDomOperations({
@@ -371,12 +372,40 @@ export function useDomOperations({
 
     const handleTreeContextMenu = useCallback(
         (nodeId: number, x: number, y: number) => {
-            const state = useStore.getState();
-            const node = findNodeInTree(state.domTree, nodeId);
-            if (!node || PROTECTED_TAGS4.has(node.localName)) return;
-            setContextMenu({ nodeId, x, y });
+            void (async () => {
+                const state = useStore.getState();
+                const node = findNodeInTree(state.domTree, nodeId);
+                if (!node || PROTECTED_TAGS4.has(node.localName)) return;
+
+                const keepSelection =
+                    state.selectedNodeIds.length > 1 && state.selectedNodeIds.includes(nodeId);
+                const targetIds = keepSelection ? state.selectedNodeIds : [nodeId];
+                const primaryId = keepSelection
+                    ? (state.selectedNodeId ?? nodeId)
+                    : nodeId;
+
+                if (!keepSelection) {
+                    selectNode(nodeId);
+                    expandToNode(nodeId);
+                    selectElements(targetIds, primaryId);
+                    await syncEditorSelectionFromBridgeIds(targetIds);
+                    bridge.fetchStyles(nodeId);
+                    setSelectedAttributes(node.attributes ?? {});
+                    setSelectedTextContent(node.textContent ?? '');
+                }
+
+                setContextMenu({ nodeId, x, y, source: 'tree' });
+            })();
         },
-        [setContextMenu],
+        [
+            bridge,
+            expandToNode,
+            selectNode,
+            setContextMenu,
+            setSelectedAttributes,
+            setSelectedTextContent,
+            syncEditorSelectionFromBridgeIds,
+        ],
     );
 
     const handleTagChange = useCallback(

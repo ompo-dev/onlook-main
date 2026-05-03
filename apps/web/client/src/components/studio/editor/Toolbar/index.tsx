@@ -26,7 +26,7 @@ const blurScale = {
     exit: { ...blurFade.exit, scale: 0.9 },
 };
 
-const COLLAPSED_KEY = 'cssstudio-toolbar-collapsed';
+const COLLAPSED_KEY = 'cssstudio-toolbar-collapsed-v2';
 
 function useToolbarCollapsed(): [boolean, () => void] {
     const [collapsed, setCollapsed] = useState(() => {

@@ -2,7 +2,11 @@ import { CodeProviderSync } from '@/services/sync-engine/sync-engine';
 import { LOCAL_MODE_ENABLED } from '@/utils/local-mode';
 import { normalizeLocalFolderPath } from '@/utils/local-mode/path';
 import type { Provider } from '@onlook/code-provider';
-import { EXCLUDED_SYNC_PATHS, ONLOOK_PRELOAD_SCRIPT_SRC } from '@onlook/constants';
+import {
+    EditorAttributes,
+    EXCLUDED_SYNC_PATHS,
+    ONLOOK_PRELOAD_SCRIPT_SRC,
+} from '@onlook/constants';
 import type { CodeFileSystem } from '@onlook/file-system';
 import { type FileEntry } from '@onlook/file-system';
 import { RouterType, type Branch, type RouterConfig } from '@onlook/models';
@@ -18,14 +22,40 @@ import { SessionManager } from './session';
 const APP_ROUTER_PATHS = ['src/app', 'app'];
 const PAGES_ROUTER_PATHS = ['src/pages', 'pages'];
 const ALLOWED_EXTENSIONS = ['.tsx', '.ts', '.jsx', '.js'];
+const ONLOOK_INSTRUMENTATION_ATTRIBUTES = new Set([
+    EditorAttributes.DATA_ONLOOK_ID,
+    EditorAttributes.DATA_ONLOOK_INSTANCE_ID,
+    EditorAttributes.DATA_ONLOOK_DOM_ID,
+    EditorAttributes.DATA_ONLOOK_COMPONENT_NAME,
+    EditorAttributes.DATA_ONLOOK_IGNORE,
+    EditorAttributes.DATA_ONLOOK_INSERTED,
+    EditorAttributes.DATA_ONLOOK_DRAG_SAVED_STYLE,
+    EditorAttributes.DATA_ONLOOK_DRAGGING,
+    EditorAttributes.DATA_ONLOOK_DRAG_DIRECTION,
+    EditorAttributes.DATA_ONLOOK_DRAG_START_POSITION,
+    EditorAttributes.DATA_ONLOOK_NEW_INDEX,
+    EditorAttributes.DATA_ONLOOK_EDITING_TEXT,
+    EditorAttributes.DATA_ONLOOK_DYNAMIC_TYPE,
+    EditorAttributes.DATA_ONLOOK_CORE_ELEMENT_TYPE,
+]);
 
-async function stripInjectedPreloadScript(content: string): Promise<string> {
+function containsOnlookInstrumentation(content: string): boolean {
+    return (
+        content.includes(ONLOOK_PRELOAD_SCRIPT_SRC) ||
+        Array.from(ONLOOK_INSTRUMENTATION_ATTRIBUTES).some((attribute) =>
+            content.includes(attribute),
+        )
+    );
+}
+
+async function sanitizeContentForProvider(content: string): Promise<string | null> {
     const ast = getAstFromContent(content, { logErrors: false });
     if (!ast) {
-        return content;
+        return containsOnlookInstrumentation(content) ? null : content;
     }
 
     let removedScript = false;
+    let removedAttributes = false;
 
     traverse(ast, {
         JSXElement(path) {
@@ -47,9 +77,25 @@ async function stripInjectedPreloadScript(content: string): Promise<string> {
             removedScript = true;
             path.remove();
         },
+        JSXOpeningElement(path) {
+            const nextAttributes = path.node.attributes.filter((attribute) => {
+                if (
+                    t.isJSXAttribute(attribute) &&
+                    t.isJSXIdentifier(attribute.name) &&
+                    ONLOOK_INSTRUMENTATION_ATTRIBUTES.has(attribute.name.name)
+                ) {
+                    removedAttributes = true;
+                    return false;
+                }
+
+                return true;
+            });
+
+            path.node.attributes = nextAttributes;
+        },
     });
 
-    if (!removedScript) {
+    if (!removedScript && !removedAttributes) {
         return content;
     }
 
@@ -147,6 +193,10 @@ export class SandboxManager {
             if (this.routerConfig) {
                 return this.routerConfig;
             }
+
+            if (!this.session.provider) {
+                return null;
+            }
         }
 
         if (!this.session.provider) {
@@ -167,7 +217,6 @@ export class SandboxManager {
 
         if (LOCAL_MODE_ENABLED && localFolderPath) {
             await this.seedCodeFileSystemFromProvider(provider);
-            await this.syncInstrumentedFilesToProvider(provider);
         }
 
         if (shouldStartSync) {
@@ -223,85 +272,43 @@ export class SandboxManager {
 
     private async seedCodeFileSystemFromProvider(provider: Provider): Promise<void> {
         const existingEntries = await this.fs.listAll();
-        const existingPaths = new Set(existingEntries.map((entry) => entry.path.replace(/^\//, '')));
+        const existingPaths = new Map(
+            existingEntries.map((entry) => [entry.path.replace(/^\//, ''), entry.type] as const),
+        );
 
         const providerEntries = await this.listProviderFiles(provider);
         let seededCount = 0;
 
         for (const entry of providerEntries) {
-            if (existingPaths.has(entry.path)) {
+            const existingType = existingPaths.get(entry.path);
+            if (existingType === entry.type) {
                 continue;
+            }
+
+            if (existingType && existingType !== entry.type) {
+                await this.fs.deleteFile(entry.path);
+                existingPaths.delete(entry.path);
             }
 
             if (entry.type === 'directory') {
                 await this.fs.createDirectory(entry.path);
-                existingPaths.add(entry.path);
+                existingPaths.set(entry.path, 'directory');
                 seededCount++;
                 continue;
             }
 
             const file = await provider.readFile({ args: { path: entry.path } });
+            if (file.file.content == null) {
+                continue;
+            }
             await this.fs.writeFile(entry.path, file.file.content);
-            existingPaths.add(entry.path);
+            existingPaths.set(entry.path, 'file');
             seededCount++;
         }
 
         if (seededCount > 0) {
             console.log(
                 `[SandboxManager] Seeded ${seededCount} missing provider entries into the local code editor`,
-            );
-        }
-    }
-
-    private async syncInstrumentedFilesToProvider(provider: Provider): Promise<void> {
-        const entries = await this.fs.listAll();
-        const codeFiles = entries.filter(
-            (entry) =>
-                entry.type === 'file' &&
-                ALLOWED_EXTENSIONS.some((extension) => entry.path.endsWith(extension)),
-        );
-
-        let syncedCount = 0;
-
-        for (const entry of codeFiles) {
-            const processedContent = await this.fs.readFile(entry.path);
-            if (typeof processedContent !== 'string') {
-                continue;
-            }
-
-            const providerPath = entry.path.startsWith('/') ? entry.path.slice(1) : entry.path;
-            const contentToWrite = await stripInjectedPreloadScript(processedContent);
-
-            if (!contentToWrite.includes('data-oid')) {
-                continue;
-            }
-
-            let existingContent: string | Uint8Array | null = null;
-
-            try {
-                const existing = await provider.readFile({ args: { path: providerPath } });
-                existingContent = existing.file.content;
-            } catch {
-                existingContent = null;
-            }
-
-            if (typeof existingContent === 'string' && existingContent === contentToWrite) {
-                continue;
-            }
-
-            await provider.writeFile({
-                args: {
-                    path: providerPath,
-                    content: contentToWrite,
-                    overwrite: true,
-                },
-            });
-            syncedCount++;
-        }
-
-        if (syncedCount > 0) {
-            console.log(
-                `[SandboxManager] Synced ${syncedCount} instrumented files to local project source`,
             );
         }
     }
@@ -401,6 +408,34 @@ export class SandboxManager {
     async writeFile(path: string, content: string | Uint8Array): Promise<void> {
         if (!this.fs) throw new Error('File system not initialized');
         return this.fs.writeFile(path, content);
+    }
+
+    async syncFileToProvider(path: string): Promise<void> {
+        if (!LOCAL_MODE_ENABLED || !this.session.provider || !this.fs) {
+            return;
+        }
+
+        const content = await this.fs.readFile(path);
+        const providerPath = path.startsWith('/') ? path.slice(1) : path;
+        const sanitizedContent =
+            typeof content === 'string'
+                ? await sanitizeContentForProvider(content)
+                : content;
+
+        if (sanitizedContent === null) {
+            console.warn(
+                `[SandboxManager] Skipping provider sync for ${providerPath} because the local editor content is instrumented and does not parse cleanly yet.`,
+            );
+            return;
+        }
+
+        await this.session.provider.writeFile({
+            args: {
+                path: providerPath,
+                content: sanitizedContent,
+                overwrite: true,
+            },
+        });
     }
 
     listAllFiles() {

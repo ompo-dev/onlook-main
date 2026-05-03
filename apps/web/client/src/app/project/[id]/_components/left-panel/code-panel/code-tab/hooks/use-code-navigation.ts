@@ -1,6 +1,7 @@
 'use client';
 
 import { useEditorEngine } from '@/components/store/editor';
+import { recoverJsxMetadataForOid } from '@/components/store/editor/code/metadata-recovery';
 import type { CodeNavigationTarget } from '@onlook/models';
 import { pathsEqual } from '@onlook/utility';
 import { reaction } from 'mobx';
@@ -73,7 +74,11 @@ export function useCodeNavigation() {
                         return;
                     }
 
-                    const metadata = await branchData.codeEditor.getJsxElementMetadata(oid);
+                    const metadata = await recoverJsxMetadataForOid(
+                        branchData.codeEditor,
+                        branchData.sandbox.session.provider,
+                        oid,
+                    );
                     if (!metadata) {
                         console.warn(`[CodeNavigation] No metadata found for OID: ${oid}`);
                         savedNavigationTarget.current = null;

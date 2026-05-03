@@ -1,7 +1,7 @@
 .toolbar {
     border: 1px solid var(--cs-border);
     background: var(--cs-layer);
-    z-index: 5;
+    z-index: 10020;
     pointer-events: auto;
     color: var(--cs-foreground);
     border-radius: 10px;
@@ -12,7 +12,7 @@
     font-size: 12px;
     display: flex;
     position: fixed;
-    top: 16px;
+    top: 56px;
     right: 16px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }

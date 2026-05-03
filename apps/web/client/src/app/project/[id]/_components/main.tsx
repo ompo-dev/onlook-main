@@ -1,39 +1,22 @@
 'use client';
 
-import { useEditorEngine } from '@/components/store/editor';
-import { useStudioRuntime } from '@/components/studio/runtime';
 import { SubscriptionModal } from '@/components/ui/pricing-modal';
 import { SettingsModalWithProjects } from '@/components/ui/settings-modal/with-project';
 import { EditorAttributes } from '@onlook/constants';
-import { EditorMode } from '@onlook/models';
 import { Button } from '@onlook/ui/button';
 import { Icons } from '@onlook/ui/icons';
 import { TooltipProvider } from '@onlook/ui/tooltip';
-import { cn } from '@onlook/ui/utils';
 import { observer } from 'mobx-react-lite';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef } from 'react';
-import { usePanelMeasurements } from '../_hooks/use-panel-measure';
+import { useEffect } from 'react';
 import { useStartProject } from '../_hooks/use-start-project';
 import { CssStudio } from '@/components/studio/css-studio';
-import { BottomBar } from './bottom-bar';
 import { Canvas } from './canvas';
-import { EditorBar } from './editor-bar';
-import { LeftPanel } from './left-panel';
-import { RightPanel } from './right-panel';
 import { TopBar } from './top-bar';
 
 export const Main = observer(() => {
     const router = useRouter();
-    const editorEngine = useEditorEngine();
-    const { mode: studioMode } = useStudioRuntime();
     const { isProjectReady, error } = useStartProject();
-    const leftPanelRef = useRef<HTMLDivElement | null>(null);
-    const rightPanelRef = useRef<HTMLDivElement | null>(null);
-    const { toolbarLeft, toolbarRight, editorBarAvailableWidth } = usePanelMeasurements(
-        leftPanelRef,
-        rightPanelRef,
-    );
 
     useEffect(() => {
         function handleGlobalWheel(event: WheelEvent) {
@@ -81,68 +64,13 @@ export const Main = observer(() => {
             </div>
         );
     }
-
-    const shouldHideLegacyChrome = studioMode === 'native';
-
     return (
         <TooltipProvider>
             <div className="h-screen w-screen flex flex-row select-none relative overflow-hidden">
                 <Canvas />
-                {studioMode === 'native' && <CssStudio />}
-                <div className="absolute top-0 w-full">
+                <CssStudio />
+                <div className="absolute top-0 z-50 w-full">
                     <TopBar />
-                </div>
-
-                {/* Left Panel */}
-                <div
-                    ref={leftPanelRef}
-                    className={cn(
-                        'absolute top-10 left-0 h-[calc(100%-40px)] z-50',
-                        shouldHideLegacyChrome && 'invisible pointer-events-none opacity-0',
-                    )}
-                >
-                    <LeftPanel />
-                </div>
-                {/* EditorBar anchored between panels */}
-                <div
-                    className={cn(
-                        'absolute top-10 z-49',
-                        shouldHideLegacyChrome && 'invisible pointer-events-none opacity-0',
-                    )}
-                    style={{
-                        left: toolbarLeft,
-                        right: toolbarRight,
-                        overflow: 'hidden',
-                        pointerEvents: 'none',
-                        maxWidth: editorBarAvailableWidth,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'flex-start',
-                    }}
-                >
-                    <div style={{ pointerEvents: 'auto' }}>
-                        <EditorBar availableWidth={editorBarAvailableWidth} />
-                    </div>
-                </div>
-
-                {/* Right Panel */}
-                <div
-                    ref={rightPanelRef}
-                    className={cn(
-                        'absolute top-10 right-0 h-[calc(100%-40px)] z-50',
-                        editorEngine.state.editorMode === EditorMode.PREVIEW && 'hidden',
-                        shouldHideLegacyChrome && 'invisible pointer-events-none opacity-0',
-                    )}
-                >
-                    <RightPanel />
-                </div>
-
-                <div
-                    className={cn(
-                        shouldHideLegacyChrome && 'invisible pointer-events-none opacity-0',
-                    )}
-                >
-                    <BottomBar />
                 </div>
             </div>
             <SettingsModalWithProjects />
