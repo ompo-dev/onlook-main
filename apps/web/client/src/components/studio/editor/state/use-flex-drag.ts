@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
+import { getStudioHost } from '../../host';
 import { useStore } from './use-store';
 import { isInlineEditActive } from './dom-bridge';
 import type { PageBridge } from './use-page-bridge';
@@ -54,18 +55,21 @@ export function useFlexDrag({
             const containerLeft = Math.min(...otherRects.map((r) => r.left));
             const containerRight = Math.max(...otherRects.map((r) => r.right));
             for (let i = 0; i < others.length; i++) {
+                const target = others[i];
+                if (!target) continue;
                 const mid = isRow
-                    ? others[i].rect.left + others[i].rect.width / 2
-                    : others[i].rect.top + others[i].rect.height / 2;
+                    ? target.rect.left + target.rect.width / 2
+                    : target.rect.top + target.rect.height / 2;
                 if (pointer < mid) {
-                    const edge = isRow ? others[i].rect.left : others[i].rect.top;
+                    const edge = isRow ? target.rect.left : target.rect.top;
                     const lineRect = isRow
                         ? { x: edge - 1, y: containerTop, w: 2, h: containerBottom - containerTop }
                         : { x: containerLeft, y: edge - 1, w: containerRight - containerLeft, h: 2 };
-                    return { beforeId: others[i].id, lineRect };
+                    return { beforeId: target.id, lineRect };
                 }
             }
             const last = others[others.length - 1];
+            if (!last) return null;
             const edge = isRow ? last.rect.right : last.rect.bottom;
             const lineRect = isRow
                 ? { x: edge - 1, y: containerTop, w: 2, h: containerBottom - containerTop }
@@ -92,8 +96,8 @@ export function useFlexDrag({
             const absCheck = bridge.getAbsolutePositionInfo(selectedNodeId);
             if (absCheck?.isAbsolute) return;
             const origin = e.composedPath()[0] as Element;
-            const host = document.querySelector('css-studio-panel');
-            if (host?.shadowRoot?.contains(origin)) return;
+            const host = getStudioHost();
+            if (host?.contains(origin)) return;
             const items = bridge.getChildRectsAndIds(parentId);
             const draggedItem = items.find((i) => i.id === selectedNodeId);
             if (!draggedItem) return;

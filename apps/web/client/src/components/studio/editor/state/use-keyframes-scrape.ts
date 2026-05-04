@@ -23,9 +23,9 @@ export function useKeyframesScrape() {
         const merged = [...scraped, ...userRules];
         setKeyframesRules(merged);
         if (!selectedKeyframesName && merged.length > 0) {
-            selectKeyframesRule(merged[0].name);
+            selectKeyframesRule(merged[0]?.name ?? null);
         } else if (selectedKeyframesName && !merged.find((r: any) => r.name === selectedKeyframesName)) {
-            selectKeyframesRule(merged.length > 0 ? merged[0].name : null);
+            selectKeyframesRule(merged[0]?.name ?? null);
         }
     }
 
@@ -73,14 +73,17 @@ export function useKeyframesScrape() {
                     e.timeline !== existing[i]?.timeline,
             );
         if (changed) state.setAnimationEntries(entries);
-        const firstName = infos[0].name;
+        const firstInfo = infos[0];
+        const firstName = firstInfo?.name;
+        if (!firstName) return;
         if (state.keyframesRules.some((r: any) => r.name === firstName)) {
             if (state.selectedKeyframesName !== firstName) state.selectKeyframesRule(firstName);
-            if (infos[0].duration > 0 && state.animDuration !== infos[0].duration) {
-                state.setAnimDuration(infos[0].duration);
+            if (firstInfo.duration > 0 && state.animDuration !== firstInfo.duration) {
+                state.setAnimDuration(firstInfo.duration);
             }
         }
         const first = entries[0];
+        if (!first) return;
         if (first.scroller !== state.animScrollScroller) state.setAnimScrollScroller(first.scroller);
         if (first.axis !== state.animScrollAxis) state.setAnimScrollAxis(first.axis);
         const firstParsed = parseTimelineValue(first.timeline);

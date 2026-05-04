@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
+import { getStudioHost } from '../../host';
 import { useStore } from './use-store';
 import { isInlineEditActive } from './dom-bridge';
 import { pointInQuad } from '../utils/element-quad';
@@ -52,8 +53,8 @@ export function useAbsDrag({
             if (useStore.getState().isDrawingElement) return;
             if (useStore.getState().isPickingElement) return;
             const origin = e.composedPath()[0] as Element;
-            const host = document.querySelector('css-studio-panel');
-            if (host?.shadowRoot?.contains(origin)) return;
+            const host = getStudioHost();
+            if (host?.contains(origin)) return;
             const quad = bridge.getElementQuad(selectedNodeId);
             if (!quad) return;
             if (!pointInQuad(e.clientX, e.clientY, quad.corners)) {

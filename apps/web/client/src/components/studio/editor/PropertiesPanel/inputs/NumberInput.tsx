@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
+import { useState, useCallback, useEffect, useRef, type CSSProperties, type JSX } from 'react';
 import styles from './inputs.module.css';
 import numStyles from './NumberInput.module.css';
 
@@ -114,10 +114,10 @@ export const STEP_CONFIGS: Record<string, StepConfig> = {
 
 export { LARGE_SPATIAL_UNITS, LARGE_SPATIAL_SIGNED_UNITS, SMALL_SPATIAL_UNITS, SMALL_SPATIAL_SIGNED_UNITS, LETTER_SPACING_UNITS, TRANSLATE_UNITS, SHADOW_UNITS, SHADOW_BLUR_UNITS };
 
-function parseNumericValue(value: string): { num: number; unit: string } {
+export function parseNumericValue(value: string): { num: number; unit: string } {
   const match = value.match(/^(-?[\d.]+)\s*(.*)$/);
   if (match) {
-    return { num: parseFloat(match[1]), unit: match[2] || '' };
+    return { num: parseFloat(match[1] ?? '0'), unit: match[2] ?? '' };
   }
   return { num: 0, unit: '' };
 }
@@ -133,7 +133,7 @@ interface ResolveOpts {
   unit?: string;
 }
 
-function resolveUnitConfig(value: string, opts: ResolveOpts) {
+export function resolveUnitConfig(value: string, opts: ResolveOpts) {
   const config = opts.label ? STEP_CONFIGS[opts.label] : undefined;
   const parsed = parseNumericValue(value);
   const allUnits = opts.units ?? config?.units;
@@ -162,7 +162,7 @@ interface NumberInputProps {
   showSlider?: boolean;
   compact?: boolean;
   indent?: boolean;
-  endContent?: ReactNode;
+  endContent?: JSX.Element | string | number | null;
   units?: UnitConfig[];
   onChange: (value: string) => void;
   onFocus?: () => void;
@@ -353,7 +353,7 @@ export function NumberInput({
             step={resolvedStep}
             value={localParsed.num}
             onChange={handleSliderInput}
-            style={{ '--cs-fill-bg': fillBg } as React.CSSProperties}
+            style={{ '--cs-fill-bg': fillBg } as CSSProperties}
           />
         )}
         <div className={numStyles.numberInputWrapper}>

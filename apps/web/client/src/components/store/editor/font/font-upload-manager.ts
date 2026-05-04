@@ -87,7 +87,11 @@ export const processFontFiles = async (
             );
 
             const buffer = Buffer.from(fontFile.file.buffer);
-            await editorEngine.activeSandbox.writeFile(filePath, buffer);
+            const sandbox = editorEngine.branches.activeSandboxOrNull;
+            if (!sandbox) {
+                throw new Error('No sandbox session found');
+            }
+            await sandbox.writeFile(filePath, buffer);
 
             return {
                 path: pathModule.posix.join('./fonts', `${fileName}.${fileExtension}`),

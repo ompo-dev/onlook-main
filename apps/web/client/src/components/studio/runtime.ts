@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
 
 export type StudioMode = 'off' | 'native';
+export type StudioEngine = 'legacy' | 'upstream';
 
 export interface StudioAvailability {
     native: boolean;
@@ -19,10 +20,12 @@ export interface NativeStudioSettings {
 
 interface StudioRuntimeSnapshot {
     availability: StudioAvailability;
+    engine: StudioEngine;
     mode: StudioMode;
     settings: NativeStudioSettings;
 }
 
+const STUDIO_ENGINE_STORAGE_KEY = 'onlook:studio:engine';
 const STUDIO_MODE_STORAGE_KEY = 'onlook:studio:mode';
 const NATIVE_STUDIO_SETTINGS_STORAGE_KEY = 'onlook:studio:native:settings';
 const STUDIO_RUNTIME_EVENT = 'onlook:studio:runtime-change';
@@ -33,12 +36,14 @@ const DEFAULT_NATIVE_SETTINGS: NativeStudioSettings = {
     highContrast: false,
     scheme: 'indigo',
 };
+const DEFAULT_STUDIO_ENGINE: StudioEngine = 'legacy';
 const DEFAULT_STUDIO_MODE: StudioMode = 'native';
 const DEFAULT_STUDIO_AVAILABILITY: StudioAvailability = {
     native: false,
 };
 const DEFAULT_STUDIO_RUNTIME_SNAPSHOT: StudioRuntimeSnapshot = {
     availability: DEFAULT_STUDIO_AVAILABILITY,
+    engine: DEFAULT_STUDIO_ENGINE,
     mode: resolveModeForAvailability(DEFAULT_STUDIO_MODE, DEFAULT_STUDIO_AVAILABILITY),
     settings: DEFAULT_NATIVE_SETTINGS,
 };
@@ -60,6 +65,13 @@ function normalizeMode(value: unknown): StudioMode {
     return 'native';
 }
 
+function normalizeEngine(value: unknown): StudioEngine {
+    if (value === 'legacy' || value === 'upstream') {
+        return value;
+    }
+    return DEFAULT_STUDIO_ENGINE;
+}
+
 export function getStudioAvailability(pathname?: string): StudioAvailability {
     const currentPath = pathname ?? (typeof window !== 'undefined' ? window.location.pathname : '');
     const isProjectRoute = currentPath.startsWith('/project/');
@@ -79,6 +91,8 @@ function resolveModeForAvailability(_mode: StudioMode, availability: StudioAvail
 
 function getRuntimeSnapshot(pathname?: string): StudioRuntimeSnapshot {
     const availability = getStudioAvailability(pathname);
+    const engine =
+        typeof window === 'undefined' ? DEFAULT_STUDIO_ENGINE : getStoredStudioEngine();
     const mode = resolveModeForAvailability(
         typeof window === 'undefined' ? DEFAULT_STUDIO_MODE : getStoredStudioMode(),
         availability,
@@ -88,6 +102,7 @@ function getRuntimeSnapshot(pathname?: string): StudioRuntimeSnapshot {
 
     const snapshotKey = JSON.stringify({
         availability,
+        engine,
         mode,
         pathname: pathname ?? '',
         settings,
@@ -100,6 +115,7 @@ function getRuntimeSnapshot(pathname?: string): StudioRuntimeSnapshot {
     cachedRuntimeSnapshotKey = snapshotKey;
     cachedRuntimeSnapshot = {
         availability,
+        engine,
         mode,
         settings,
     };
@@ -113,6 +129,14 @@ export function getStoredStudioMode(): StudioMode {
     }
 
     return normalizeMode(window.localStorage.getItem(STUDIO_MODE_STORAGE_KEY));
+}
+
+export function getStoredStudioEngine(): StudioEngine {
+    if (typeof window === 'undefined') {
+        return DEFAULT_STUDIO_ENGINE;
+    }
+
+    return normalizeEngine(window.localStorage.getItem(STUDIO_ENGINE_STORAGE_KEY));
 }
 
 export function getStudioMode(pathname?: string): StudioMode {
@@ -131,12 +155,23 @@ export function setStudioMode(mode: StudioMode) {
     emitRuntimeChange();
 }
 
+export function setStudioEngine(engine: StudioEngine) {
+    if (typeof window === 'undefined') {
+        return;
+    }
+
+    window.localStorage.setItem(STUDIO_ENGINE_STORAGE_KEY, normalizeEngine(engine));
+    window.dispatchEvent(new Event(STUDIO_RUNTIME_EVENT));
+    emitRuntimeChange();
+}
+
 export function subscribeToStudioRuntime(listener: () => void) {
     listeners.add(listener);
 
     if (typeof window !== 'undefined') {
         const onStorage = (event: StorageEvent) => {
             if (
+                event.key === STUDIO_ENGINE_STORAGE_KEY ||
                 event.key === STUDIO_MODE_STORAGE_KEY ||
                 event.key === NATIVE_STUDIO_SETTINGS_STORAGE_KEY
             ) {
@@ -214,6 +249,10 @@ export function useStudioRuntime() {
         setStudioMode(mode);
     }, []);
 
+    const setEngine = useCallback((engine: StudioEngine) => {
+        setStudioEngine(engine);
+    }, []);
+
     const setSettings = useCallback((nextSettings: Partial<NativeStudioSettings>) => {
         updateNativeStudioSettings(nextSettings);
     }, []);
@@ -221,9 +260,10 @@ export function useStudioRuntime() {
     return useMemo(
         () => ({
             ...snapshot,
+            setEngine,
             setMode,
             setSettings,
         }),
-        [setMode, setSettings, snapshot],
+        [setEngine, setMode, setSettings, snapshot],
     );
 }

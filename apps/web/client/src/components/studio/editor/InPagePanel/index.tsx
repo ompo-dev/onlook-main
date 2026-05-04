@@ -35,7 +35,7 @@ import { ChatPanel } from '../ChatPanel';
 import { AnimationsPanel } from '../AnimationsPanel';
 import { ContextMenu } from '../ContextMenu';
 import { StudioOnlookDocks } from '../docks';
-import { auth } from '../auth/Auth';
+import { auth } from '../../auth/Auth';
 
 const LOGIN_URL = 'https://cssstudio.ai/login';
 

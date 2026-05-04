@@ -1,0 +1,117 @@
+.responsiveContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: auto;
+    cursor: default;
+    background: var(--cs-black);
+    background-image: radial-gradient(circle, rgb(255 255 255 / 3%) 1px, transparent 1px);
+    background-size: 24px 24px;
+}
+
+.responsiveWorld {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+}
+
+.frame {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.frameCard {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: clip;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 6%), 0 4px 24px rgb(0 0 0 / 38%);
+}
+
+.frameIframe {
+    display: block;
+    border: 0;
+    background: #fff;
+}
+
+.frameOverlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+.frameControlsOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    transform-origin: 0 0;
+    will-change: transform, width, height;
+}
+
+.resizeGripHitArea {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    pointer-events: auto;
+    touch-action: none;
+}
+
+.resizeGripHitAreaRight {
+    top: 50%;
+    left: 100%;
+    margin-left: 20px;
+    transform: translate(-50%, -50%);
+    cursor: ew-resize;
+}
+
+.resizeGripHitAreaBottom {
+    top: 100%;
+    left: 50%;
+    margin-top: 20px;
+    transform: translate(-50%, -50%);
+    cursor: ns-resize;
+}
+
+.resizeGrip {
+    pointer-events: none;
+    border-radius: 2px;
+    transition: transform .15s ease, filter .15s ease;
+}
+
+.resizeGripRight {
+    width: 4px;
+    height: 16px;
+    background:
+        radial-gradient(circle at 50% 2px, var(--cs-accent) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 50% 50%, var(--cs-accent) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 50% calc(100% - 2px), var(--cs-accent) 1.5px, transparent 1.5px),
+        color-mix(in srgb, var(--cs-accent) 20%, transparent);
+}
+
+.resizeGripBottom {
+    width: 16px;
+    height: 4px;
+    background:
+        radial-gradient(circle at 2px 50%, var(--cs-accent) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 50% 50%, var(--cs-accent) 1.5px, transparent 1.5px),
+        radial-gradient(circle at calc(100% - 2px) 50%, var(--cs-accent) 1.5px, transparent 1.5px),
+        color-mix(in srgb, var(--cs-accent) 20%, transparent);
+}
+
+.resizeGripHitArea:hover .resizeGrip,
+.resizeGripHitArea[data-dragging] .resizeGrip {
+    filter: brightness(1.5);
+    transform: scale(1.3);
+}

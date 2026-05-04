@@ -1,0 +1,535 @@
+.wrap {
+    --tray-width: min(380px, calc(100vw - 32px));
+    position: fixed;
+    left: 50%;
+    bottom: 16px;
+    z-index: 10012;
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    pointer-events: none;
+    transform: translate3d(calc(-50% + var(--cs-tray-tx, 0px)), var(--cs-tray-ty, 0px), 0);
+}
+
+.tray {
+    width: var(--tray-width);
+    max-width: var(--tray-width);
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--cs-border);
+    border-radius: 16px;
+    background:
+        linear-gradient(180deg, rgb(255 255 255 / 0.03), transparent 24%),
+        color-mix(in srgb, var(--cs-panel-bg) 92%, black 8%);
+    box-shadow:
+        0 24px 80px rgb(0 0 0 / 0.45),
+        0 8px 24px rgb(0 0 0 / 0.22);
+    backdrop-filter: blur(18px);
+}
+
+.dragHandle {
+    height: 14px;
+    cursor: grab;
+    flex-shrink: 0;
+    background:
+        radial-gradient(circle at center, rgb(255 255 255 / 0.18) 1px, transparent 1.2px)
+        center / 10px 10px no-repeat;
+}
+
+.dragHandle:active {
+    cursor: grabbing;
+}
+
+.connectionRegion {
+    padding: 10px 12px 0;
+}
+
+.connectionBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 34px;
+    padding: 6px 8px;
+    border: 1px solid rgb(255 255 255 / 0.06);
+    border-radius: 10px;
+    background: rgb(255 255 255 / 0.03);
+}
+
+.statusPills {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+}
+
+.statusPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 22px;
+    padding: 0 8px;
+    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.04);
+    color: var(--cs-secondary-text);
+    font-size: 11px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.statusPill[data-cs-ok='true'] {
+    color: var(--cs-foreground);
+    border-color: color-mix(in srgb, var(--cs-accent) 30%, transparent);
+    background: color-mix(in srgb, var(--cs-accent) 10%, transparent);
+}
+
+.statusPill[data-cs-ok='pending'] {
+    color: var(--cs-foreground);
+}
+
+.statusPill[data-cs-ok='false'] {
+    color: rgb(255 255 255 / 0.72);
+}
+
+.statusPillIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    opacity: 0.92;
+}
+
+.connectionInfo {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--cs-icon-muted);
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.connectionInfo:hover {
+    background: var(--cs-feint);
+    color: var(--cs-foreground);
+}
+
+.messages {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: min(34vh, 320px);
+    padding: 10px 12px 0;
+    overflow-y: auto;
+}
+
+.userMsg,
+.agentMsg,
+.statusMsg {
+    word-break: break-word;
+    line-height: 1.55;
+}
+
+.userMsg {
+    align-self: flex-end;
+    max-width: 88%;
+    padding: 10px 12px;
+    border-radius: 14px 14px 6px;
+    background: var(--cs-feint-solid);
+    color: var(--cs-foreground);
+    font-size: 12px;
+}
+
+.userMsgPending {
+    opacity: 0.62;
+}
+
+.userMsgQueued {
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+}
+
+.agentMsg {
+    color: var(--cs-foreground);
+    font-size: 12px;
+}
+
+.agentMsg p,
+.agentMsg ul,
+.agentMsg ol,
+.agentMsg pre,
+.agentMsg h1,
+.agentMsg h2,
+.agentMsg h3,
+.agentMsg h4,
+.agentMsg h5,
+.agentMsg h6 {
+    margin: 0 0 8px;
+}
+
+.agentMsg p:last-child,
+.agentMsg ul:last-child,
+.agentMsg ol:last-child,
+.agentMsg pre:last-child {
+    margin-bottom: 0;
+}
+
+.agentMsg ul,
+.agentMsg ol {
+    padding-left: 18px;
+}
+
+.agentMsg pre {
+    overflow-x: auto;
+    padding: 10px;
+    border: 1px solid rgb(255 255 255 / 0.06);
+    border-radius: 10px;
+    background: rgb(0 0 0 / 0.2);
+    font-family: var(--cs-font-mono, monospace);
+    font-size: 11px;
+}
+
+.agentMsg code {
+    font-family: var(--cs-font-mono, monospace);
+    font-size: 11px;
+}
+
+.agentMsg a {
+    color: var(--cs-accent);
+    text-decoration: none;
+}
+
+.agentMsg a:hover {
+    text-decoration: underline;
+}
+
+.statusMsg {
+    color: var(--cs-secondary-text);
+    font-size: 11px;
+    text-align: center;
+}
+
+.respondingLine {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--cs-secondary-text);
+}
+
+.attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 12px 0;
+}
+
+.chip,
+.msgChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 24px;
+    padding: 4px 8px;
+    border: 1px solid rgb(255 255 255 / 0.06);
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.05);
+    color: var(--cs-foreground);
+    font-size: 11px;
+    line-height: 1;
+}
+
+.chipAuto {
+    opacity: 0.66;
+}
+
+.chipImage,
+.msgChipImage {
+    padding-left: 4px;
+}
+
+.chipThumb,
+.msgChipThumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.chipRemove {
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--cs-icon-muted);
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.chipRemove:hover {
+    background: rgb(255 255 255 / 0.08);
+    color: var(--cs-foreground);
+}
+
+.msgAttachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.inputRow {
+    padding: 12px 12px 0;
+}
+
+.input {
+    width: 100%;
+    min-height: 44px;
+    max-height: 132px;
+    resize: none;
+    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: 12px;
+    background: rgb(255 255 255 / 0.045);
+    color: var(--cs-foreground);
+    padding: 10px 12px;
+    outline: none;
+    font: inherit;
+    line-height: 1.55;
+    overflow-y: auto;
+    transition: border-color 0.12s ease, background 0.12s ease;
+}
+
+.input::placeholder {
+    color: var(--cs-secondary-text);
+}
+
+.input:focus {
+    border-color: color-mix(in srgb, var(--cs-accent) 40%, transparent);
+    background: rgb(255 255 255 / 0.06);
+}
+
+.actionRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px 12px;
+}
+
+.actionLeft,
+.actionRight {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.spacer {
+    flex: 1;
+}
+
+.iconButton,
+.secondaryButton,
+.sendButton {
+    border: 0;
+    cursor: pointer;
+    transition:
+        background 0.12s ease,
+        color 0.12s ease,
+        opacity 0.12s ease,
+        transform 0.12s ease;
+}
+
+.iconButton,
+.secondaryButton {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgb(255 255 255 / 0.045);
+    color: var(--cs-foreground);
+}
+
+.iconButton:hover,
+.secondaryButton:hover {
+    background: rgb(255 255 255 / 0.08);
+}
+
+.iconButtonActive {
+    background: color-mix(in srgb, var(--cs-accent) 14%, transparent);
+    color: var(--cs-accent);
+}
+
+.iconButtonAction {
+    color: rgb(255 255 255 / 0.82);
+}
+
+.iconButton:disabled,
+.secondaryButton:disabled,
+.sendButton:disabled {
+    opacity: 0.42;
+    cursor: default;
+}
+
+.hiddenFileInput {
+    display: none;
+}
+
+.sendButton {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--cs-accent);
+    color: var(--cs-on-accent, #000);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2);
+}
+
+.sendButton:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(1.03);
+}
+
+.sendButtonIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pendingEdits {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pendingEditsToggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--cs-foreground);
+    cursor: pointer;
+    text-align: left;
+}
+
+.pendingEditsChevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cs-feint-text);
+    transition: transform .15s ease;
+}
+
+.pendingEditsChevronOpen {
+    transform: rotate(90deg);
+}
+
+.pendingEditsLabel {
+    color: var(--cs-foreground);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.pendingEditsCount {
+    color: var(--cs-feint-text);
+    font-size: 11px;
+    font-family: var(--cs-font-mono, monospace);
+}
+
+.pendingEditsList {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 2px 0 2px 16px;
+}
+
+.pendingEditRow {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+    line-height: 1.4;
+    color: var(--cs-feint-text);
+    font-size: 11px;
+    font-family: var(--cs-font-mono, monospace);
+}
+
+.pendingEditElement {
+    max-width: 40%;
+    flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: color-mix(in srgb, var(--cs-foreground) 55%, transparent);
+}
+
+.pendingEditHead {
+    flex-shrink: 0;
+    color: var(--cs-foreground);
+    opacity: .8;
+}
+
+.pendingEditDetail {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--cs-feint-text);
+}
+
+.pendingEditFrom {
+    min-width: 0;
+    flex: 0 0 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: color-mix(in srgb, var(--cs-feint-text) 80%, transparent);
+    text-decoration: line-through;
+}
+
+.pendingEditArrow {
+    flex-shrink: 0;
+    color: color-mix(in srgb, var(--cs-feint-text) 70%, transparent);
+}
+
+.pendingEditTo {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--cs-foreground);
+}
+
+.pendingEditsShowMore {
+    align-self: flex-start;
+    padding: 2px 0;
+    border: 0;
+    background: transparent;
+    color: var(--cs-feint-text);
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.pendingEditsShowMore:hover {
+    color: var(--cs-foreground);
+}

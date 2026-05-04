@@ -51,7 +51,11 @@ export const addFontVariableToRootLayout = async (
                 if (!newContent) {
                     return false;
                 }
-                await editorEngine.activeSandbox.writeFile(layoutPath, newContent);
+                const sandbox = editorEngine.branches.activeSandboxOrNull;
+                if (!sandbox) {
+                    return false;
+                }
+                await sandbox.writeFile(layoutPath, newContent);
                 return true;
             }
         }
@@ -106,7 +110,11 @@ export const removeFontVariableFromRootLayout = async (
             if (!newContent) {
                 return false;
             }
-            await editorEngine.activeSandbox.writeFile(layoutPath, newContent);
+            const sandbox = editorEngine.branches.activeSandboxOrNull;
+            if (!sandbox) {
+                return false;
+            }
+            await sandbox.writeFile(layoutPath, newContent);
             return true;
         }
         return false;
@@ -223,7 +231,7 @@ export const traverseClassName = async (
     elementsFound: boolean;
     ast: T.File;
 } | null> => {
-    const sandbox = editorEngine.activeSandbox;
+    const sandbox = editorEngine.branches.activeSandboxOrNull;
     if (!sandbox) {
         console.error('No sandbox session found');
         return null;
@@ -290,15 +298,20 @@ export const getLayoutContext = async (
 ): Promise<
     { layoutPath: string; targetElements: string[]; layoutContent: string } | undefined
 > => {
-    const layoutPath = await editorEngine.activeSandbox.getLayoutPath();
-    const routerConfig = await editorEngine.activeSandbox.getRouterConfig();
+    const sandbox = editorEngine.branches.activeSandboxOrNull;
+    if (!sandbox) {
+        return;
+    }
+
+    const layoutPath = await sandbox.getLayoutPath();
+    const routerConfig = await sandbox.getRouterConfig();
 
     if (!layoutPath || !routerConfig) {
         console.error('Could not get layout path or router config');
         return;
     }
 
-    const file = await editorEngine.activeSandbox.readFile(layoutPath);
+    const file = await sandbox.readFile(layoutPath);
     if (typeof file !== 'string') {
         console.error(`Layout file is not text: ${layoutPath}`);
         return;
@@ -323,7 +336,10 @@ export const clearDefaultFontFromRootLayout = async (
         if (!context) return false;
         const { layoutPath } = context;
 
-        const sandbox = editorEngine.activeSandbox;
+        const sandbox = editorEngine.branches.activeSandboxOrNull;
+        if (!sandbox) {
+            return false;
+        }
         const file = await sandbox.readFile(layoutPath);
         if (typeof file !== 'string') return false;
 
@@ -358,7 +374,11 @@ export const clearDefaultFontFromRootLayout = async (
 
         if (hasUpdated) {
             const { code } = generate(ast);
-            await editorEngine.activeSandbox.writeFile(layoutPath, code);
+            const sandbox = editorEngine.branches.activeSandboxOrNull;
+            if (!sandbox) {
+                return false;
+            }
+            await sandbox.writeFile(layoutPath, code);
             return true;
         }
 

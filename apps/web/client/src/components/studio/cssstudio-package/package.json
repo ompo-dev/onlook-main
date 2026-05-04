@@ -1,0 +1,54 @@
+{
+  "name": "cssstudio",
+  "version": "1.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/motiondivision/css-studio-public.git"
+  },
+  "main": "dist/cssstudio.js",
+  "module": "dist/cssstudio.mjs",
+  "bin": "dist/bin.js",
+  "exports": {
+    ".": {
+      "import": "./dist/cssstudio.mjs",
+      "require": "./dist/cssstudio.js"
+    }
+  },
+  "files": [
+    "dist/*.js",
+    "dist/*.mjs",
+    "dist/*.css"
+  ],
+  "scripts": {
+    "build": "node esbuild.js",
+    "dev": "node esbuild.js --watch",
+    "test": "vitest run",
+    "test:e2e": "node esbuild.js && playwright test --config playwright.config.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "immer": "^10.0.0",
+    "motion": "^12.0.0",
+    "motion-dom": "^12.0.0",
+    "ws": "^8.19.0",
+    "zod": "^3.25.56",
+    "zustand": "^5.0.0"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/ws": "^8.18.1",
+    "esbuild": "^0.24.0",
+    "esbuild-css-modules-plugin": "^3.1.0",
+    "jsdom": "^29.0.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^4.1.0"
+  },
+  "gitHead": "7db62071087dd739207b2920bfaaf7010ab34173"
+}

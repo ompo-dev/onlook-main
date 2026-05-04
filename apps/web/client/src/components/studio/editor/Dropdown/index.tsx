@@ -68,19 +68,23 @@ export function Dropdown({ open, onClose, anchorRef, children, width }: Dropdown
         return null;
     }
 
-    return createPortal(
-        <motion.div
-            ref={ref}
-            data-cs-floating="dropdown"
-            className="z-[10000] overflow-hidden rounded-lg border border-[var(--cs-border)] bg-[var(--cs-layer)] p-1 shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
-            initial={{ opacity: 0, scale: 0.9, filter: 'blur(2px)' }}
-            animate={open ? { opacity: 1, scale: 1, filter: 'blur(0px)' } : { opacity: 0, scale: 0.9, filter: 'blur(2px)' }}
-            onPointerDown={(event) => event.stopPropagation()}
-            style={{ ...style, transformOrigin: 'top right', pointerEvents: open ? 'auto' : 'none' }}
-            transition={{ duration: 0.12, ease: 'easeOut' }}
-        >
-            {children}
-        </motion.div>,
-        document.body,
+    return (
+        <>
+            {createPortal(
+                <motion.div
+                    ref={ref}
+                    data-cs-floating="dropdown"
+                    className="z-[10000] overflow-hidden rounded-lg border border-[var(--cs-border)] bg-[var(--cs-layer)] p-1 shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
+                    initial={{ opacity: 0, scale: 0.9, filter: 'blur(2px)' }}
+                    animate={open ? { opacity: 1, scale: 1, filter: 'blur(0px)' } : { opacity: 0, scale: 0.9, filter: 'blur(2px)' }}
+                    onPointerDown={(event) => event.stopPropagation()}
+                    style={{ ...style, transformOrigin: 'top right', pointerEvents: open ? 'auto' : 'none' }}
+                    transition={{ duration: 0.12, ease: 'easeOut' }}
+                >
+                    {children}
+                </motion.div>,
+                document.body,
+            )}
+        </>
     );
 }

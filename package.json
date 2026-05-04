@@ -13,6 +13,7 @@
   "workspaces": [
     "packages/*",
     "tooling/*",
+    "apps/web",
     "apps/web/*"
   ],
   "scripts": {
@@ -20,6 +21,7 @@
     "start": "bun --filter @onlook/web start:client",
     "dev": "bun --filter @onlook/web dev",
     "typecheck": "bun --filter @onlook/web-client typecheck",
+    "audit:cssstudio-upstream": "node tooling/extract-cssstudio-upstream.mjs",
     "clean": "git clean -xdf node_modules"
   },
   "repository": {

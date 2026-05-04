@@ -1,0 +1,1181 @@
+{
+  "package": {
+    "name": "cssstudio",
+    "version": "1.1.0",
+    "repository": "https://github.com/motiondivision/css-studio-public.git",
+    "gitHead": "7db62071087dd739207b2920bfaaf7010ab34173"
+  },
+  "generatedAt": "2026-05-04T02:08:03.846Z",
+  "stats": {
+    "upstreamModuleCount": 189,
+    "upstreamJsModuleCount": 237,
+    "upstreamCssModuleCount": 38,
+    "localMappedModuleCount": 211,
+    "overlapCount": 189,
+    "missingCount": 0,
+    "extraLocalCount": 22
+  },
+  "upstreamModules": [
+    {
+      "path": "src/Editor/AnimationsPanel/AnimationsPanel.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/AnimationsPanel/CompactPlaybackControls.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/AnimationsPanel/CompactTimeMarkers.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/AnimationsPanel/CompactValueKeyframes.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/AnimationsPanel/DurationInput.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/AnimationsPanel/EditableInput.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/AnimationsPanel/KeyframePopover.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/AnimationsPanel/KeyframesDropdown.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/AnimationsPanel/index.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/ChatTray/BrailleSpinner.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/ChatTray/ChatTray.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/ChatTray/Markdown.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/ChatTray/PendingEditsSection.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/ChatTray/TaskRail.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/ChatTray/TaskRail.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/ChatTray/index.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/ChatTray/use-tray-position.ts",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/ContextMenu/ContextMenu.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/ContextMenu/index.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/DomTree/DomTree.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/DomTree/TreeNode.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/DomTree/index.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/Dropdown/Dropdown.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/Dropdown/index.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/InPagePanel/element-info.ts",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/InPagePanel/index.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/InPagePanel/tree-nav-utils.ts",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/InPagePanel/use-dom-operations.ts",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/InPagePanel/use-keyboard-shortcuts.ts",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/InPagePanel/use-undo-apply.ts",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/InstallPopover/InstallPopover.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/InstallPopover/index.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/MetadataPanel/MetadataPanel.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/MetadataPanel/index.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/Panel/Panel.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/Panel/index.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/Panel/use-panel-position.ts",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/PropertiesPanel.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/Section.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/Section.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/filter-utils.ts",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/index.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/BezierCurveEditor.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/BorderInput.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/BorderInput.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/BoxShadowInput.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/BoxShadowInput.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/ColorInput.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/ColorPicker/ColorPicker.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/ColorPicker/ColorPicker.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/ColorPicker/GradientPicker.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/ColorPicker/GradientPicker.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/ColorPicker/color-utils.ts",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/ColorPicker/gradient-utils.ts",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/CornerShapeInput.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/EasingCurve.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/EasingPopover/EasingInput.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/EasingPopover/EasingInput.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/EasingPopover/EasingPopover.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/EasingPopover/EasingPopover.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/IconTabBar.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/IconTabBar.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/NumberInput.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/NumberInput.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/OverflowInput.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/PerCornerToggle.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/PopoverPanel.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/PopoverPanel.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/PositionBox.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/PositionBox.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/ScrubInput.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/ScrubInput.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/SelectInput.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/SplitAxisToggle.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/SplitAxisToggle.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/SpringCurve.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/TextAreaInput.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/TextInput.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/Toggle.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/Toggle.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/TokenPicker.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/TokenPicker.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/inputs.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/inputs/popover-utils.ts",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/sections/AnimationSection.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/sections/AttributesSection.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/sections/LayoutSection.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/sections/LayoutSection.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/sections/MotionCard.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/sections/MotionCard.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/sections/MotionSection.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/sections/StylesSection.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/sections/SvgSection.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/sections/TextSection.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/sections/TextSection.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/sections/TransformSection.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/sections/TransformSection.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/sections/TransitionSection.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/sections/VariablesSection.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/sections/VariablesSection.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/PropertiesPanel/use-row-context-menu.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/ResponsiveView/ResponsiveFrame.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/ResponsiveView/ResponsiveView.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/ResponsiveView/ViewportToolbar.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/ResponsiveView/ViewportToolbar.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/ResponsiveView/index.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/ResponsiveView/use-responsive-bridge.ts",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/Settings/Settings.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/Settings/index.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/TaskOverlays/TaskOverlays.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/TaskOverlays/index.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/Toolbar/IconButton.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/Toolbar/Toolbar.module.css",
+      "kind": "css-module",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/Toolbar/index.tsx",
+      "kind": "component",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/icons/ChevronIcon.tsx",
+      "kind": "icons",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/icons/CopyIcon.tsx",
+      "kind": "icons",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/icons/DrawElementIcon.tsx",
+      "kind": "icons",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/icons/LayoutIcons.tsx",
+      "kind": "icons",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/icons/LoginIcon.tsx",
+      "kind": "icons",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/icons/PencilLineIcon.tsx",
+      "kind": "icons",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/icons/PerCornerIcon.tsx",
+      "kind": "icons",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/icons/PlusIcon.tsx",
+      "kind": "icons",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/icons/ResponsiveIcon.tsx",
+      "kind": "icons",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/icons/SearchIcon.tsx",
+      "kind": "icons",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/icons/SelectElementIcon.tsx",
+      "kind": "icons",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/icons/SplitAxisIcon.tsx",
+      "kind": "icons",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/icons/StatusIcons.tsx",
+      "kind": "icons",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/icons/TickIcon.tsx",
+      "kind": "icons",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/icons/TokenIcon.tsx",
+      "kind": "icons",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/icons/XIcon.tsx",
+      "kind": "icons",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/dom-bridge.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/iframe-agent.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/responsive-bridge-proxy.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/slices/animation-slice.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/slices/auth-slice.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/slices/chat-slice.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/slices/dom-slice.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/slices/edit-slice.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/slices/panels-slice.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/slices/responsive-slice.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/slices/styles-slice.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/slices/tasks-slice.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/slices/ui-slice.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/types.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/use-abs-drag.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/use-anim-preview.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/use-animation-edits.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/use-element-draw.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/use-element-picker.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/use-flex-drag.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/use-inline-edit.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/use-keyframes-scrape.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/use-mcp-direct.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/use-page-bridge.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/use-store.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/use-tree-drag.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/use-undo.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/utils/active-task.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/utils/block-diff.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/utils/coalesce-edits.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/utils/dom-to-markdown.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/utils/drag-cursor.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/utils/html-tags.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/utils/inline-markdown-shortcuts.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/utils/safe-random-id.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/variant-controls.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/state/visual-controls.ts",
+      "kind": "state",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/build-clipboard-prompt.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/build-task-payload.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/classify-token-value.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/convert-tree.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/css-shorthand.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/element-quad.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/find-node.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/iframe-coords.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/is-color-value.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/parse-border.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/parse-box-shadow.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/parse-filter.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/parse-transform.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/parse-transition.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/process-styles.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/sort-keyframes.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/spring.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/track-node-rect.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/Editor/utils/url-key.ts",
+      "kind": "utils",
+      "existsLocally": true
+    },
+    {
+      "path": "src/auth/Auth.ts",
+      "kind": "auth",
+      "existsLocally": true
+    },
+    {
+      "path": "src/index.ts",
+      "kind": "other",
+      "existsLocally": true
+    },
+    {
+      "path": "src/mcp/subagent-prompts.ts",
+      "kind": "other",
+      "existsLocally": true
+    }
+  ],
+  "overlap": [
+    "src/Editor/AnimationsPanel/AnimationsPanel.module.css",
+    "src/Editor/AnimationsPanel/CompactPlaybackControls.tsx",
+    "src/Editor/AnimationsPanel/CompactTimeMarkers.tsx",
+    "src/Editor/AnimationsPanel/CompactValueKeyframes.tsx",
+    "src/Editor/AnimationsPanel/DurationInput.tsx",
+    "src/Editor/AnimationsPanel/EditableInput.tsx",
+    "src/Editor/AnimationsPanel/KeyframePopover.tsx",
+    "src/Editor/AnimationsPanel/KeyframesDropdown.tsx",
+    "src/Editor/AnimationsPanel/index.tsx",
+    "src/Editor/ChatTray/BrailleSpinner.tsx",
+    "src/Editor/ChatTray/ChatTray.module.css",
+    "src/Editor/ChatTray/Markdown.tsx",
+    "src/Editor/ChatTray/PendingEditsSection.tsx",
+    "src/Editor/ChatTray/TaskRail.module.css",
+    "src/Editor/ChatTray/TaskRail.tsx",
+    "src/Editor/ChatTray/index.tsx",
+    "src/Editor/ChatTray/use-tray-position.ts",
+    "src/Editor/ContextMenu/ContextMenu.module.css",
+    "src/Editor/ContextMenu/index.tsx",
+    "src/Editor/DomTree/DomTree.module.css",
+    "src/Editor/DomTree/TreeNode.tsx",
+    "src/Editor/DomTree/index.tsx",
+    "src/Editor/Dropdown/Dropdown.module.css",
+    "src/Editor/Dropdown/index.tsx",
+    "src/Editor/InPagePanel/element-info.ts",
+    "src/Editor/InPagePanel/index.tsx",
+    "src/Editor/InPagePanel/tree-nav-utils.ts",
+    "src/Editor/InPagePanel/use-dom-operations.ts",
+    "src/Editor/InPagePanel/use-keyboard-shortcuts.ts",
+    "src/Editor/InPagePanel/use-undo-apply.ts",
+    "src/Editor/InstallPopover/InstallPopover.module.css",
+    "src/Editor/InstallPopover/index.tsx",
+    "src/Editor/MetadataPanel/MetadataPanel.module.css",
+    "src/Editor/MetadataPanel/index.tsx",
+    "src/Editor/Panel/Panel.module.css",
+    "src/Editor/Panel/index.tsx",
+    "src/Editor/Panel/use-panel-position.ts",
+    "src/Editor/PropertiesPanel/PropertiesPanel.module.css",
+    "src/Editor/PropertiesPanel/Section.module.css",
+    "src/Editor/PropertiesPanel/Section.tsx",
+    "src/Editor/PropertiesPanel/filter-utils.ts",
+    "src/Editor/PropertiesPanel/index.tsx",
+    "src/Editor/PropertiesPanel/inputs/BezierCurveEditor.tsx",
+    "src/Editor/PropertiesPanel/inputs/BorderInput.module.css",
+    "src/Editor/PropertiesPanel/inputs/BorderInput.tsx",
+    "src/Editor/PropertiesPanel/inputs/BoxShadowInput.module.css",
+    "src/Editor/PropertiesPanel/inputs/BoxShadowInput.tsx",
+    "src/Editor/PropertiesPanel/inputs/ColorInput.tsx",
+    "src/Editor/PropertiesPanel/inputs/ColorPicker/ColorPicker.module.css",
+    "src/Editor/PropertiesPanel/inputs/ColorPicker/ColorPicker.tsx",
+    "src/Editor/PropertiesPanel/inputs/ColorPicker/GradientPicker.module.css",
+    "src/Editor/PropertiesPanel/inputs/ColorPicker/GradientPicker.tsx",
+    "src/Editor/PropertiesPanel/inputs/ColorPicker/color-utils.ts",
+    "src/Editor/PropertiesPanel/inputs/ColorPicker/gradient-utils.ts",
+    "src/Editor/PropertiesPanel/inputs/CornerShapeInput.tsx",
+    "src/Editor/PropertiesPanel/inputs/EasingCurve.tsx",
+    "src/Editor/PropertiesPanel/inputs/EasingPopover/EasingInput.module.css",
+    "src/Editor/PropertiesPanel/inputs/EasingPopover/EasingInput.tsx",
+    "src/Editor/PropertiesPanel/inputs/EasingPopover/EasingPopover.module.css",
+    "src/Editor/PropertiesPanel/inputs/EasingPopover/EasingPopover.tsx",
+    "src/Editor/PropertiesPanel/inputs/IconTabBar.module.css",
+    "src/Editor/PropertiesPanel/inputs/IconTabBar.tsx",
+    "src/Editor/PropertiesPanel/inputs/NumberInput.module.css",
+    "src/Editor/PropertiesPanel/inputs/NumberInput.tsx",
+    "src/Editor/PropertiesPanel/inputs/OverflowInput.tsx",
+    "src/Editor/PropertiesPanel/inputs/PerCornerToggle.tsx",
+    "src/Editor/PropertiesPanel/inputs/PopoverPanel.module.css",
+    "src/Editor/PropertiesPanel/inputs/PopoverPanel.tsx",
+    "src/Editor/PropertiesPanel/inputs/PositionBox.module.css",
+    "src/Editor/PropertiesPanel/inputs/PositionBox.tsx",
+    "src/Editor/PropertiesPanel/inputs/ScrubInput.module.css",
+    "src/Editor/PropertiesPanel/inputs/ScrubInput.tsx",
+    "src/Editor/PropertiesPanel/inputs/SelectInput.tsx",
+    "src/Editor/PropertiesPanel/inputs/SplitAxisToggle.module.css",
+    "src/Editor/PropertiesPanel/inputs/SplitAxisToggle.tsx",
+    "src/Editor/PropertiesPanel/inputs/SpringCurve.tsx",
+    "src/Editor/PropertiesPanel/inputs/TextAreaInput.tsx",
+    "src/Editor/PropertiesPanel/inputs/TextInput.tsx",
+    "src/Editor/PropertiesPanel/inputs/Toggle.module.css",
+    "src/Editor/PropertiesPanel/inputs/Toggle.tsx",
+    "src/Editor/PropertiesPanel/inputs/TokenPicker.module.css",
+    "src/Editor/PropertiesPanel/inputs/TokenPicker.tsx",
+    "src/Editor/PropertiesPanel/inputs/inputs.module.css",
+    "src/Editor/PropertiesPanel/inputs/popover-utils.ts",
+    "src/Editor/PropertiesPanel/sections/AnimationSection.module.css",
+    "src/Editor/PropertiesPanel/sections/AttributesSection.tsx",
+    "src/Editor/PropertiesPanel/sections/LayoutSection.module.css",
+    "src/Editor/PropertiesPanel/sections/LayoutSection.tsx",
+    "src/Editor/PropertiesPanel/sections/MotionCard.module.css",
+    "src/Editor/PropertiesPanel/sections/MotionCard.tsx",
+    "src/Editor/PropertiesPanel/sections/MotionSection.tsx",
+    "src/Editor/PropertiesPanel/sections/StylesSection.tsx",
+    "src/Editor/PropertiesPanel/sections/SvgSection.tsx",
+    "src/Editor/PropertiesPanel/sections/TextSection.module.css",
+    "src/Editor/PropertiesPanel/sections/TextSection.tsx",
+    "src/Editor/PropertiesPanel/sections/TransformSection.module.css",
+    "src/Editor/PropertiesPanel/sections/TransformSection.tsx",
+    "src/Editor/PropertiesPanel/sections/TransitionSection.module.css",
+    "src/Editor/PropertiesPanel/sections/VariablesSection.module.css",
+    "src/Editor/PropertiesPanel/sections/VariablesSection.tsx",
+    "src/Editor/PropertiesPanel/use-row-context-menu.tsx",
+    "src/Editor/ResponsiveView/ResponsiveFrame.tsx",
+    "src/Editor/ResponsiveView/ResponsiveView.module.css",
+    "src/Editor/ResponsiveView/ViewportToolbar.module.css",
+    "src/Editor/ResponsiveView/ViewportToolbar.tsx",
+    "src/Editor/ResponsiveView/index.tsx",
+    "src/Editor/ResponsiveView/use-responsive-bridge.ts",
+    "src/Editor/Settings/Settings.module.css",
+    "src/Editor/Settings/index.tsx",
+    "src/Editor/TaskOverlays/TaskOverlays.module.css",
+    "src/Editor/TaskOverlays/index.tsx",
+    "src/Editor/Toolbar/IconButton.tsx",
+    "src/Editor/Toolbar/Toolbar.module.css",
+    "src/Editor/Toolbar/index.tsx",
+    "src/Editor/icons/ChevronIcon.tsx",
+    "src/Editor/icons/CopyIcon.tsx",
+    "src/Editor/icons/DrawElementIcon.tsx",
+    "src/Editor/icons/LayoutIcons.tsx",
+    "src/Editor/icons/LoginIcon.tsx",
+    "src/Editor/icons/PencilLineIcon.tsx",
+    "src/Editor/icons/PerCornerIcon.tsx",
+    "src/Editor/icons/PlusIcon.tsx",
+    "src/Editor/icons/ResponsiveIcon.tsx",
+    "src/Editor/icons/SearchIcon.tsx",
+    "src/Editor/icons/SelectElementIcon.tsx",
+    "src/Editor/icons/SplitAxisIcon.tsx",
+    "src/Editor/icons/StatusIcons.tsx",
+    "src/Editor/icons/TickIcon.tsx",
+    "src/Editor/icons/TokenIcon.tsx",
+    "src/Editor/icons/XIcon.tsx",
+    "src/Editor/state/dom-bridge.ts",
+    "src/Editor/state/iframe-agent.ts",
+    "src/Editor/state/responsive-bridge-proxy.ts",
+    "src/Editor/state/slices/animation-slice.ts",
+    "src/Editor/state/slices/auth-slice.ts",
+    "src/Editor/state/slices/chat-slice.ts",
+    "src/Editor/state/slices/dom-slice.ts",
+    "src/Editor/state/slices/edit-slice.ts",
+    "src/Editor/state/slices/panels-slice.ts",
+    "src/Editor/state/slices/responsive-slice.ts",
+    "src/Editor/state/slices/styles-slice.ts",
+    "src/Editor/state/slices/tasks-slice.ts",
+    "src/Editor/state/slices/ui-slice.ts",
+    "src/Editor/state/types.ts",
+    "src/Editor/state/use-abs-drag.ts",
+    "src/Editor/state/use-anim-preview.ts",
+    "src/Editor/state/use-animation-edits.ts",
+    "src/Editor/state/use-element-draw.ts",
+    "src/Editor/state/use-element-picker.ts",
+    "src/Editor/state/use-flex-drag.ts",
+    "src/Editor/state/use-inline-edit.ts",
+    "src/Editor/state/use-keyframes-scrape.ts",
+    "src/Editor/state/use-mcp-direct.ts",
+    "src/Editor/state/use-page-bridge.ts",
+    "src/Editor/state/use-store.ts",
+    "src/Editor/state/use-tree-drag.ts",
+    "src/Editor/state/use-undo.ts",
+    "src/Editor/state/utils/active-task.ts",
+    "src/Editor/state/utils/block-diff.ts",
+    "src/Editor/state/utils/coalesce-edits.ts",
+    "src/Editor/state/utils/dom-to-markdown.ts",
+    "src/Editor/state/utils/drag-cursor.ts",
+    "src/Editor/state/utils/html-tags.ts",
+    "src/Editor/state/utils/inline-markdown-shortcuts.ts",
+    "src/Editor/state/utils/safe-random-id.ts",
+    "src/Editor/state/variant-controls.ts",
+    "src/Editor/state/visual-controls.ts",
+    "src/Editor/utils/build-clipboard-prompt.ts",
+    "src/Editor/utils/build-task-payload.ts",
+    "src/Editor/utils/classify-token-value.ts",
+    "src/Editor/utils/convert-tree.ts",
+    "src/Editor/utils/css-shorthand.ts",
+    "src/Editor/utils/element-quad.ts",
+    "src/Editor/utils/find-node.ts",
+    "src/Editor/utils/iframe-coords.ts",
+    "src/Editor/utils/is-color-value.ts",
+    "src/Editor/utils/parse-border.ts",
+    "src/Editor/utils/parse-box-shadow.ts",
+    "src/Editor/utils/parse-filter.ts",
+    "src/Editor/utils/parse-transform.ts",
+    "src/Editor/utils/parse-transition.ts",
+    "src/Editor/utils/process-styles.ts",
+    "src/Editor/utils/sort-keyframes.ts",
+    "src/Editor/utils/spring.ts",
+    "src/Editor/utils/track-node-rect.ts",
+    "src/Editor/utils/url-key.ts",
+    "src/auth/Auth.ts",
+    "src/index.ts",
+    "src/mcp/subagent-prompts.ts"
+  ],
+  "missing": [],
+  "extraLocal": [
+    "src/Editor/ChatPanel/ChatPanel.module.css",
+    "src/Editor/ChatPanel/index.tsx",
+    "src/Editor/InPagePanelUpstream.tsx",
+    "src/Editor/PropertiesPanel/inputs/SelectInput.module.css",
+    "src/Editor/PropertiesPanel/layout-icons.tsx",
+    "src/Editor/QuestionPopover/QuestionPopover.module.css",
+    "src/Editor/QuestionPopover/index.tsx",
+    "src/Editor/docks/StudioDockButton.tsx",
+    "src/Editor/docks/StudioDockPopover.tsx",
+    "src/Editor/docks/StudioDockShell.tsx",
+    "src/Editor/docks/StudioElementDock.tsx",
+    "src/Editor/docks/StudioFrameDock.tsx",
+    "src/Editor/docks/StudioMainDock.tsx",
+    "src/Editor/docks/StudioOnlookDocks.tsx",
+    "src/Editor/docks/index.ts",
+    "src/Editor/icons/ApplyIcons.tsx",
+    "src/Editor/icons/BotIcon.tsx",
+    "src/Editor/icons/CableIcon.tsx",
+    "src/Editor/state/onlook-bridge-map.ts",
+    "src/Editor/state/slices/error-slice.ts",
+    "src/Editor/state/use-prompt-input.ts",
+    "src/Editor/utils/studio-prompt.ts"
+  ]
+}

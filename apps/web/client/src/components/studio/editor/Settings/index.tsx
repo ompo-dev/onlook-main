@@ -4,6 +4,7 @@ import { Dropdown } from '../Dropdown';
 import { Toggle } from '../PropertiesPanel/inputs/Toggle';
 import { useStore } from '../state/use-store';
 import { syncThemeToPage } from '../state/dom-bridge';
+import { useStudioRuntime, type StudioEngine } from '@/components/studio/runtime';
 import styles from './Settings.module.css';
 
 interface SchemeColors {
@@ -54,10 +55,14 @@ function resolveMode(appearance: string): 'dark' | 'light' {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
+function getSchemeByName(name: string): Scheme {
+    return SCHEMES.find((scheme) => scheme.name === name) ?? SCHEMES[0]!;
+}
+
 function applyToDOM(settings: Settings) {
     const host = document.querySelector('css-studio-panel') as HTMLElement | null;
     if (!host) return;
-    const scheme = SCHEMES.find((s) => s.name === settings.scheme) ?? SCHEMES[0];
+    const scheme = getSchemeByName(settings.scheme);
     const hc = settings.highContrast;
     const mode = resolveMode(settings.appearance);
     const isLight = mode === 'light';
@@ -101,7 +106,7 @@ function applyToDOM(settings: Settings) {
 }
 
 function pushThemeToPage(settings: Settings) {
-    const scheme = SCHEMES.find((s) => s.name === settings.scheme) ?? SCHEMES[0];
+    const scheme = getSchemeByName(settings.scheme);
     const hc = settings.highContrast;
     const mode = resolveMode(settings.appearance);
     const isLight = mode === 'light';
@@ -122,12 +127,15 @@ function persist(settings: Settings) {
 }
 
 const APPEARANCES = ['auto', 'dark', 'light'] as const;
+const STUDIO_ENGINES: StudioEngine[] = ['legacy', 'upstream'];
 
 export function Settings() {
     const [open, setOpen] = useState(false);
     const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
     const buttonRef = useRef<HTMLSpanElement>(null);
     const mcpStatus = useStore((s) => s.mcpStatus);
+    const { engine, setEngine } = useStudioRuntime();
+    const canUseUpstream = true;
 
     useEffect(() => {
         try {
@@ -190,6 +198,21 @@ export function Settings() {
                     </div>
                 </div>
                 <div className={styles.row}>
+                    <span className={styles.label}>Engine</span>
+                    <div className={styles.modeButtons}>
+                        {STUDIO_ENGINES.map((currentEngine) => (
+                            <button
+                                key={currentEngine}
+                                className={`${styles.modeButton} ${engine === currentEngine ? styles.modeButtonActive : ''}`}
+                                onClick={() => setEngine(currentEngine)}
+                                disabled={!canUseUpstream && currentEngine === 'upstream'}
+                            >
+                                {currentEngine === 'legacy' ? 'Legacy' : 'New'}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div className={styles.row}>
                     <span className={styles.label}>Appearance</span>
                     <div className={styles.modeButtons}>
                         {APPEARANCES.map((mode) => (
@@ -198,7 +221,7 @@ export function Settings() {
                                 className={`${styles.modeButton} ${settings.appearance === mode ? styles.modeButtonActive : ''}`}
                                 onClick={() => update({ appearance: mode })}
                             >
-                                {mode[0].toUpperCase() + mode.slice(1)}
+                                {mode.slice(0, 1).toUpperCase() + mode.slice(1)}
                             </button>
                         ))}
                     </div>

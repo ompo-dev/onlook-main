@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useStore } from './use-store';
+import type { ChatAttachment } from './slices/chat-slice';
 
 const AUTO_SEND_DEBOUNCE = 1000;
 const WARM_RECONNECT_INITIAL = 2000;
@@ -10,7 +11,7 @@ const DEFAULT_PORT = 9877;
 interface OfflineQueueItem {
     id: string;
     text: string;
-    attachments?: unknown[];
+    attachments?: ChatAttachment[];
 }
 
 export function useMcpDirect(mcpPort?: number, mode?: string) {
@@ -208,7 +209,7 @@ export function useMcpDirect(mcpPort?: number, mode?: string) {
         addChatMessage({ role: 'status', text: `Sent ${count} change${count === 1 ? '' : 's'}` });
     }, []);
 
-    const sendUserMessage = useCallback((text: string, attachments: unknown[]) => {
+    const sendUserMessage = useCallback((text: string, attachments: ChatAttachment[]) => {
         const store = useStore.getState();
         const msgAttachments = attachments.length > 0 ? attachments : undefined;
         if (isDemo) {
@@ -225,7 +226,7 @@ export function useMcpDirect(mcpPort?: number, mode?: string) {
             ws.send(JSON.stringify({ type: 'user-message', text, attachments: msgAttachments, clientMsgId: id }));
         } else {
             if (offlineQueueRef.current.length < 50) {
-                offlineQueueRef.current.push({ id, text, attachments: msgAttachments as unknown[] | undefined });
+                offlineQueueRef.current.push({ id, text, attachments: msgAttachments });
             }
             if (!ws && Date.now() - lastProbeRef.current > VISIBILITY_PROBE_COOLDOWN) {
                 connectRef.current();

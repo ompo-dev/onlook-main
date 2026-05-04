@@ -33,7 +33,7 @@ export const scanFontConfig = async (fontConfigPath: string, editorEngine: Edito
  * Scan existing fonts declaration in the layout file and move them to the font config file
  */
 export const scanExistingFonts = async (layoutPath: string, editorEngine: EditorEngine): Promise<Font[] | undefined> => {
-    const sandbox = editorEngine.activeSandbox;
+    const sandbox = editorEngine.branches.activeSandboxOrNull;
     if (!sandbox) {
         console.error('No sandbox session found');
         return;
@@ -109,7 +109,13 @@ export const addFontToConfig = async (font: Font, fontConfigPath: string, editor
         // Generate and write the updated code back to the file
         const { code } = generate(ast);
 
-        await editorEngine.activeSandbox.writeFile(
+        const sandbox = editorEngine.branches.activeSandboxOrNull;
+        if (!sandbox) {
+            console.error('No sandbox session found');
+            return false;
+        }
+
+        await sandbox.writeFile(
             fontConfigPath,
             code,
         );
@@ -145,13 +151,19 @@ export const removeFontFromConfig = async (font: Font, fontConfigPath: string, e
                 path: fontConfigPath,
             };
 
-            await editorEngine.activeSandbox.writeFile(
+            const sandbox = editorEngine.branches.activeSandboxOrNull;
+            if (!sandbox) {
+                console.error('No sandbox session found');
+                return false;
+            }
+
+            await sandbox.writeFile(
                 fontConfigPath,
                 code,
             );
             // Delete font files if this is a custom font
             if (fontFilesToDelete.length > 0) {
-                const routerConfig = await editorEngine.activeSandbox.getRouterConfig();
+                const routerConfig = await sandbox.getRouterConfig();
                 if (!routerConfig?.basePath) {
                     console.error('Could not get base path');
                     return false;
@@ -159,7 +171,7 @@ export const removeFontFromConfig = async (font: Font, fontConfigPath: string, e
 
                 await Promise.all(
                     fontFilesToDelete.map((file) =>
-                        editorEngine.activeSandbox.deleteFile(
+                        sandbox.deleteFile(
                             normalizePath(routerConfig.basePath + '/' + file),
                         ),
                     ),
@@ -261,7 +273,12 @@ export const ensureFontConfigFileExists = async (fontConfigPath: string, editorE
  * Updates the font config path based on the detected router configuration
  */
 export const getFontConfigPath = async (editorEngine: EditorEngine): Promise<string | null> => {
-    const routerConfig = await editorEngine.activeSandbox.getRouterConfig();
+    const sandbox = editorEngine.branches.activeSandboxOrNull;
+    if (!sandbox) {
+        return null;
+    }
+
+    const routerConfig = await sandbox.getRouterConfig();
 
     if (routerConfig) {
         let fontConfigPath: string;
@@ -281,4 +298,3 @@ export const getFontConfigPath = async (editorEngine: EditorEngine): Promise<str
         return null;
     }
 }
-

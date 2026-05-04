@@ -1,0 +1,44 @@
+.wrap {
+    position: fixed;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    pointer-events: auto;
+    background: rgb(0 0 0 / 35%);
+    backdrop-filter: blur(1px);
+}
+
+.wrap[data-cs-blocking] {
+    background: rgb(0 0 0 / 55%);
+    backdrop-filter: blur(3px);
+}
+
+.pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--cs-border, #313244);
+    background: var(--cs-layer, #13181a);
+    color: var(--cs-white, #cdd6f4);
+    cursor: pointer;
+    font: 500 12px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    box-shadow: 0 4px 16px rgb(0 0 0 / 35%);
+    transition: background .12s, border-color .12s;
+}
+
+.pill:hover {
+    background: var(--cs-layer-hover, #1b2124);
+    border-color: var(--cs-border-strong, #4a4e68);
+}
+
+.pill:focus-visible {
+    outline: 2px solid var(--cs-accent, #89b4fa);
+    outline-offset: 2px;
+}
+
+.label {
+    white-space: nowrap;
+}

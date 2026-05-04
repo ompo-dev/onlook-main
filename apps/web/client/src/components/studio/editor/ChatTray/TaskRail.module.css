@@ -1,0 +1,314 @@
+.rail {
+    background: var(--cs-black);
+    border: 1px solid var(--cs-border);
+    border-right: 0;
+    border-radius: 12px 0 0 12px;
+    align-self: stretch;
+    max-height: calc(100vh - 32px);
+    display: flex;
+    overflow: hidden;
+}
+
+.inner {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.viewport {
+    position: relative;
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.pane {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.paneInner {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.header {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px 6px 6px;
+    color: var(--cs-feint-text);
+    font-size: 11px;
+    font-variation-settings: 'opsz' 24, 'wght' 560;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.headerLabel {
+    flex: 1;
+    min-width: 0;
+    padding-left: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.headerLabelPage {
+    color: var(--cs-foreground);
+    font-family: var(--cs-font-mono, monospace);
+    font-size: 11px;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.headerBackButton,
+.headerNewTaskButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--cs-feint-text);
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+}
+
+.headerBackButton {
+    width: auto;
+    padding: 2px 6px 2px 4px;
+}
+
+.headerBackButton:hover,
+.headerNewTaskButton:hover {
+    background: color-mix(in srgb, var(--cs-foreground) 8%, transparent);
+    color: var(--cs-foreground);
+}
+
+.headerBackCount {
+    font-family: var(--cs-font-mono, monospace);
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.chipList {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 0;
+    padding: 2px 6px;
+    overflow-y: auto;
+}
+
+.chipList::-webkit-scrollbar {
+    width: 4px;
+    background: none;
+}
+
+.chipList::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--cs-foreground) 20%, transparent);
+    border-radius: 2px;
+}
+
+.chip,
+.pageRow {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--cs-foreground);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    text-align: left;
+}
+
+.chip:hover,
+.pageRow:hover {
+    background: color-mix(in srgb, var(--cs-foreground) 6%, transparent);
+}
+
+.chipActive,
+.pageRowActive {
+    background: color-mix(in srgb, var(--cs-foreground) 12%, transparent);
+}
+
+.chipActive:hover,
+.pageRowActive:hover {
+    background: color-mix(in srgb, var(--cs-foreground) 14%, transparent);
+}
+
+.chipIcon {
+    display: flex;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    color: var(--cs-foreground);
+    opacity: 0.55;
+}
+
+.chipIconReady {
+    color: #10b981;
+    opacity: 1;
+}
+
+.chipIconReverted {
+    color: var(--cs-feint-text);
+    opacity: 0.8;
+}
+
+.chipIconFailed {
+    color: #ef4444;
+    opacity: 1;
+}
+
+.chipIconAttention,
+.chipIconAwaiting {
+    color: #3b82f6;
+    opacity: 1;
+    animation: cs-chip-attention 1.4s ease-in-out infinite;
+}
+
+.chipLabel,
+.pageRowLabel {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--cs-font-mono, monospace);
+    font-size: 11px;
+}
+
+.chipDraft .chipLabel {
+    color: var(--cs-feint-text);
+    font-style: italic;
+}
+
+.chipUnnamed .chipLabel {
+    background-image: linear-gradient(
+        90deg,
+        var(--cs-feint-text) 0%,
+        var(--cs-foreground) 50%,
+        var(--cs-feint-text) 100%
+    );
+    background-size: 200% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: var(--cs-feint-text);
+    font-style: italic;
+    animation: cs-chip-shimmer 2s linear infinite;
+}
+
+.chipEditCount {
+    flex-shrink: 0;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 5px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--cs-foreground) 10%, transparent);
+    color: var(--cs-foreground);
+    font-family: var(--cs-font-mono, monospace);
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 16px;
+    opacity: 0.8;
+    text-align: center;
+}
+
+.chip[data-cs-drifted] {
+    outline: 1px dashed var(--cs-warn, #c5a000);
+    opacity: 0.6;
+}
+
+.chipActions {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+
+.chip:hover .chipActions,
+.chipActionsAwaiting {
+    opacity: 1;
+}
+
+.chipAwaiting {
+    background: rgba(59, 130, 246, 0.06);
+}
+
+.chipAwaiting:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.chipActionButton {
+    display: flex;
+    width: 18px;
+    height: 18px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--cs-feint-text);
+    cursor: pointer;
+}
+
+.chipActionButton:hover {
+    background: color-mix(in srgb, var(--cs-foreground) 10%, transparent);
+    color: var(--cs-foreground);
+}
+
+.chipActionAccept {
+    color: #10b981;
+}
+
+.chipActionAccept:hover {
+    background: rgba(16, 185, 129, 0.18);
+    color: #10b981;
+}
+
+.chipActionRevert {
+    color: #ef4444;
+}
+
+.chipActionRevert:hover {
+    background: rgba(239, 68, 68, 0.18);
+    color: #ef4444;
+}
+
+@keyframes cs-chip-attention {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes cs-chip-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}

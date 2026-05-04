@@ -19,6 +19,7 @@ export interface DockedClaims {
 export interface PanelsSlice {
     panels: Record<PanelId, PanelState>;
     dockedClaims: DockedClaims;
+    chatOpen: boolean;
     setPanelOpen: (id: PanelId, open: boolean) => void;
     togglePanel: (id: PanelId) => void;
     setPanelDock: (id: PanelId, dock: PanelDock) => void;
@@ -26,6 +27,7 @@ export interface PanelsSlice {
     setPanelActiveTab: (id: PanelId, tab: string) => void;
     togglePanelTab: (id: PanelId, tab: string) => void;
     openChat: () => void;
+    toggleChatOpen: () => void;
 }
 
 const DEFAULT_PANELS: Record<PanelId, PanelState> = {
@@ -46,6 +48,7 @@ function recomputeClaims(panels: Record<string, PanelState>): DockedClaims {
 export const createPanelsSlice: StateCreator<any, [['zustand/immer', never]], [], PanelsSlice> = (set) => ({
     panels: { ...DEFAULT_PANELS },
     dockedClaims: { left: 0, right: 0, bottom: 0 },
+    chatOpen: true,
     setPanelOpen: (id, open) => set((s: any) => { s.panels[id].open = open; s.dockedClaims = recomputeClaims(s.panels); }),
     togglePanel: (id) => set((s: any) => { s.panels[id].open = !s.panels[id].open; s.dockedClaims = recomputeClaims(s.panels); }),
     setPanelDock: (id, dock) => set((s: any) => { s.panels[id].dock = dock; s.dockedClaims = recomputeClaims(s.panels); }),
@@ -60,6 +63,8 @@ export const createPanelsSlice: StateCreator<any, [['zustand/immer', never]], []
     openChat: () => set((s: any) => {
         s.panels.navigator.open = true;
         s.panels.navigator.activeTab = 'chat';
+        s.chatFocusToken = (s.chatFocusToken ?? 0) + 1;
         s.dockedClaims = recomputeClaims(s.panels);
     }),
+    toggleChatOpen: () => set((s: any) => { s.chatOpen = !s.chatOpen; }),
 });

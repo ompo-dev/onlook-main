@@ -1,0 +1,107 @@
+.toolbar {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--cs-border);
+    background: var(--cs-layer);
+    color: var(--cs-foreground);
+    pointer-events: auto;
+    user-select: none;
+    transform: translateX(-50%);
+    box-shadow: 0 4px 16px rgb(0 0 0 / 30%);
+}
+
+.tab,
+.closeButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    color: var(--cs-white);
+    cursor: pointer;
+    transition: background .1s ease, color .1s ease;
+}
+
+.tab:hover,
+.closeButton:hover {
+    background: var(--cs-feint);
+}
+
+.tabActive {
+    color: var(--cs-accent);
+    background: color-mix(in srgb, var(--cs-accent) 12%, transparent);
+}
+
+.separator {
+    width: 1px;
+    height: 16px;
+    margin: 0 4px;
+    background: var(--cs-border);
+}
+
+.dim {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 28px;
+    padding: 0 4px;
+}
+
+.dimLabel {
+    color: var(--cs-feint-text);
+    font-size: 10px;
+    font-family: var(--cs-font-mono);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.dimInput {
+    width: 48px;
+    height: 20px;
+    padding: 0 4px;
+    border: 1px solid var(--cs-input-border);
+    border-radius: 4px;
+    outline: none;
+    appearance: textfield;
+    background: var(--cs-input-bg);
+    color: var(--cs-foreground);
+    font-size: 11px;
+    font-family: var(--cs-font-mono);
+    text-align: center;
+}
+
+.dimInput::-webkit-outer-spin-button,
+.dimInput::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.dimInput:hover {
+    background: var(--cs-input-bg-hover);
+}
+
+.dimInput:focus {
+    border-color: var(--cs-input-border-strong);
+    background: var(--cs-input-bg-hover);
+}
+
+.times {
+    padding: 0 2px;
+    color: var(--cs-feint-text);
+    font-size: 11px;
+    font-family: var(--cs-font-mono);
+}
+
+.closeButton {
+    color: var(--cs-feint-text);
+}

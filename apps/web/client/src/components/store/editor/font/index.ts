@@ -78,7 +78,12 @@ export class FontManager {
      */
     private async scanExistingFonts(): Promise<Font[] | undefined> {
         try {
-            const layoutPath = await this.editorEngine.activeSandbox.getLayoutPath();
+            const sandbox = this.editorEngine.branches.activeSandboxOrNull;
+            if (!sandbox) {
+                return [];
+            }
+
+            const layoutPath = await sandbox.getLayoutPath();
             if (!layoutPath) {
                 console.log('Could not get layout path');
                 return [];
@@ -151,7 +156,10 @@ export class FontManager {
                 await removeFontVariableFromRootLayout(font.id, this.editorEngine);
 
                 // Remove font from Tailwind config
-                await removeFontFromTailwindConfig(font, this.editorEngine.activeSandbox);
+                const sandbox = this.editorEngine.branches.activeSandboxOrNull;
+                if (sandbox) {
+                    await removeFontFromTailwindConfig(font, sandbox);
+                }
 
                 return result;
             }
@@ -212,7 +220,12 @@ export class FontManager {
     async uploadFonts(fontFiles: FontUploadFile[]): Promise<boolean> {
         this._isUploading = true;
         try {
-            const routerConfig = await this.editorEngine.activeSandbox.getRouterConfig();
+            const sandbox = this.editorEngine.branches.activeSandboxOrNull;
+            if (!sandbox) {
+                return false;
+            }
+
+            const routerConfig = await sandbox.getRouterConfig();
             if (!routerConfig?.basePath) {
                 console.error('Could not get base path');
                 return false;
@@ -331,7 +344,10 @@ export class FontManager {
      * Synchronizes detected fonts with the project configuration files
      */
     private async syncFontsWithConfigs(): Promise<void> {
-        const sandbox = this.editorEngine.activeSandbox;
+        const sandbox = this.editorEngine.branches.activeSandboxOrNull;
+        if (!sandbox) {
+            return;
+        }
 
         try {
             const currentFonts = await this.scanFonts();
@@ -374,7 +390,7 @@ export class FontManager {
      * Ensures both font config and tailwind config files exist
      */
     private async ensureConfigFilesExist(): Promise<void> {
-        const sandbox = this.editorEngine.activeSandbox;
+        const sandbox = this.editorEngine.branches.activeSandboxOrNull;
         if (!sandbox) {
             console.error('No sandbox session found');
             return;

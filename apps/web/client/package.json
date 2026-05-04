@@ -42,7 +42,6 @@
     "@onlook/parser": "*",
     "@onlook/penpal": "*",
     "@onlook/rpc": "*",
-    "@onlook/stripe": "*",
     "@onlook/ui": "*",
     "@onlook/utility": "*",
     "@opentelemetry/api-logs": "0.57.2",
@@ -103,9 +102,9 @@
     "unicornstudio-react": "^1.4.33",
     "use-resize-observer": "^9.1.0",
     "uuid": "^11.1.0",
-    "zustand": "^5.0.0",
     "webfontloader": "^1.6.28",
-    "zod": "^4.1.3"
+    "zod": "^4.1.3",
+    "zustand": "^5.0.0"
   },
   "devDependencies": {
     "@onlook/typescript": "*",

@@ -9,11 +9,13 @@ import { createChatSlice, type ChatSlice } from './slices/chat-slice';
 import { createAnimationSlice, type AnimationSlice } from './slices/animation-slice';
 import { createErrorSlice, type ErrorSlice } from './slices/error-slice';
 import { createPanelsSlice, type PanelsSlice } from './slices/panels-slice';
+import { createResponsiveSlice, type ResponsiveSlice } from './slices/responsive-slice';
+import { createTasksSlice, type TasksSlice } from './slices/tasks-slice';
 
-export type StoreState = DomSlice & StylesSlice & UiSlice & EditSlice & AuthSlice & ChatSlice & AnimationSlice & ErrorSlice & PanelsSlice;
+export type StoreState = DomSlice & StylesSlice & UiSlice & EditSlice & AuthSlice & ChatSlice & AnimationSlice & ErrorSlice & PanelsSlice & ResponsiveSlice & TasksSlice;
 
 export const useStore = create<StoreState>()(
-    immer((rawSet, get) => {
+    immer((rawSet, get, store) => {
         const set = (fn: (state: StoreState) => void) =>
             rawSet((state) => {
                 fn(state);
@@ -21,15 +23,17 @@ export const useStore = create<StoreState>()(
             });
 
         return {
-            ...createDomSlice(set, get, rawSet, {} as any),
-            ...createStylesSlice(set, get, rawSet, {} as any),
-            ...createUiSlice(set, get, rawSet, {} as any),
-            ...createEditSlice(set, get, rawSet, {} as any),
-            ...createAuthSlice(set, get, rawSet, {} as any),
-            ...createChatSlice(set, get, rawSet, {} as any),
-            ...createAnimationSlice(set, get, rawSet, {} as any),
-            ...createErrorSlice(set, get, rawSet, {} as any),
-            ...createPanelsSlice(set, get, rawSet, {} as any),
+            ...createDomSlice(set, get, store),
+            ...createStylesSlice(set, get, store),
+            ...createUiSlice(set, get, store),
+            ...createEditSlice(set, get, store),
+            ...createAuthSlice(set, get, store),
+            ...createChatSlice(set, get, store),
+            ...createAnimationSlice(set, get, store),
+            ...createErrorSlice(set, get, store),
+            ...createPanelsSlice(set, get, store),
+            ...createResponsiveSlice(set, get, store),
+            ...createTasksSlice(set, get, store),
         };
     }),
 );
